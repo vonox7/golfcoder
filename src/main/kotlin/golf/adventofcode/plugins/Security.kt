@@ -9,6 +9,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 
+// TODO setup properly, this is just from the project setup wizard
 fun Application.configureSecurity() {
     authentication {
         oauth("auth-oauth-google") {

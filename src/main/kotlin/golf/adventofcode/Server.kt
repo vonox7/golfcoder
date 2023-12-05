@@ -9,11 +9,12 @@ val container = System.getenv("CONTAINER") ?: "local"
 
 fun main() {
     println("Starting ktor...")
-    embeddedServer(Netty,
+    embeddedServer(
+        Netty,
         port = System.getenv("PORT")?.toIntOrNull() ?: 8030,
         host = System.getenv("HOST") ?: "0.0.0.0",
-        module = Application::module)
-        .start(wait = true)
+        module = Application::module
+    ).start(wait = true)
 }
 
 fun Application.module() {
