@@ -1,0 +1,36 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #dad8cd;
+    background-color: #0c171f;
+    padding: 16px;
+}
+
+a {
+    color: #fcdd2d;
+    font-weight: 700;
+    background-color: transparent;
+    text-decoration: underline 0.1em rgba(255, 255, 255, 0);
+    transition: color 0.15s ease-in-out, text-decoration-color 0.15s;
+}
+
+a:hover {
+    text-decoration-color: rgba(255, 255, 255, 0.7);
+    color: #fff;
+}
+
+header {
+    font-size: 20px;
+}
+
+header .header-text {
+    font-weight: 700;
+    float: left;
+    margin-right: 32px;
+}
+
+header .header-logo {
+    margin-right: 8px;
+    margin-bottom: -2px;
+}

@@ -9,15 +9,27 @@ import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.forwardedheaders.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.response.*
 import java.time.Duration
 
 fun Application.configureHTTP() {
-    install(CachingHeaders) {
-        options { _, outgoingContent ->
-            when (outgoingContent.contentType?.withoutParameters()) {
-                ContentType.Text.CSS -> CachingOptions(CacheControl.MaxAge(maxAgeSeconds = 24 * 60 * 60))
-                else -> null
+    if (!Sysinfo.isLocal) {
+        install(CachingHeaders) {
+            options { _, outgoingContent ->
+                val oneDayInSeconds = 24 * 60 * 60
+                when (outgoingContent.contentType?.withoutParameters()) {
+                    ContentType.Text.CSS -> CachingOptions(CacheControl.MaxAge(maxAgeSeconds = oneDayInSeconds))
+                    ContentType.Application.JavaScript -> CachingOptions(CacheControl.MaxAge(maxAgeSeconds = oneDayInSeconds))
+                    ContentType.Image.XIcon -> CachingOptions(CacheControl.MaxAge(maxAgeSeconds = oneDayInSeconds))
+                    else -> null
+                }
             }
+        }
+    }
+    install(StatusPages) {
+        exception<Throwable> { call, cause ->
+            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
         }
     }
     install(Compression) {
