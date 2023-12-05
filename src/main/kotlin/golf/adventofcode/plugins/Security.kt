@@ -79,7 +79,7 @@ fun Application.configureSecurity() {
     authentication {
         oauth(oauthGoogleAuthenticationName) {
             urlProvider = {
-                if (Sysinfo.isLocal) "http://localhost:8030/oauth-callback" else "https://adventofcodegolf.com/oauth-callback"
+                if (Sysinfo.isLocal) "http://localhost:8030/oauth-callback" else "https://adventofcode.golf/oauth-callback"
             }
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
