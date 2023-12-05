@@ -5,8 +5,14 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 
+val container = System.getenv("CONTAINER") ?: "local"
+
 fun main() {
-    embeddedServer(Netty, port = 8030, host = "0.0.0.0", module = Application::module)
+    println("Starting ktor...")
+    embeddedServer(Netty,
+        port = System.getenv("PORT")?.toIntOrNull() ?: 8030,
+        host = System.getenv("HOST") ?: "0.0.0.0",
+        module = Application::module)
         .start(wait = true)
 }
 

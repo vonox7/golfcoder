@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
@@ -6,13 +8,14 @@ plugins {
     kotlin("jvm") version "1.9.21"
     id("io.ktor.plugin") version "2.3.6"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.21"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "golf.adventofcode"
 version = "0.0.1"
 
 application {
-    mainClass.set("golf.adventofcode.ApplicationKt")
+    mainClass.set("golf.adventofcode.ServerKt")
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
@@ -41,4 +44,36 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+}
+
+kotlin {
+    compilerOptions.jvmTarget = JvmTarget.JVM_19
+}
+
+tasks {
+    getByName<JavaExec>("run") {
+        dependsOn(shadowJar)
+        classpath(shadowJar)
+    }
+
+    shadowJar {
+        setProperty("archiveFileName", "Server.jar")
+        isZip64 = true // Our jar files might have more than 65535 classes/files
+    }
+
+    // Copy Server.jar from build folder to root folder so we can delete all other folders
+    register<Copy>("copyServer") {
+        dependsOn(shadowJar)
+        from(file("build/libs/Server.jar"))
+        into(file("."))
+    }
+
+    register("stage") {
+        group = "distribution"
+        dependsOn(getByName("copyServer"))
+    }
+
+    build {
+        mustRunAfter(clean)
+    }
 }
