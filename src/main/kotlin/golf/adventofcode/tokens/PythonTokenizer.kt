@@ -24,7 +24,7 @@ class PythonTokenizer : Tokenizer {
             file.writeText(input)
 
             val tokenString = arrayOf("python3", "-m", "tokenize", filename)
-                .runCommand(waitMilliSeconds = 1000, printOutput = true)
+                .runCommand(waitMilliSeconds = 1000, printOutput = false)
 
             val lineRegex = Regex("""^([0-9]+),([0-9]+)-([0-9]+),([0-9]+):\s*([A-Z]+)\s*(.+?)\s*$""")
             var endMarkerFound = false
@@ -60,7 +60,7 @@ class PythonTokenizer : Tokenizer {
                 }
 
             // Ensure that we didn't kill the python process before it finished parsing, and we had no parsing exceptions
-            require(endMarkerFound)
+            require(endMarkerFound) { "ENDMARKER not found. Result of `python3 -m tokenize`:\n$tokenString" }
 
             return tokens
         } finally {
