@@ -1,5 +1,6 @@
 package golf.adventofcode
 
+import golf.adventofcode.database.MainDatabase
 import golf.adventofcode.endpoints.web.AboutView
 import golf.adventofcode.endpoints.web.LeaderboardDayView
 import golf.adventofcode.endpoints.web.LeaderboardYearView
@@ -15,13 +16,17 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 val container = System.getenv("CONTAINER") ?: "local"
+lateinit var mainDatabase: MainDatabase
 
 fun main() {
+    println("Connecting to database...")
+    mainDatabase = MainDatabase(System.getenv("MONGO_URL") ?: "mongodb://localhost:27017/advent-of-code-golf")
+
     println("Starting ktor...")
     embeddedServer(
         Netty,
         port = System.getenv("PORT")?.toIntOrNull() ?: 8030,
-        host = System.getenv("HOST") ?: "0.0.0.0",
+        host = if (Sysinfo.isLocal) "localhost" else "0.0.0.0",
         module = Application::ktorServerModule
     ).start(wait = true)
 }

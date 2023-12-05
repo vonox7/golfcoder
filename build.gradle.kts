@@ -23,6 +23,7 @@ application {
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io") // Needed for katerbase
 }
 
 dependencies {
@@ -44,6 +45,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    implementation("com.github.studoverse:katerbase:feb131944cef43e6accd101d3b2579e7a0b171b7")
+    implementation("org.mongodb:mongodb-driver-sync:4.9.0")
 }
 
 kotlin {

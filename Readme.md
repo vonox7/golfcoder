@@ -10,8 +10,8 @@ This project is not affiliated with adventofcode.com.
 
 # Running the leaderboard locally
 
-Clone the repo, open it in IntelliJ, and use the `Server` run configuration.
-TODO: Add instructions for database setup.
+1. Install mongodb, at least version 4.0, see https://www.mongodb.com/docs/manual/administration/install-community/
+2. Clone the repo, open it in IntelliJ, and use the `Server` run configuration.
 
 # Deployment
 
