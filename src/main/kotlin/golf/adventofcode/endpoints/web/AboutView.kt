@@ -28,10 +28,22 @@ object AboutView {
                 a("https://github.com/SebLague/Chess-Challenge") { +"SebLague's chess coding challenge" }
                 +"."
             }
+
             p {
                 +"This project is not affiliated with "
                 a("https://adventofcode.com") { +"adventofcode.com" }
                 +"."
+                br()
+                +"The "
+                a(href = "https://adventofcode.com/leaderboard") { +"official leaderboard" }
+                +" calculates the score based on completion time. "
+                +"Depending on your personal timezone and your personal/work schedule, this can be a significant disadvantage. "
+                br()
+                +"I have, therefore, created this unofficial leaderboard to compare code size optimization, instead of completion time."
+                br()
+                +"This leaderboard is not meant to replace the official leaderboard but to complement it with a different perspective."
+                br()
+                +"I want to express my gratitude to Eric Wastl and his supporters for creating the Advent of Code challenges each year with such great detail and care!"
             }
 
             h2 { +"Credits" }
