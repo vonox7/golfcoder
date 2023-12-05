@@ -1,5 +1,6 @@
 package golf.adventofcode.plugins
 
+import golf.adventofcode.tokens.PythonTokenizer
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
@@ -16,6 +17,9 @@ fun Application.configureRouting() {
     routing {
         get("/") {
             call.respondText("Hello World!")
+        }
+        get("/tmp-python-tokenizer") { // TODO remove tmp
+            call.respondText(PythonTokenizer().getTokenCount("print('Hello, world!')").toString())
         }
         staticResources("/static", "static")
     }
