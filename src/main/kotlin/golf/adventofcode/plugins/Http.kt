@@ -38,7 +38,7 @@ fun Application.configureHTTP() {
     install(CORS) {
         allowHost("adventofcode.golf", schemes = listOf("https"))
         if (Sysinfo.isLocal) {
-            allowHost("0.0.0.0:8030")
+            allowHost("localhost:8030")
         }
         allowNonSimpleContentTypes = true
         allowCredentials = true

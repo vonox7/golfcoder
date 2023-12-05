@@ -1,8 +1,10 @@
 package golf.adventofcode.endpoints.web
 
 import golf.adventofcode.Sysinfo
+import golf.adventofcode.plugins.UserSession
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.html.*
 import kotlinx.html.*
 
@@ -14,7 +16,7 @@ suspend fun ApplicationCall.respondHtmlView(
     this.respondHtml(status) {
         head(pageTitle = pageTitle)
         body {
-            header()
+            header(this@respondHtmlView)
             render()
         }
     }
@@ -60,7 +62,7 @@ private fun HTML.head(pageTitle: String) {
     }
 }
 
-private fun HtmlBlockTag.header() {
+private fun HtmlBlockTag.header(call: ApplicationCall) {
     header {
         a(href = "/", classes = "header-text") {
             img(src = "/static/images/favicon.ico", alt = "Logo", classes = "header-logo") {
@@ -71,6 +73,19 @@ private fun HtmlBlockTag.header() {
         }
         a(href = "/about") {
             +"About"
+        }
+        val userSession = call.principal<UserSession>()
+        if (userSession == null) {
+            a(href = "/login") {
+                +"Login"
+            }
+        } else {
+            a(href = "/logout") {
+                +"Logout"
+            }
+            a(href = "/user/edit") {
+                +userSession.displayName
+            }
         }
     }
 }

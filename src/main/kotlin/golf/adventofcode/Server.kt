@@ -1,14 +1,13 @@
 package golf.adventofcode
 
 import golf.adventofcode.database.MainDatabase
-import golf.adventofcode.endpoints.web.AboutView
-import golf.adventofcode.endpoints.web.LeaderboardDayView
-import golf.adventofcode.endpoints.web.LeaderboardYearView
+import golf.adventofcode.endpoints.web.*
 import golf.adventofcode.plugins.configureHTTP
 import golf.adventofcode.plugins.configureSecurity
 import golf.adventofcode.plugins.configureSerialization
-import golf.adventofcode.plugins.configureTemplating
+import golf.adventofcode.plugins.sessionAuthenticationName
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
@@ -35,15 +34,20 @@ private fun Application.ktorServerModule() {
     configureSecurity()
     configureHTTP()
     configureSerialization()
-    configureTemplating()
 
     routing {
         get("/") { call.respondRedirect("/2023") }
         get("/favicon.ico") { call.respondRedirect("/static/images/favicon.ico", permanent = true) }
 
-        get(Regex("about")) { AboutView.getHtml(call) }
-        get(Regex("20(?<year>[0-9]{2})")) { LeaderboardYearView.getHtml(call) }
-        get(Regex("20(?<year>[0-9]{2})/day/(?<day>[0-9]{1,2})")) { LeaderboardDayView.getHtml(call) }
+        authenticate(sessionAuthenticationName, optional = true) {
+            get(Regex("about")) { AboutView.getHtml(call) }
+            get(Regex("20(?<year>[0-9]{2})")) { LeaderboardYearView.getHtml(call) }
+            get(Regex("20(?<year>[0-9]{2})/day/(?<day>[0-9]{1,2})")) { LeaderboardDayView.getHtml(call) }
+            get("/logout") { LogoutView.doLogout(call) }
+        }
+        authenticate(sessionAuthenticationName, optional = false) {
+            get("/user/edit") { EditUserView.getHtml(call) }
+        }
 
         // TODO robots.txt, etc.
 

@@ -34,12 +34,17 @@ header {
 header .header-text {
     font-weight: bold;
     float: left;
-    margin-right: 32px;
+    margin-right: 16px;
 }
 
 header .header-logo {
     margin-right: 8px;
     margin-bottom: -2px;
+}
+
+header a {
+    margin-left: 16px;
+    margin-right: 16px;
 }
 
 .leaderboard {
