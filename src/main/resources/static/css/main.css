@@ -20,6 +20,13 @@ a:hover {
     color: #fff;
 }
 
+h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
 header {
     font-size: 20px;
 }
