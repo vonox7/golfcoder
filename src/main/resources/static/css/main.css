@@ -9,7 +9,7 @@ body {
 
 a {
     color: #fcdd2d;
-    font-weight: 700;
+    font-weight: bold;
     background-color: transparent;
     text-decoration: underline 0.1em rgba(255, 255, 255, 0);
     transition: color 0.15s ease-in-out, text-decoration-color 0.15s;
@@ -25,7 +25,7 @@ header {
 }
 
 header .header-text {
-    font-weight: 700;
+    font-weight: bold;
     float: left;
     margin-right: 32px;
 }
@@ -33,4 +33,35 @@ header .header-text {
 header .header-logo {
     margin-right: 8px;
     margin-bottom: -2px;
+}
+
+.leaderboard {
+    max-width: 800px;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.leaderboard tr {
+    border-bottom: 1px solid #eeeeee21;
+    padding: 12px;
+    font-size: 15px;
+    line-height: 2.5;
+}
+
+.leaderboard .rank {
+    padding-left: 24px;
+    font-weight: bold;
+}
+
+.leaderboard .username {
+    max-width: 50vw;
+    overflow-wrap: anywhere;
+}
+
+.leaderboard .left-align {
+    text-align: left;
+}
+
+.leaderboard .right-align {
+    text-align: right;
 }
