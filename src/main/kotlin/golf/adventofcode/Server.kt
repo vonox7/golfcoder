@@ -1,10 +1,10 @@
 package golf.adventofcode
 
 import golf.adventofcode.database.MainDatabase
+import golf.adventofcode.endpoints.api.EditUserApi
 import golf.adventofcode.endpoints.web.*
 import golf.adventofcode.plugins.configureHTTP
 import golf.adventofcode.plugins.configureSecurity
-import golf.adventofcode.plugins.configureSerialization
 import golf.adventofcode.plugins.sessionAuthenticationName
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -33,7 +33,6 @@ fun main() {
 private fun Application.ktorServerModule() {
     configureSecurity()
     configureHTTP()
-    configureSerialization()
 
     routing {
         get("/") { call.respondRedirect("/2023") }
@@ -45,7 +44,9 @@ private fun Application.ktorServerModule() {
             get(Regex("20(?<year>[0-9]{2})/day/(?<day>[0-9]{1,2})")) { LeaderboardDayView.getHtml(call) }
             get("/logout") { LogoutView.doLogout(call) }
         }
-        authenticate(sessionAuthenticationName, optional = false) {
+
+        authenticate(sessionAuthenticationName) {
+            post("/api/user/edit") { EditUserApi.post(call) }
             get("/user/edit") { EditUserView.getHtml(call) }
         }
 

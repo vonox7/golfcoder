@@ -47,7 +47,16 @@ object AboutView {
             }
 
             h2 { +"Credits" }
-            "Favicon: " + a("https://www.flaticon.com/free-icons/three") { +"Three icons created by Uniconlabs - Flaticon" }
+            ul {
+                li {
+                    +"Favicon: "
+                    a("https://www.flaticon.com/free-icons/three") { +"Three icons created by Uniconlabs - Flaticon" }
+                }
+                li {
+                    +"HTML Checkbox: "
+                    a("https://www.w3schools.com/howto/howto_css_custom_checkbox.asp") { +"w3schools" }
+                }
+            }
         }
     }
 }

@@ -14,7 +14,7 @@ class User : MongoMainEntry() {
     var createdOn: Date = Date()
     var name: String = ""
     var publicProfilePictureUrl: String? = null
-    var nameIsPublic: Boolean = false
+    var nameIsPublic: Boolean = true
 
     class OAuthDetails(
         val provider: String,

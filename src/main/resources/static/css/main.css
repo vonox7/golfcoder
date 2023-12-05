@@ -1,3 +1,5 @@
+/* GLOBAL */
+
 body {
     font-family: 'Roboto', sans-serif;
     font-size: 1rem;
@@ -47,6 +49,8 @@ header a {
     margin-right: 16px;
 }
 
+/* LEADERBOARD */
+
 .leaderboard {
     max-width: 800px;
     width: 100%;
@@ -76,4 +80,97 @@ header a {
 
 .leaderboard .right-align {
     text-align: right;
+}
+
+/* FORM */
+
+/* Customize the label (the container) */
+.checkbox-container {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 18px;
+    user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Create a custom checkbox */
+.checkbox-container .checkbox {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    background-color: #b8bec2;
+}
+
+/* On mouse-over, add a grey background color */
+.checkbox-container:hover input ~ .checkbox {
+    background-color: #c0b375 !important;
+}
+
+.checkbox-container:active input ~ .checkbox {
+    background-color: #a2976a;
+!important;
+}
+
+/* When the checkbox is checked, add a yellow background */
+.checkbox-container input:checked ~ .checkbox {
+    background-color: #fcdd2d;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkbox-container .checkbox:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+/* Show the checkmark when checked */
+.checkbox-container input:checked ~ .checkbox:after {
+    display: block;
+}
+
+/* Style the checkmark/indicator */
+.checkbox-container .checkbox:after {
+    left: 9px;
+    top: 5px;
+    width: 5px;
+    height: 10px;
+    border: solid #0b171f;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}
+
+.button, input[type=submit] {
+    background-color: #fcdd2d;
+    border: none;
+    padding: 12px 24px;
+    margin-bottom: 12px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    color: #0b171f;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.button:hover, input[type=submit]:hover {
+    background-color: #c0b375;
+}
+
+.button:active, input[type=submit]:active {
+    background-color: #a2976a;
+    color: #000000;
 }
