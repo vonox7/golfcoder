@@ -1,4 +1,4 @@
-package golf.adventofcode.tokens
+package golf.adventofcode.tokenizer
 
 import java.io.*
 import java.util.concurrent.TimeUnit

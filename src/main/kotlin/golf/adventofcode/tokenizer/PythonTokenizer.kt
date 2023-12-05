@@ -1,4 +1,4 @@
-package golf.adventofcode.tokens
+package golf.adventofcode.tokenizer
 
 import io.ktor.util.*
 import java.io.File

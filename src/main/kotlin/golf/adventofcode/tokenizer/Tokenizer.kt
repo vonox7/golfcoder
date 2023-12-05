@@ -1,4 +1,4 @@
-package golf.adventofcode.tokens
+package golf.adventofcode.tokenizer
 
 interface Tokenizer {
     data class Token(val sourcePosition: ClosedRange<Position>, val source: String, val type: Type) {
