@@ -31,6 +31,9 @@ fun Application.configureHTTP() {
     }
     install(StatusPages) {
         exception<Throwable> { call, cause ->
+            if (Sysinfo.isLocal) {
+                cause.printStackTrace()
+            }
             call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
         }
     }

@@ -89,6 +89,7 @@ header a {
     display: block;
     position: relative;
     padding-left: 35px;
+    margin-top: 12px;
     margin-bottom: 12px;
     cursor: pointer;
     font-size: 18px;
@@ -156,6 +157,7 @@ header a {
     background-color: #fcdd2d;
     border: none;
     padding: 12px 24px;
+    margin-top: 12px;
     margin-bottom: 12px;
     text-align: center;
     text-decoration: none;

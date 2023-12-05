@@ -2,6 +2,7 @@ package golf.adventofcode
 
 import golf.adventofcode.database.MainDatabase
 import golf.adventofcode.endpoints.api.EditUserApi
+import golf.adventofcode.endpoints.api.UploadSolutionApi
 import golf.adventofcode.endpoints.web.*
 import golf.adventofcode.plugins.configureHTTP
 import golf.adventofcode.plugins.configureSecurity
@@ -46,8 +47,10 @@ private fun Application.ktorServerModule() {
         }
 
         authenticate(sessionAuthenticationName) {
-            post("/api/user/edit") { EditUserApi.post(call) }
             get("/user/edit") { EditUserView.getHtml(call) }
+
+            post("/api/user/edit") { EditUserApi.post(call) }
+            post("/api/solution/upload") { UploadSolutionApi.post(call) }
         }
 
         // TODO robots.txt, etc.
