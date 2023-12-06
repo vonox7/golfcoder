@@ -49,7 +49,14 @@ fun Application.configureHTTP() {
         allowCredentials = true
         maxAgeInSeconds = Duration.ofDays(1).seconds
     }
-    install(DefaultHeaders)
+    install(DefaultHeaders) {
+        // Security headers
+        if (!Sysinfo.isLocal) {
+            header("Strict-Transport-Security", "max-age=31536000; includeSubdomains; preload")
+        }
+        header("X-Content-Type-Options", "nosniff")
+        header("X-Frame-Options", "SAMEORIGIN")
+    }
     install(XForwardedHeaders)
     install(ContentNegotiation) {
         json()
