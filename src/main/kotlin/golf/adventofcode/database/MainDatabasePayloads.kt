@@ -37,16 +37,22 @@ class Solution : MongoMainEntry() {
     var tokenCountAnalyzeDate: Date? = null
 
     // Most used languages on GitHub for advent-of-code: https://github.com/search?q=advent-of-code+2023&type=repositories
-    enum class Language(val displayName: String, val fileEnding: String, val tokenizerClass: KClass<out Tokenizer>) {
-        PYTHON("Python", "py", PythonTokenizer::class),
-        RUST("Rust", "rs", NotYetAvailableTokenizer::class),
-        GO("Go", "go", NotYetAvailableTokenizer::class),
-        KOTLIN("Kotlin", "kt", NotYetAvailableTokenizer::class),
-        JAVASCRIPT("JavaScript", "js", NotYetAvailableTokenizer::class),
-        CSHARP("C#", "cs", NotYetAvailableTokenizer::class),
-        TYPESCRIPT("TypeScript", "ts", NotYetAvailableTokenizer::class),
-        CPLUSPLUS("C++", "cpp", NotYetAvailableTokenizer::class),
-        JAVA("Java", "java", NotYetAvailableTokenizer::class),
-        C("C", "c", NotYetAvailableTokenizer::class),
+
+    enum class Language(
+        val displayName: String,
+        val fileEnding: String,
+        val onecompilerLanguageId: String, // Find out by checking the URL after selecting a language at the dropdown at https://onecompiler.com/
+        val tokenizerClass: KClass<out Tokenizer>,
+    ) {
+        PYTHON("Python", "py", "python", PythonTokenizer::class),
+        RUST("Rust", "rs", "rust", NotYetAvailableTokenizer::class),
+        GO("Go", "go", "go", NotYetAvailableTokenizer::class),
+        KOTLIN("Kotlin", "kt", "kotlin", NotYetAvailableTokenizer::class),
+        JAVASCRIPT("JavaScript", "js", "javascript", NotYetAvailableTokenizer::class),
+        CSHARP("C#", "cs", "csharp", NotYetAvailableTokenizer::class),
+        TYPESCRIPT("TypeScript", "ts", "typescript", NotYetAvailableTokenizer::class),
+        CPLUSPLUS("C++", "cpp", "cpp", NotYetAvailableTokenizer::class),
+        JAVA("Java", "java", "java", NotYetAvailableTokenizer::class),
+        C("C", "c", "c", NotYetAvailableTokenizer::class),
     }
 }

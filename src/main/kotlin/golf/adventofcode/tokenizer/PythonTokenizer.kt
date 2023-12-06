@@ -42,6 +42,7 @@ class PythonTokenizer : Tokenizer {
                         type = when (type) {
                             "NAME" -> Tokenizer.Token.Type.CODE_TOKEN
                             "OP" -> Tokenizer.Token.Type.CODE_TOKEN
+                            "NUMBER" -> Tokenizer.Token.Type.CODE_TOKEN
                             "STRING" -> Tokenizer.Token.Type.STRING
                             "ENCODING" -> Tokenizer.Token.Type.WHITESPACE
                             "NEWLINE" -> Tokenizer.Token.Type.WHITESPACE

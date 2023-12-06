@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 class ApiCallResult(
     val buttonText: String? = null,
-    val reloadSite: Boolean = false
+    val alertText: String? = null,
+    val reloadSite: Boolean = false,
 )

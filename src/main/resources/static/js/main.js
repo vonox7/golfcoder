@@ -24,6 +24,11 @@ async function submitForm(event) {
             if (responseData.buttonText) {
                 event.target.value = responseData.buttonText;
             }
+            if (responseData.alertText) {
+                setTimeout(() => {
+                    alert(responseData.alertText); // TODO use modern dialog?
+                }, 1);
+            }
             if (responseData.reloadSite) {
                 window.location.reload();
             }
