@@ -49,6 +49,30 @@ header a {
     margin-right: 16px;
 }
 
+.profile-image {
+    margin-right: 10px;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    font-size: 12px;
+    vertical-align: middle;
+    border-radius: 50%;
+    background: #c0b375;
+    display: inline-block;
+    text-align: center;
+    color: #0c171f;
+    font-family: monospace;
+    border: 1px solid #b8bec2;
+}
+
+.profile-image.big {
+    margin-right: 16px;
+    height: 42px;
+    width: 42px;
+    line-height: 42px;
+    font-size: 21px;
+}
+
 /* LEADERBOARD */
 
 .leaderboard {

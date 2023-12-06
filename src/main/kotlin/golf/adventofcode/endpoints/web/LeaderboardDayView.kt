@@ -1,16 +1,35 @@
 package golf.adventofcode.endpoints.web
 
+import com.moshbit.katerbase.equal
+import com.moshbit.katerbase.inArray
 import golf.adventofcode.database.Solution
+import golf.adventofcode.database.User
 import golf.adventofcode.endpoints.api.UploadSolutionApi
+import golf.adventofcode.mainDatabase
 import golf.adventofcode.tokenizer.NotYetAvailableTokenizer
+import golf.adventofcode.utils.relativeToNow
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
+import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
 
 object LeaderboardDayView {
     suspend fun getHtml(call: ApplicationCall) {
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
         val day = call.parameters["day"]?.toIntOrNull() ?: throw NotFoundException("Invalid day")
+        val solutions = (1..2).map { part ->
+            mainDatabase.getSuspendingCollection<Solution>()
+                .find(Solution::year equal year, Solution::day equal day, Solution::part equal part)
+                .sortByDescending(Solution::tokenCount)
+                .limit(100)
+                .toList()
+        }
+        val userIds = solutions.flatten().map { it.userId }.distinct()
+        val userIdsToUsers = mainDatabase.getSuspendingCollection<User>()
+            .find(User::_id inArray userIds)
+            .selectedFields(User::_id, User::name, User::nameIsPublic, User::publicProfilePictureUrl)
+            .toList()
+            .associateBy { it._id }
 
         fun HtmlBlockTag.renderUpload() {
             h2 { +"Submit solution" }
@@ -79,32 +98,49 @@ object LeaderboardDayView {
             renderUpload()
 
             h2 { +"Part 1" }
-            renderLeaderboardTable()
+            renderLeaderboardTable(solutions[0], userIdsToUsers)
 
             h2 { +"Part 2" }
-            renderLeaderboardTable()
+            renderLeaderboardTable(solutions[1], userIdsToUsers)
         }
     }
 
-    private fun HtmlBlockTag.renderLeaderboardTable() {
+    private fun HtmlBlockTag.renderLeaderboardTable(solutions: List<Solution>, userIdsToUsers: Map<String, User>) {
+        if (solutions.isEmpty()) {
+            p { +"No solutions submitted yet. Submit now your own solution." }
+            return
+        }
+
         table("leaderboard") {
             thead {
                 tr {
                     th {}
-                    th(classes = "left-align") { +"Username" }
+                    th(classes = "left-align") { +"Name" }
                     th(classes = "left-align") { +"Language" }
                     th(classes = "right-align") { +"Tokens" }
                     th(classes = "right-align") { +"Date" }
                 }
             }
             tbody {
-                (1..10).forEach { rank ->
+                solutions.forEachIndexed { index, solution ->
                     tr {
-                        td("rank") { +"$rank" }
-                        td { +"My_username" }
-                        td { +"Python" }
-                        td("right-align") { +"1234" }
-                        td("right-align") { +"Two days ago" }
+                        td("rank") { +"${index + 1}" }
+                        td {
+                            val user = userIdsToUsers[solution.userId]
+                            renderUserProfileImage(user, big = false)
+                            +(user?.name?.takeIf { user.nameIsPublic } ?: "anonymous")
+                        }
+                        td { +solution.language.displayName }
+                        td("right-align") {
+                            if (solution.tokenCount == null) {
+                                a(href = "") { // Just reload site, calculation should have finished by then
+                                    +"Calculating..."
+                                }
+                            } else {
+                                +"${solution.tokenCount}"
+                            }
+                        }
+                        td("right-align") { +solution.uploadDate.relativeToNow }
                     }
                 }
             }
