@@ -5,6 +5,7 @@ import com.moshbit.katerbase.inArray
 import golf.adventofcode.database.Solution
 import golf.adventofcode.database.User
 import golf.adventofcode.endpoints.api.UploadSolutionApi
+import golf.adventofcode.endpoints.web.TemplateView.template
 import golf.adventofcode.mainDatabase
 import golf.adventofcode.tokenizer.NotYetAvailableTokenizer
 import golf.adventofcode.utils.relativeToNow
@@ -85,6 +86,40 @@ object LeaderboardDayView {
                     maxLength = UploadSolutionApi.MAX_CODE_LENGTH.toString()
                 }
                 br()
+                p {
+                    b { +"Rules" }
+                    ul {
+                        li {
+                            +"You may participate alone or in a team."
+                        }
+                        li {
+                            +"You may submit multiple solutions."
+                        }
+                        li {
+                            +"You may submit solutions in multiple programming languages."
+                        }
+                        li {
+                            +"Only using the standard library of your language is allowed, no further dependencies/libraries."
+                        }
+                        li {
+                            +"The code needs to conform to the template ("
+                            Solution.Language.entries
+                                .filter { it.template != null }
+                                .mapIndexed { index, it ->
+                                    if (index != 0) {
+                                        +", "
+                                    }
+                                    a(href = "/template/advent-of-code-golf-${it.name.lowercase()}-template.${it.fileEnding}") {
+                                        +it.displayName
+                                    }
+                                }
+                            +"), read the puzzle input from file \"input.txt\" and print the solution to stdout."
+                        }
+                        li {
+                            +"You may not make network request, read data from a file (except \"input.txt\"), or store data inside the name of variables/functions/classes etc and read them with reflection."
+                        }
+                    }
+                }
                 input(type = InputType.submit) {
                     onClick = "submitForm(event)"
                     value = "Submit"

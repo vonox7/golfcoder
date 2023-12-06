@@ -29,6 +29,10 @@ h2 {
     margin-bottom: 1rem;
 }
 
+ul {
+    line-height: 150%;
+}
+
 header {
     font-size: 20px;
 }
