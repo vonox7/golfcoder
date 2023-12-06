@@ -20,7 +20,7 @@ object LeaderboardDayView {
         val solutions = (1..2).map { part ->
             mainDatabase.getSuspendingCollection<Solution>()
                 .find(Solution::year equal year, Solution::day equal day, Solution::part equal part)
-                .sortByDescending(Solution::tokenCount)
+                .sortBy(Solution::tokenCount)
                 .limit(100)
                 .toList()
         }
@@ -117,7 +117,7 @@ object LeaderboardDayView {
                     th {}
                     th(classes = "left-align") { +"Name" }
                     th(classes = "left-align") { +"Language" }
-                    th(classes = "right-align") { +"Tokens" }
+                    th(classes = "right-align") { +"Tokens" } // TODO add download link to source (if public), and add external links.
                     th(classes = "right-align") { +"Date" }
                 }
             }
