@@ -93,6 +93,16 @@ object AboutView {
             +"Each user has for each language one leaderboard entry. The best score from each part will be used. "
             +"If a user has not submitted a solution for a part, that part will be ranked with 10_000 tokens."
 
+            h3 { +"Why is my language not yet supported?" }
+            +"Writing a tokenizer for a language is not trivial. "
+            +"I therefore look for a tokenizer that is already implemented and can easily be integrated. "
+            /* TODO uncomment when public
+            +"Join the discussion on "
+            a(href = "https://github.com/vonox7/advent-of-code-golf/labels/language-support") { +"GitHub" }
+            +" and help to add support for your favorite language, or just upvote the language you want to promote! "
+             */
+            +"Please be patient, I will add more popular languages as soon as possible. "
+
             h2 { +"Credits" }
             ul {
                 li {
