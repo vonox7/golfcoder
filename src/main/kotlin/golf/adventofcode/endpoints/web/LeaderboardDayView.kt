@@ -7,10 +7,13 @@ import golf.adventofcode.database.User
 import golf.adventofcode.endpoints.api.UploadSolutionApi
 import golf.adventofcode.endpoints.web.TemplateView.template
 import golf.adventofcode.mainDatabase
+import golf.adventofcode.plugins.UserSession
 import golf.adventofcode.tokenizer.NotYetAvailableTokenizer
 import golf.adventofcode.utils.relativeToNow
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
+import io.ktor.server.sessions.*
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
 
@@ -27,6 +30,8 @@ object LeaderboardDayView {
                 // This could be done also with an aggregate query?
                 // But then we could also combine the 2 queries (1 per part) into 1 query?
                 .limit(200)
+                // Filter out solutions that errored during analysis
+                .filter { it.tokenCountAnalyzeDate == null || it.tokenCount != null }
                 .toList()
         }
         val userIds = solutions.flatten().map { it.userId }.distinct()
@@ -120,7 +125,12 @@ object LeaderboardDayView {
                 }
                 input(type = InputType.submit) {
                     onClick = "submitForm(event)"
-                    value = "Submit"
+                    if (call.sessions.get<UserSession>() == null) {
+                        disabled = true
+                        value = "Please login to submit a solution"
+                    } else {
+                        value = "Submit"
+                    }
                 }
             }
         }
@@ -152,9 +162,9 @@ object LeaderboardDayView {
                 }
         }
 
-        val sortedScores: List<Pair<List<Solution>, Int>> = scoresByUserId.values.associateWith { solutions ->
+        val sortedScores: List<Pair<List<Solution>, Int>> = scoresByUserId.values.associateWith { userSolutions ->
             (1..parts).sumOf { part ->
-                val solution = solutions.find { it.part == part }
+                val solution = userSolutions.find { it.part == part }
                 when {
                     solution == null -> 10_000// No solution for part yet submitted
                     solution.tokenCount == null -> 0 // Score not calculated yet: show "Calculating..." on top for a short time
