@@ -4,6 +4,7 @@ async function submitForm(event) {
     const originalButtonText = event.target.value;
     const form = event.target.closest("form");
     event.target.value += "...";
+    event.target.disabled = true;
 
     try {
         const response = await fetch(form.action, {
@@ -23,6 +24,9 @@ async function submitForm(event) {
             if (responseData.buttonText) {
                 event.target.value = responseData.buttonText;
             }
+            if (responseData.reloadSite) {
+                window.location.reload();
+            }
         }
 
     } catch (error) {
@@ -30,6 +34,7 @@ async function submitForm(event) {
         event.target.value = "Error";
     }
 
+    event.target.disabled = false;
     setTimeout(() => {
         event.target.value = originalButtonText;
     }, 2000);

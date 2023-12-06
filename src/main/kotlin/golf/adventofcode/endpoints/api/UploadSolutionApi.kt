@@ -48,6 +48,6 @@ object UploadSolutionApi {
         // Trigger instantly analysis
         analyzerThread.interrupt()
 
-        call.respond(mapOf("buttonText" to "Submitted"))
+        call.respond(ApiCallResult(buttonText = "Submitted", reloadSite = true))
     }
 }

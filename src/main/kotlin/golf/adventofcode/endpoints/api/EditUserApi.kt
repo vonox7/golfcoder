@@ -23,6 +23,6 @@ object EditUserApi {
                 User::nameIsPublic setTo (request.nameIsPublic == "on")
             }
 
-        call.respond(mapOf("buttonText" to "Saved"))
+        call.respond(ApiCallResult(buttonText = "Saved"))
     }
 }
