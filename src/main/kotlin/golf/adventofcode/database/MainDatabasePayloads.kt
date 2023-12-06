@@ -37,16 +37,16 @@ class Solution : MongoMainEntry() {
     var tokenCountAnalyzeDate: Date? = null
 
     // Most used languages on GitHub for advent-of-code: https://github.com/search?q=advent-of-code+2023&type=repositories
-    enum class Language(val fileEnding: String, val tokenizerClass: KClass<out Tokenizer>) {
-        PYTHON("py", PythonTokenizer::class),
-        RUST("rs", NotYetAvailableTokenizer::class),
-        GO("go", NotYetAvailableTokenizer::class),
-        KOTLIN("kt", NotYetAvailableTokenizer::class),
-        JAVASCRIPT("js", NotYetAvailableTokenizer::class),
-        CSHARP("cs", NotYetAvailableTokenizer::class),
-        TYPESCRIPT("ts", NotYetAvailableTokenizer::class),
-        CPLUSPLUS("cpp", NotYetAvailableTokenizer::class),
-        JAVA("java", NotYetAvailableTokenizer::class),
-        C("c", NotYetAvailableTokenizer::class),
+    enum class Language(val displayName: String, val fileEnding: String, val tokenizerClass: KClass<out Tokenizer>) {
+        PYTHON("Python", "py", PythonTokenizer::class),
+        RUST("Rust", "rs", NotYetAvailableTokenizer::class),
+        GO("Go", "go", NotYetAvailableTokenizer::class),
+        KOTLIN("Kotlin", "kt", NotYetAvailableTokenizer::class),
+        JAVASCRIPT("JavaScript", "js", NotYetAvailableTokenizer::class),
+        CSHARP("C#", "cs", NotYetAvailableTokenizer::class),
+        TYPESCRIPT("TypeScript", "ts", NotYetAvailableTokenizer::class),
+        CPLUSPLUS("C++", "cpp", NotYetAvailableTokenizer::class),
+        JAVA("Java", "java", NotYetAvailableTokenizer::class),
+        C("C", "c", NotYetAvailableTokenizer::class),
     }
 }

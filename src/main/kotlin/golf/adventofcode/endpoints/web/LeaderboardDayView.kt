@@ -2,6 +2,7 @@ package golf.adventofcode.endpoints.web
 
 import golf.adventofcode.database.Solution
 import golf.adventofcode.endpoints.api.UploadSolutionApi
+import golf.adventofcode.tokenizer.NotYetAvailableTokenizer
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import kotlinx.html.*
@@ -37,10 +38,15 @@ object LeaderboardDayView {
                 br()
                 select { // TODO design: either prettify select, or use radio (similar style as checkbox)
                     name = "language"
-                    Solution.Language.entries.forEach {
+                    Solution.Language.entries.forEach { language ->
                         option {
-                            value = it.name
-                            +it.name
+                            value = language.name
+                            if (language.tokenizerClass == NotYetAvailableTokenizer::class) {
+                                disabled = true
+                                +"${language.displayName} (not yet available) "
+                            } else {
+                                +language.displayName
+                            }
                         }
                     }
                 }

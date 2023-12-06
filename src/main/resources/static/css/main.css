@@ -89,8 +89,8 @@ header a {
     display: block;
     position: relative;
     padding-left: 35px;
-    margin-top: 12px;
-    margin-bottom: 12px;
+    margin-top: 8px;
+    margin-bottom: 8px;
     cursor: pointer;
     font-size: 18px;
     user-select: none;
@@ -157,8 +157,8 @@ header a {
     background-color: #fcdd2d;
     border: none;
     padding: 12px 24px;
-    margin-top: 12px;
-    margin-bottom: 12px;
+    margin-top: 8px;
+    margin-bottom: 8px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -175,4 +175,18 @@ header a {
 .button:active, input[type=submit]:active {
     background-color: #a2976a;
     color: #000000;
+}
+
+select {
+    background-color: #fcdd2d;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    font-size: 16px;
+    padding: 8px;
+    font-weight: bold;
+}
+
+textarea {
+    margin-top: 8px;
+    margin-bottom: 8px;
 }
