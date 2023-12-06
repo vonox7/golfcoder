@@ -20,10 +20,12 @@ fun Application.configureHTTP() {
         install(CachingHeaders) {
             options { _, outgoingContent ->
                 val oneDayInSeconds = 24 * 60 * 60
+                val oneDayPublic =
+                    CacheControl.MaxAge(maxAgeSeconds = oneDayInSeconds, visibility = CacheControl.Visibility.Public)
                 when (outgoingContent.contentType?.withoutParameters()) {
-                    ContentType.Text.CSS -> CachingOptions(CacheControl.MaxAge(maxAgeSeconds = oneDayInSeconds))
-                    ContentType.Application.JavaScript -> CachingOptions(CacheControl.MaxAge(maxAgeSeconds = oneDayInSeconds))
-                    ContentType.Image.XIcon -> CachingOptions(CacheControl.MaxAge(maxAgeSeconds = oneDayInSeconds))
+                    ContentType.Text.CSS -> CachingOptions(oneDayPublic)
+                    ContentType.Application.JavaScript -> CachingOptions(oneDayPublic)
+                    ContentType.Image.XIcon -> CachingOptions(oneDayPublic)
                     else -> null
                 }
             }
