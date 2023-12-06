@@ -116,12 +116,24 @@ object AboutView {
                     }
                 }
                 li {
-                    +"HTML Checkbox: "
+                    +"HTML checkbox styling: "
                     a("https://www.w3schools.com/howto/howto_css_custom_checkbox.asp", "_blank") { +"w3schools" }
                 }
                 li {
                     +"Wording help: "
                     a("https://chat.openai.com/", "_blank") { +"ChatGPT 3.5" }
+                }
+                li {
+                    +"Hosting: "
+                    a("https://sclng.io/r/a3cd6268ba623f3b", "_blank") { +"Scalingo" }
+                    +" (support this site by using this referral link to create your Scalingo account)"
+                }
+                li {
+                    +"Backend: "
+                    a("https://ktor.io/", "_blank") { +"Ktor" }
+                    +" ("
+                    a("https://kotlinlang.org/", "_blank") { +"Kotlin" }
+                    +")"
                 }
                 li {
                     +"This site: "
