@@ -29,8 +29,18 @@ h2 {
     margin-bottom: 1rem;
 }
 
-ul {
-    line-height: 150%;
+li {
+    margin-bottom: 8px;
+}
+
+code {
+    display: inline-block;
+    background: #1a2933;
+    padding: 0.2em 0.4em;
+    border-radius: 6px;
+    font-size: 85%;
+    font-family: monospace;
+    white-space: pre;
 }
 
 header {

@@ -73,7 +73,7 @@ private fun HtmlBlockTag.header(call: ApplicationCall) {
             +"AdventOfCode.golf"
         }
         a(href = "/about") {
-            +"About"
+            +"About & FAQ"
         }
         val userSession = call.principal<UserSession>()
         if (userSession == null) {

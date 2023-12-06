@@ -46,6 +46,53 @@ object AboutView {
                 +"I want to express my gratitude to Eric Wastl and his supporters for creating the Advent of Code challenges each year with such great detail and care!"
             }
 
+            h2 { +"FAQ" }
+            h3 { +"What is a token?" }
+            +"A token represents one token in the "
+            a(href = "https://en.wikipedia.org/wiki/Abstract_syntax_tree") { +"abstract syntax tree" }
+            +"."
+            +"Every name, including variables and functions, is considered as a single token, irrespective of its length. "
+            +"Therefore, both lines of code - "
+            code { +"bool a = true;" }
+            +" and "
+            code { +"bool aVeryDetailedVariableName = true;" }
+            +" - contribute equally to the token count."
+            br()
+            +"Whitespaces (spaces, newlines, tabs...), statement delimiters (eg. semikolons in C++) and comments are ignored."
+            +"However, each single character in a string counts as one token, so solving the challenge with one big Regex might not be the optimal solution."
+            br()
+            br()
+            +"This means that the following code has a score of 13 tokens: "
+            br()
+            br()
+            code {
+                +"fun main() {"
+                br()
+                +"    println(\"hi\")"
+                br()
+                +"}"
+            }
+            ol {
+                li { code { +"fun" } }
+                li { code { +"main" } }
+                li { code { +"(" } }
+                li { code { +")" } }
+                li { code { +"{" } }
+                li { code { +"println" } }
+                li { code { +"(" } }
+                li { code { +"\"" } }
+                li { code { +"h" } }
+                li { code { +"i" } }
+                li { code { +"\"" } }
+                li { code { +")" } }
+                li { code { +"}" } }
+            }
+            +""
+
+            h3 { +"How is the leaderboard sorted?" }
+            +"Each user has for each language one leaderboard entry. The best score from each part will be used. "
+            +"If a user has not submitted a solution for a part, that part will be ranked with 10_000 tokens."
+
             h2 { +"Credits" }
             ul {
                 li {
