@@ -50,7 +50,7 @@ object AboutView {
             h3 { +"What is a token?" }
             +"A token represents one token in the "
             a(href = "https://en.wikipedia.org/wiki/Abstract_syntax_tree") { +"abstract syntax tree" }
-            +"."
+            +". "
             +"Every name, including variables and functions, is considered as a single token, irrespective of its length. "
             +"Therefore, both lines of code - "
             code { +"bool a = true;" }

@@ -41,6 +41,7 @@ code {
     font-size: 85%;
     font-family: monospace;
     white-space: pre;
+    margin: 2px;
 }
 
 header {
