@@ -72,14 +72,7 @@ object LeaderboardDayView {
                         }
                     }
                 }
-                label("checkbox-container") {
-                    +"Code publicly visible"
-                    input(type = InputType.checkBox) {
-                        name = "codeIsPublic"
-                        checked = true
-                        span("checkbox")
-                    }
-                }
+                br()
                 textArea {
                     name = "code"
                     rows = "10"
@@ -88,35 +81,41 @@ object LeaderboardDayView {
                     maxLength = UploadSolutionApi.MAX_CODE_LENGTH.toString()
                 }
                 br()
-                p {
-                    b { +"Rules" }
-                    ul {
-                        li {
-                            +"You're welcome to participate alone or in a team."
-                        }
-                        li {
-                            +"You may submit multiple solutions and explore different programming languages.."
-                        }
-                        li {
-                            +"Stick to the standard library of your language, no further dependencies/libraries."
-                        }
-                        li {
-                            +"Ensure your code aligns to the template ("
-                            Solution.Language.entries
-                                .filter { it.template != null }
-                                .mapIndexed { index, it ->
-                                    if (index != 0) {
-                                        +", "
-                                    }
-                                    a(href = "/template/advent-of-code-golf-${it.name.lowercase()}-template.${it.fileEnding}") {
-                                        +it.displayName
-                                    }
+                b { +"Rules" }
+                ul {
+                    li {
+                        +"You're welcome to participate alone or in a team."
+                    }
+                    li {
+                        +"You may submit multiple solutions and explore different programming languages.."
+                    }
+                    li {
+                        +"Stick to the standard library of your language, no further dependencies/libraries."
+                    }
+                    li {
+                        +"Ensure your code aligns to the template ("
+                        Solution.Language.entries
+                            .filter { it.template != null }
+                            .mapIndexed { index, it ->
+                                if (index != 0) {
+                                    +", "
                                 }
-                            +"), reading the puzzle input from \"input.txt\", and printing the solution to stdout."
-                        }
-                        li {
-                            +"Please refrain from making network requests, reading data from files other than \"input.txt\", or storing data in variable/function/class names for reflection."
-                        }
+                                a(href = "/template/advent-of-code-golf-${it.name.lowercase()}-template.${it.fileEnding}") {
+                                    +it.displayName
+                                }
+                            }
+                        +"), reading the puzzle input from \"input.txt\", and printing the solution to stdout."
+                    }
+                    li {
+                        +"Please refrain from making network requests, reading data from files other than \"input.txt\", or storing data in variable/function/class names for reflection."
+                    }
+                }
+                label("checkbox-container") {
+                    +"Code publicly visible"
+                    input(type = InputType.checkBox) {
+                        name = "codeIsPublic"
+                        checked = true
+                        span("checkbox")
                     }
                 }
                 input(type = InputType.submit) {
@@ -140,9 +139,31 @@ object LeaderboardDayView {
         solutions: List<List<Solution>>,
         userIdsToUsers: Map<String, User>,
     ) {
+        // We need to do some transformations here, so we get per user the best solution per part (also per language).
+        // And to calculate the total score (for all parts) (per user+language).
         val parts = solutions.count()
+        val scoresByUserId = mutableMapOf<String, List<Solution>>()
+        solutions.forEach { solutionsPerPart ->
+            solutionsPerPart
+                .groupBy { it.userId + it.language }
+                .forEach { (userId, solutions) ->
+                    scoresByUserId[userId] =
+                        (scoresByUserId[userId] ?: emptyList()) + solutions.minBy { it.tokenCount ?: 0 }
+                }
+        }
 
-        if (solutions.isEmpty()) {
+        val sortedScores: List<Pair<List<Solution>, Int>> = scoresByUserId.values.associateWith { solutions ->
+            (1..parts).sumOf { part ->
+                val solution = solutions.find { it.part == part }
+                when {
+                    solution == null -> 10_000// No solution for part yet submitted
+                    solution.tokenCount == null -> 0 // Score not calculated yet: show "Calculating..." on top for a short time
+                    else -> solution.tokenCount!!
+                }
+            }
+        }.toList().sortedBy { it.second }
+
+        if (sortedScores.isEmpty()) {
             p { +"No solutions submitted yet. Submit now your own solution." }
             return
         }
@@ -162,30 +183,6 @@ object LeaderboardDayView {
                 }
             }
             tbody {
-                // We need to do some transformations here, so we get per user the best solution per part (also per language).
-                // And to calculate the total score (for all parts) (per user+language).
-
-                val scoresByUserId = mutableMapOf<String, List<Solution>>()
-                solutions.forEach { solutionsPerPart ->
-                    solutionsPerPart
-                        .groupBy { it.userId + it.language }
-                        .forEach { (userId, solutions) ->
-                            scoresByUserId[userId] =
-                                (scoresByUserId[userId] ?: emptyList()) + solutions.minBy { it.tokenCount ?: 0 }
-                        }
-                }
-
-                val sortedScores: List<Pair<List<Solution>, Int>> = scoresByUserId.values.associateWith { solutions ->
-                    (1..parts).sumOf { part ->
-                        val solution = solutions.find { it.part == part }
-                        when {
-                            solution == null -> 10_000// No solution for part yet submitted
-                            solution.tokenCount == null -> 0 // Score not calculated yet: show "Calculating..." on top for a short time
-                            else -> solution.tokenCount!!
-                        }
-                    }
-                }.toList().sortedBy { it.second }
-
                 // Render leaderboard
                 sortedScores.forEachIndexed { index, (solutions, totalScore) ->
                     tr {

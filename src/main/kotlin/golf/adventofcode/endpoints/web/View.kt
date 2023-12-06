@@ -72,25 +72,30 @@ private fun HtmlBlockTag.header(call: ApplicationCall) {
             }
             +"AdventOfCode.golf"
         }
+        +" "
         a(href = "/about") {
-            +"About & FAQ"
+            +"About & FAQ".replace(" ", "\u00A0") // Non-breaking space
         }
+        +" "
         val userSession = call.principal<UserSession>()
         if (userSession == null) {
             a(href = "/login") {
                 +"Login"
             }
+            +" "
             if (Sysinfo.isLocal) {
                 a(href = "/create-random-user") {
-                    +"Create random user (local only)"
+                    +"Create random user (local only)".replace(" ", "\u00A0") // Non-breaking space
                 }
             }
         } else {
+            +" "
             a(href = "/logout") {
                 +"Logout"
             }
+            +" "
             a(href = "/user/edit") {
-                +userSession.displayName
+                +userSession.displayName.replace(" ", "\u00A0") // Non-breaking space
             }
         }
     }
