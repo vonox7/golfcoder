@@ -90,19 +90,16 @@ object LeaderboardDayView {
                     b { +"Rules" }
                     ul {
                         li {
-                            +"You may participate alone or in a team."
+                            +"You're welcome to participate alone or in a team."
                         }
                         li {
-                            +"You may submit multiple solutions."
+                            +"You may submit multiple solutions and explore different programming languages.."
                         }
                         li {
-                            +"You may submit solutions in multiple programming languages."
+                            +"Stick to the standard library of your language, no further dependencies/libraries."
                         }
                         li {
-                            +"Only using the standard library of your language is allowed, no further dependencies/libraries."
-                        }
-                        li {
-                            +"The code needs to conform to the template ("
+                            +"Ensure your code aligns to the template ("
                             Solution.Language.entries
                                 .filter { it.template != null }
                                 .mapIndexed { index, it ->
@@ -113,10 +110,10 @@ object LeaderboardDayView {
                                         +it.displayName
                                     }
                                 }
-                            +"), read the puzzle input from file \"input.txt\" and print the solution to stdout."
+                            +"), reading the puzzle input from \"input.txt\", and printing the solution to stdout."
                         }
                         li {
-                            +"You may not make network request, read data from a file (except \"input.txt\"), or store data inside the name of variables/functions/classes etc and read them with reflection."
+                            +"Please refrain from making network requests, reading data from files other than \"input.txt\", or storing data in variable/function/class names for reflection."
                         }
                     }
                 }

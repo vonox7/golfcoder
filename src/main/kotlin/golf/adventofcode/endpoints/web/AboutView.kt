@@ -50,11 +50,17 @@ object AboutView {
             ul {
                 li {
                     +"Favicon: "
-                    a("https://www.flaticon.com/free-icons/three") { +"Three icons created by Uniconlabs - Flaticon" }
+                    a("https://www.flaticon.com/free-icons/three", "_blank") {
+                        +"Three icons created by Uniconlabs - Flaticon"
+                    }
                 }
                 li {
                     +"HTML Checkbox: "
-                    a("https://www.w3schools.com/howto/howto_css_custom_checkbox.asp") { +"w3schools" }
+                    a("https://www.w3schools.com/howto/howto_css_custom_checkbox.asp", "_blank") { +"w3schools" }
+                }
+                li {
+                    +"Wording help: "
+                    a("https://chat.openai.com/", "_blank") { +"ChatGPT 3.5" }
                 }
             }
         }
