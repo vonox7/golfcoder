@@ -3,6 +3,7 @@ package golf.adventofcode.endpoints.api
 import golf.adventofcode.database.Solution
 import golf.adventofcode.mainDatabase
 import golf.adventofcode.plugins.UserSession
+import golf.adventofcode.tokenizer.analyzerThread
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -43,6 +44,9 @@ object UploadSolutionApi {
             externalLinks = request.externalLinks
             uploadDate = Date()
         }, upsert = false)
+
+        // Trigger instantly analysis
+        analyzerThread.interrupt()
 
         call.respond(mapOf("buttonText" to "Submitted"))
     }

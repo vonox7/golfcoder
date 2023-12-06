@@ -7,6 +7,7 @@ import golf.adventofcode.endpoints.web.*
 import golf.adventofcode.plugins.configureHTTP
 import golf.adventofcode.plugins.configureSecurity
 import golf.adventofcode.plugins.sessionAuthenticationName
+import golf.adventofcode.tokenizer.analyzerThread
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.engine.*
@@ -21,6 +22,7 @@ lateinit var mainDatabase: MainDatabase
 fun main() {
     println("Connecting to database...")
     mainDatabase = MainDatabase(System.getenv("MONGO_URL") ?: "mongodb://localhost:27017/advent-of-code-golf")
+    analyzerThread.start()
 
     println("Starting ktor...")
     embeddedServer(

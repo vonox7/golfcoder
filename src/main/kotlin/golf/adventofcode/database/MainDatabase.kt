@@ -2,6 +2,7 @@ package golf.adventofcode.database
 
 import com.moshbit.katerbase.MongoDatabase
 import com.moshbit.katerbase.child
+import com.moshbit.katerbase.equal
 import golf.adventofcode.Sysinfo
 
 class MainDatabase(uri: String) : MongoDatabase(
@@ -32,6 +33,11 @@ class MainDatabase(uri: String) : MongoDatabase(
                 Solution::day.ascending(),
                 Solution::part.ascending(),
                 Solution::tokenCount.descending()
+            )
+            index(
+                Solution::tokenCountAnalyzeDate.descending(),
+                Solution::uploadDate.descending(),
+                partialIndex = arrayOf(Solution::tokenCountAnalyzeDate equal null)
             )
         }
     }
