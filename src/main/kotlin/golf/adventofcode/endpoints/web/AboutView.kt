@@ -50,7 +50,7 @@ object AboutView {
             ul {
                 li {
                     +"Advent of Code: "
-                    a("https://adventofcode.com") { +"Eric Wastl + team" }
+                    a("https://adventofcode.com", "_blank") { +"Eric Wastl + team" }
                 }
                 li {
                     +"Favicon: "
@@ -68,7 +68,7 @@ object AboutView {
                 }
                 li {
                     +"This site: "
-                    a("https://github.com/vonox7") { +"Valentin Slawicek" }
+                    a("https://github.com/vonox7", "_blank") { +"Valentin Slawicek" }
                 }
             }
         }
