@@ -62,6 +62,7 @@ object UploadSolutionApi {
         val day: String,
         val part: String,
         val code: String,
+        val input: String, // TODO remove and load from database
         val language: Solution.Language,
         val codeIsPublic: String = "off",
         val externalLinks: List<String> = emptyList(), // TODO UI needed (with explanation)
@@ -88,7 +89,7 @@ object UploadSolutionApi {
             setBody(
                 OnecompilerRequest(
                     language = request.language.onecompilerLanguageId,
-                    stdin = "TODO", // TODO stdin: Load input from db (always the same one?)
+                    stdin = request.input,
                     files = listOf(
                         OnecompilerRequest.File(
                             name = "index.${request.language.fileEnding}",
