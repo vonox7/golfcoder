@@ -13,6 +13,7 @@ This project is not affiliated with adventofcode.com.
 
 1. Install mongodb, at least version 4.0, see https://www.mongodb.com/docs/manual/administration/install-community/
 2. Clone the repo, open it in IntelliJ, run the `Server` run configuration, and navigate to http://localhost:8030
+3. Create a random user locally by clicking "Create random user (local only)" in the menu
 
 # Deployment
 

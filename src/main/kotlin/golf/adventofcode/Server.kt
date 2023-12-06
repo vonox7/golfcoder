@@ -57,6 +57,10 @@ private fun Application.ktorServerModule() {
 
         // TODO robots.txt, etc.
 
+        if (Sysinfo.isLocal) {
+            get("/create-random-user") { DebugView.createRandomUser(call) }
+        }
+
         get("/template/{templateFileName}") { TemplateView.download(call) }
         staticResources("/static/css-${Sysinfo.release}", "static/css")
         staticResources("/static/js-${Sysinfo.release}", "static/js")

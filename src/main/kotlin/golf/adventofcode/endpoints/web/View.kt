@@ -80,6 +80,11 @@ private fun HtmlBlockTag.header(call: ApplicationCall) {
             a(href = "/login") {
                 +"Login"
             }
+            if (Sysinfo.isLocal) {
+                a(href = "/create-random-user") {
+                    +"Create random user (local only)"
+                }
+            }
         } else {
             a(href = "/logout") {
                 +"Logout"
