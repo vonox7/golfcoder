@@ -49,6 +49,10 @@ object AboutView {
             h2 { +"Credits" }
             ul {
                 li {
+                    +"Advent of Code: "
+                    a("https://adventofcode.com") { +"Eric Wastl + team" }
+                }
+                li {
                     +"Favicon: "
                     a("https://www.flaticon.com/free-icons/three", "_blank") {
                         +"Three icons created by Uniconlabs - Flaticon"
@@ -61,6 +65,10 @@ object AboutView {
                 li {
                     +"Wording help: "
                     a("https://chat.openai.com/", "_blank") { +"ChatGPT 3.5" }
+                }
+                li {
+                    +"This site: "
+                    a("https://github.com/vonox7") { +"Valentin Slawicek" }
                 }
             }
         }
