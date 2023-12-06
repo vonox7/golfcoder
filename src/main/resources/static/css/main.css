@@ -217,4 +217,5 @@ select {
 textarea {
     margin-top: 8px;
     margin-bottom: 8px;
+    max-width: calc(100% - 4px);
 }
