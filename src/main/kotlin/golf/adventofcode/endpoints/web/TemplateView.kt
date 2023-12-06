@@ -31,8 +31,13 @@ object TemplateView {
         get() = when (this) {
             Solution.Language.PYTHON -> {
                 @Language("Python") val code = """
-                |with open("input.txt", 'r') as file:
-                |    print(sum(1 for line in file))""".trimMargin()
+                |lines = []
+                |while True:
+                |    try:
+                |        lines.append(input())
+                |    except EOFError:
+                |        break
+                |print(len(lines))""".trimMargin()
                 code
             }
 

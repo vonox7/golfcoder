@@ -109,10 +109,10 @@ object LeaderboardDayView {
                                     +it.displayName
                                 }
                             }
-                        +"), reading the puzzle input from \"input.txt\", and printing the solution to stdout."
+                        +"), reading the puzzle input from stdin (terminated with end-of-file), and printing the solution to stdout."
                     }
                     li {
-                        +"Please refrain from making network requests, reading data from files other than \"input.txt\", or storing data in variable/function/class names for reflection."
+                        +"Please refrain from making network requests, reading data from files, or storing data in variable/function/class names for reflection."
                     }
                 }
                 label("checkbox-container") {
