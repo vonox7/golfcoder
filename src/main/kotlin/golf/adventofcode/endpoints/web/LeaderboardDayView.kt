@@ -18,11 +18,15 @@ object LeaderboardDayView {
     suspend fun getHtml(call: ApplicationCall) {
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
         val day = call.parameters["day"]?.toIntOrNull() ?: throw NotFoundException("Invalid day")
-        val solutions = (1..2).map { part ->
+        val parts = 2
+        val solutions = (1..parts).map { part ->
             mainDatabase.getSuspendingCollection<Solution>()
                 .find(Solution::year equal year, Solution::day equal day, Solution::part equal part)
                 .sortBy(Solution::tokenCount)
-                .limit(100)
+                // Load a little bit more than we display, so we show only 1 score per user.
+                // This could be done also with an aggregate query?
+                // But then we could also combine the 2 queries (1 per part) into 1 query?
+                .limit(200)
                 .toList()
         }
         val userIds = solutions.flatten().map { it.userId }.distinct()
@@ -46,13 +50,11 @@ object LeaderboardDayView {
                 }
                 select {
                     name = "part"
-                    option {
-                        value = "1"
-                        +"Part 1"
-                    }
-                    option {
-                        value = "2"
-                        +"Part 2"
+                    (1..parts).forEach { part ->
+                        option {
+                            value = part.toString()
+                            +"Part $part"
+                        }
                     }
                 }
                 br()
@@ -129,15 +131,17 @@ object LeaderboardDayView {
 
             renderUpload()
 
-            h2 { +"Part 1" }
-            renderLeaderboardTable(solutions[0], userIdsToUsers)
-
-            h2 { +"Part 2" }
-            renderLeaderboardTable(solutions[1], userIdsToUsers)
+            h2 { +"Leaderboard" }
+            renderLeaderboardTable(solutions, userIdsToUsers)
         }
     }
 
-    private fun HtmlBlockTag.renderLeaderboardTable(solutions: List<Solution>, userIdsToUsers: Map<String, User>) {
+    private fun HtmlBlockTag.renderLeaderboardTable(
+        solutions: List<List<Solution>>,
+        userIdsToUsers: Map<String, User>,
+    ) {
+        val parts = solutions.count()
+
         if (solutions.isEmpty()) {
             p { +"No solutions submitted yet. Submit now your own solution." }
             return
@@ -149,30 +153,73 @@ object LeaderboardDayView {
                     th {}
                     th(classes = "left-align") { +"Name" }
                     th(classes = "left-align") { +"Language" }
-                    th(classes = "right-align") { +"Tokens" } // TODO add download link to source (if public), and add external links.
-                    th(classes = "right-align") { +"Date" }
+                    th(classes = "right-align") { +"Tokens Sum" }
+                    (1..parts).forEach { part ->
+                        th(classes = "right-align") { +"Tokens Part $part" }
+                    }
+                    // TODO add download link to source (if public), and add external links.
+                    th(classes = "right-align") { +"Last change" }
                 }
             }
             tbody {
-                solutions.forEachIndexed { index, solution ->
+                // We need to do some transformations here, so we get per user the best solution per part (also per language).
+                // And to calculate the total score (for all parts) (per user+language).
+
+                val scoresByUserId = mutableMapOf<String, List<Solution>>()
+                solutions.forEach { solutionsPerPart ->
+                    solutionsPerPart
+                        .groupBy { it.userId + it.language }
+                        .forEach { (userId, solutions) ->
+                            scoresByUserId[userId] =
+                                (scoresByUserId[userId] ?: emptyList()) + solutions.minBy { it.tokenCount ?: 0 }
+                        }
+                }
+
+                val sortedScores: List<Pair<List<Solution>, Int>> = scoresByUserId.values.associateWith { solutions ->
+                    (1..parts).sumOf { part ->
+                        val solution = solutions.find { it.part == part }
+                        when {
+                            solution == null -> 10_000// No solution for part yet submitted
+                            solution.tokenCount == null -> 0 // Score not calculated yet: show "Calculating..." on top for a short time
+                            else -> solution.tokenCount!!
+                        }
+                    }
+                }.toList().sortedBy { it.second }
+
+                // Render leaderboard
+                sortedScores.forEachIndexed { index, (solutions, totalScore) ->
                     tr {
                         td("rank") { +"${index + 1}" }
                         td {
-                            val user = userIdsToUsers[solution.userId]
+                            // All solutions in sortedScores have per entry the same user
+                            val user = userIdsToUsers[solutions.first().userId]
                             renderUserProfileImage(user, big = false)
                             +(user?.name?.takeIf { user.nameIsPublic } ?: "anonymous")
                         }
-                        td { +solution.language.displayName }
+                        // All solutions in sortedScores have per entry the same language
+                        td { +solutions.first().language.displayName }
+
                         td("right-align") {
-                            if (solution.tokenCount == null) {
-                                a(href = "") { // Just reload site, calculation should have finished by then
-                                    +"Calculating..."
+                            +"$totalScore"
+                        }
+
+                        (1..parts).forEach { part ->
+                            val solution = solutions.find { it.part == part }
+                            td("right-align") {
+                                if (solution == null) {
+                                    +"-"
+                                } else {
+                                    if (solution.tokenCount == null) {
+                                        a(href = "") { // Just reload site, calculation should have finished by then
+                                            +"Calculating..."
+                                        }
+                                    } else {
+                                        +"${solution.tokenCount}"
+                                    }
                                 }
-                            } else {
-                                +"${solution.tokenCount}"
                             }
                         }
-                        td("right-align") { +solution.uploadDate.relativeToNow }
+                        td("right-align") { +solutions.maxOf { it.uploadDate }.relativeToNow }
                     }
                 }
             }
