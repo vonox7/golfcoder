@@ -26,7 +26,7 @@ object AboutView {
             p {
                 +"Inspired by "
                 a("https://github.com/SebLague/Chess-Challenge") { +"SebLague's chess coding challenge" }
-                +" and its community leaderboard."
+                +" and it's community leaderboard."
             }
 
             p {

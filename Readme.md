@@ -4,7 +4,7 @@ A global leaderboard for [adventofcode.com](adventofcode.com), with a focus on c
 
 Access the production site at [adventofcode.golf](https://adventofcode.golf).
 
-Inspired by [SebLague's chess coding challenge](https://github.com/SebLague/Chess-Challenge) and its community
+Inspired by [SebLague's chess coding challenge](https://github.com/SebLague/Chess-Challenge) and it's community
 leaderboard.
 
 This project is not affiliated with adventofcode.com.
