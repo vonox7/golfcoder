@@ -20,7 +20,7 @@ import java.util.*
 
 object UploadSolutionApi {
 
-    const val MAX_CODE_LENGTH = 10_000
+    const val MAX_CODE_LENGTH = 100_000
     private const val MIN_CODE_LENGTH = 10
 
     private val onecompilerHttpClient = HttpClient(CIO) {
