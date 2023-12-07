@@ -16,6 +16,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
 import org.golfcoder.database.User
+import org.golfcoder.endpoints.api.EditUserApi
 import org.golfcoder.httpClient
 import org.golfcoder.mainDatabase
 import java.util.*
@@ -120,7 +121,7 @@ fun Application.configureSecurity() {
                             )
                         )
                         createdOn = date
-                        name = userInfo.name
+                        name = userInfo.name.take(EditUserApi.MAX_USER_NAME_LENGTH)
                         publicProfilePictureUrl = userInfo.picture
                     }
                 }

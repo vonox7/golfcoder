@@ -11,18 +11,25 @@ import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 
 object EditUserApi {
+    const val MAX_USER_NAME_LENGTH = 50
 
     @Serializable
-    private class EditUserRequest(val nameIsPublic: String = "off")
+    private class EditUserRequest(val name: String = "", val nameIsPublic: String = "off")
 
     suspend fun post(call: ApplicationCall) {
         val request = call.receive<EditUserRequest>()
+        val session = call.sessions.get<UserSession>()!!
+
+        val newName = request.name.take(MAX_USER_NAME_LENGTH).trim().takeIf { it.isNotEmpty() } ?: "XXX"
 
         mainDatabase.getSuspendingCollection<User>()
-            .updateOne(User::_id equal call.sessions.get<UserSession>()!!.userId) {
+            .updateOne(User::_id equal session.userId) {
+                User::name setTo newName
                 User::nameIsPublic setTo (request.nameIsPublic == "on")
             }
 
-        call.respond(ApiCallResult(buttonText = "Saved"))
+        call.sessions.set(UserSession(session.userId, newName))
+
+        call.respond(ApiCallResult(buttonText = "Saved", reloadSite = true))
     }
 }
