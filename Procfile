@@ -1,1 +1,1 @@
-web: start.sh
+web: npm start & java -XX:MaxJavaStackTraceDepth=0 -jar Server.jar
