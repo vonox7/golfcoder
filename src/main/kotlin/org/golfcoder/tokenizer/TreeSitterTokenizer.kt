@@ -43,17 +43,16 @@ abstract class TreeSitterTokenizer(private val language: String) : Tokenizer {
 
         return body.tokens.map { treeSitterToken ->
             Tokenizer.Token(
-                Tokenizer.Token.Position(
-                    treeSitterToken.startRow,
-                    treeSitterToken.startColumn
-                )..Tokenizer.Token.Position(treeSitterToken.endRow, treeSitterToken.endColumn),
+                Tokenizer.Token.Position(treeSitterToken.startRow, treeSitterToken.startColumn)..
+                        Tokenizer.Token.Position(treeSitterToken.endRow, treeSitterToken.endColumn),
                 treeSitterToken.text, // Some whitespaces (and comments?) might be missing. We could combine them using start/end position in case we add a visual feedback for the user.
-                when (treeSitterToken.type) {
-                    "ERROR" -> throw Exception("Syntax error on line ${treeSitterToken.startRow}:${treeSitterToken.startColumn}:\n${treeSitterToken.text}")
-                    "comment" -> Tokenizer.Token.Type.COMMENT
-                    "string_content" -> Tokenizer.Token.Type.STRING // Python
-                    "string_fragment" -> Tokenizer.Token.Type.STRING // Javascript
-                    else -> Tokenizer.Token.Type.CODE_TOKEN
+                treeSitterToken.type.lowercase().let { type ->
+                    when {
+                        "error" in type -> throw Exception("Syntax error on line ${treeSitterToken.startRow}:${treeSitterToken.startColumn}:\n${treeSitterToken.text}")
+                        "comment" in type -> Tokenizer.Token.Type.COMMENT
+                        "string" in type -> Tokenizer.Token.Type.STRING // e.g. Python reports "string_content", Javascript "string_fragment"
+                        else -> Tokenizer.Token.Type.CODE_TOKEN
+                    }
                 }
             )
         }
