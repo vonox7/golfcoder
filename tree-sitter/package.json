@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "express": "^4.18.2",
+    "tree-sitter": "^0.20.6",
+    "tree-sitter-javascript": "^0.20.1",
+    "tree-sitter-python": "^0.20.4"
+  },
+  "name": "js",
+  "version": "1.0.0",
+  "main": "tree-sitter.js",
+  "scripts": {
+    "build": "node tree-sitter.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

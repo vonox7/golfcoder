@@ -1,1 +1,1 @@
-web: java -XX:MaxJavaStackTraceDepth=0 -jar Server.jar
+web: start.sh
