@@ -70,7 +70,7 @@ private fun HtmlBlockTag.header(call: ApplicationCall) {
                 width = "20"
                 height = "20"
             }
-            +"AdventOfCode.golf"
+            +"Golfcoder"
         }
         +" "
         a(href = "/about") {

@@ -1,8 +1,8 @@
-# adventofcode.golf
+# golfcoder.org
 
-A global leaderboard for [adventofcode.com](adventofcode.com), with a focus on code size.
+A global code golf leaderboard for [adventofcode.com](adventofcode.com), with a focus on code size.
 
-Access the production site at [adventofcode.golf](https://adventofcode.golf).
+Access the production site at [golfcoder.org](https://golfcoder.org).
 
 Inspired by [SebLague's chess coding challenge](https://github.com/SebLague/Chess-Challenge) and it's community
 leaderboard.

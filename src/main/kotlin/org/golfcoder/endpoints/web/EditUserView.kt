@@ -15,7 +15,7 @@ object EditUserView {
         val session = call.sessions.get<UserSession>()!!
         val userProfile = mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)!!
 
-        call.respondHtmlView("Advent of Code ${userProfile.name}") {
+        call.respondHtmlView("Golfcoder ${userProfile.name}") {
             h1 {
                 renderUserProfileImage(userProfile, big = true)
                 +userProfile.name

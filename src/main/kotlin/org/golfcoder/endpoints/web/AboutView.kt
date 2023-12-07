@@ -5,11 +5,11 @@ import kotlinx.html.*
 
 object AboutView {
     suspend fun getHtml(call: ApplicationCall) {
-        call.respondHtmlView("About Advent of Code Golf") {
-            h1 { +"About Advent of Code Golf" }
+        call.respondHtmlView("About Golfcoder") {
+            h1 { +"About Golfcoder" }
 
             p {
-                +"A global leaderboard for "
+                +"A global code golf leaderboard for "
                 a("https://adventofcode.com") { +"adventofcode.com" }
                 +", with a focus on code size."
             }

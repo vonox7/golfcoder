@@ -43,7 +43,7 @@ fun Application.configureHTTP() {
         default()
     }
     install(CORS) {
-        allowHost("adventofcode.golf", schemes = listOf("https"))
+        allowHost("golfcoder.org", schemes = listOf("https"))
         if (Sysinfo.isLocal) {
             allowHost("localhost:8030")
         }

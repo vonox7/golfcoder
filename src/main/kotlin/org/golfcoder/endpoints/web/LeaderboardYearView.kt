@@ -10,8 +10,8 @@ object LeaderboardYearView {
     suspend fun getHtml(call: ApplicationCall) {
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
 
-        call.respondHtmlView("Advent of Code $year") {
-            h1 { +"Advent of Code Golf Leaderboard $year" }
+        call.respondHtmlView("Golfcoder Advent of Code Leaderboard $year") {
+            h1 { +"Golfcoder Advent of Code Leaderboard $year" }
             (1..24).forEach { day ->
                 p {
                     a("/$year/day/$day") { +"Day $day" }
