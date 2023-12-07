@@ -1,6 +1,6 @@
 # golfcoder.org
 
-A global code golf leaderboard for [adventofcode.com](adventofcode.com), with a focus on code size.
+A code golf community leaderboard for [adventofcode.com](adventofcode.com), with a focus on code size.
 
 Access the production site at [golfcoder.org](https://golfcoder.org).
 

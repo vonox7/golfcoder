@@ -9,7 +9,7 @@ object AboutView {
             h1 { +"About Golfcoder" }
 
             p {
-                +"A global code golf leaderboard for "
+                +"A code golf community leaderboard for "
                 a("https://adventofcode.com", "_blank") { +"adventofcode.com" }
                 +", with a focus on code size."
             }
@@ -32,7 +32,7 @@ object AboutView {
             p {
                 +"This project is not affiliated with "
                 a("https://adventofcode.com", "_blank") { +"adventofcode.com" }
-                +"."
+                +", but is a community project."
                 br()
                 +"The "
                 a("https://adventofcode.com/leaderboard", "_blank") { +"official leaderboard" }
@@ -106,11 +106,12 @@ object AboutView {
             +" and help to add support for your favorite language, or just upvote the language you want to promote! "
             +"Please be patient, I will add more popular languages as soon as possible. "
 
-            h3 { +"What libraries are allowed?" }
+            h3 { +"Which libraries are allowed?" }
             +"Golfcoder uses "
             a("https://onecompiler.com/", "_blank") { +"OneCompiler" }
             +" to execute your code. "
-            +"Please check out their site and see, if they have a \"Supported libraries\" section for your programming language."
+            +"Please check out their site and see, if they have a \"Supported libraries\" section for your programming language. "
+            +"The standard library of your language is always supported."
 
             h3 { +"My code doesn't compile or returns a wrong output in Golfcoder, but works on my machine." }
             +"Please make sure your code runs on "
