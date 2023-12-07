@@ -15,7 +15,7 @@ object AboutView {
             }
 
             p {
-                +"Code golf is a type of recreational computer programming competition in which participants strive to achieve the shortest possible source code that solves a certain problem. "
+                +"\"Code golf is a type of recreational computer programming competition in which participants strive to achieve the shortest possible source code that solves a certain problem.\" "
                 a("https://en.wikipedia.org/wiki/Code_golf") { +"[wikipedia.com]" }
                 br()
                 +" In this challenge, "
@@ -48,7 +48,7 @@ object AboutView {
 
             h2 { +"FAQ" }
             h3 { +"What is a token?" }
-            +"A token represents one token in the "
+            +"A token represents roughly one element in the "
             a(href = "https://en.wikipedia.org/wiki/Abstract_syntax_tree") { +"abstract syntax tree" }
             +". "
             +"Every name, including variables and functions, is considered as a single token, irrespective of its length. "
@@ -59,6 +59,7 @@ object AboutView {
             +" - contribute equally to the token count."
             br()
             +"Whitespaces (spaces, newlines, tabs...), statement delimiters (eg. semikolons in C++) and comments are ignored."
+            br()
             +"However, each single character in a string counts as one token, so solving the challenge with one big Regex might not be the optimal solution."
             br()
             br()
@@ -126,7 +127,7 @@ object AboutView {
                 li {
                     +"Hosting: "
                     a("https://sclng.io/r/a3cd6268ba623f3b", "_blank") { +"Scalingo" }
-                    +" (support this site by using this referral link to create your Scalingo account)"
+                    +" (support Golfcoder by using this referral link to create your Scalingo account)"
                 }
                 li {
                     +"Backend: "
@@ -136,7 +137,7 @@ object AboutView {
                     +")"
                 }
                 li {
-                    +"This site: "
+                    +"Golfcoder: "
                     a("https://github.com/vonox7", "_blank") { +"Valentin Slawicek" }
                 }
             }
