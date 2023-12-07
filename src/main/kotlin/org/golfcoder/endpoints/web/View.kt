@@ -65,6 +65,14 @@ private fun HTML.head(pageTitle: String) {
 
 private fun HtmlBlockTag.header(call: ApplicationCall) {
     header {
+        iframe(classes = "github-star-button") {
+            src = "https://ghbtns.com/github-btn.html?user=vonox7&repo=golfcoder&type=star&count=true&size=large"
+            attributes["frameborder"] = "0"
+            attributes["scrolling"] = "0"
+            width = "140"
+            height = "30"
+            title = "GitHub"
+        }
         a(href = "/", classes = "header-text") {
             img(src = "/static/images/favicon.ico", alt = "Logo", classes = "header-logo") {
                 width = "20"

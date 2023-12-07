@@ -64,6 +64,10 @@ header a {
     margin-right: 16px;
 }
 
+header .github-star-button {
+    float: right;
+}
+
 .profile-image {
     margin-right: 10px;
     height: 24px;
