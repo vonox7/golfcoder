@@ -14,6 +14,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.golfcoder.database.MainDatabase
 import org.golfcoder.endpoints.api.EditUserApi
 import org.golfcoder.endpoints.api.UploadSolutionApi
@@ -21,6 +22,7 @@ import org.golfcoder.endpoints.web.*
 import org.golfcoder.plugins.configureHTTP
 import org.golfcoder.plugins.configureSecurity
 import org.golfcoder.plugins.sessionAuthenticationName
+import org.golfcoder.tokenizer.Recalculation
 
 val container = System.getenv("CONTAINER") ?: "local"
 lateinit var mainDatabase: MainDatabase
@@ -30,7 +32,7 @@ val httpClient = HttpClient(CIO) {
     }
 }
 
-suspend fun main() {
+fun main() = runBlocking {
     println("Connecting to database...")
     mainDatabase = MainDatabase(System.getenv("MONGO_URL") ?: "mongodb://localhost:27017/golfcoder")
 
@@ -54,7 +56,9 @@ suspend fun main() {
         port = System.getenv("PORT")?.toIntOrNull() ?: 8030,
         host = if (Sysinfo.isLocal) "localhost" else "0.0.0.0",
         module = Application::ktorServerModule
-    ).start(wait = true)
+    ).start(wait = false)
+
+    Recalculation.recalculateSolutions()
 }
 
 private fun Application.ktorServerModule() {

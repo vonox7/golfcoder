@@ -151,7 +151,7 @@ object UploadSolutionApi {
             externalLinks = request.externalLinks
             uploadDate = now
             this.tokenCount = tokenCount
-            tokenCountAnalyzeDate = now
+            tokenizerVersion = language.tokenizerVersion
         }, upsert = false)
 
         call.respond(ApiCallResult(buttonText = "Submitted", reloadSite = true))

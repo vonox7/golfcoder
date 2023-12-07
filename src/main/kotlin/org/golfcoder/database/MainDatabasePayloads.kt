@@ -31,8 +31,8 @@ class Solution : MongoMainEntry() {
     var part: Int = 0
     var codePubliclyVisible: Boolean = false
     var externalLinks: List<String> = emptyList() // e.g. Github, Blog explaining stuff...
-    var tokenCount: Int? = null
-    var tokenCountAnalyzeDate: Date? = null
+    var tokenCount: Int = 0
+    var tokenizerVersion: Int = 0
 
     // Most used languages on GitHub for advent-of-code: https://github.com/search?q=advent-of-code+2023&type=repositories
 
@@ -41,16 +41,17 @@ class Solution : MongoMainEntry() {
         val fileEnding: String,
         val onecompilerLanguageId: String, // Find out by checking the URL after selecting a language at the dropdown at https://onecompiler.com/
         val tokenizerClass: KClass<out Tokenizer>,
+        val tokenizerVersion: Int, // Increment this when the tokenizer changes to force re-analysis of all solutions
     ) {
-        PYTHON("Python", "py", "python", PythonTokenizer::class),
-        RUST("Rust", "rs", "rust", NotYetAvailableTokenizer::class),
-        GO("Go", "go", "go", NotYetAvailableTokenizer::class),
-        KOTLIN("Kotlin", "kt", "kotlin", KotlinTokenizer::class),
-        JAVASCRIPT("JavaScript", "js", "javascript", JavascriptTokenizer::class),
-        CSHARP("C#", "cs", "csharp", NotYetAvailableTokenizer::class),
-        TYPESCRIPT("TypeScript", "ts", "typescript", NotYetAvailableTokenizer::class),
-        CPLUSPLUS("C++", "cpp", "cpp", NotYetAvailableTokenizer::class),
-        JAVA("Java", "java", "java", NotYetAvailableTokenizer::class),
-        C("C", "c", "c", NotYetAvailableTokenizer::class),
+        PYTHON("Python", "py", "python", PythonTokenizer::class, 1),
+        RUST("Rust", "rs", "rust", NotYetAvailableTokenizer::class, 1),
+        GO("Go", "go", "go", NotYetAvailableTokenizer::class, 1),
+        KOTLIN("Kotlin", "kt", "kotlin", KotlinTokenizer::class, 1),
+        JAVASCRIPT("JavaScript", "js", "javascript", JavascriptTokenizer::class, 1),
+        CSHARP("C#", "cs", "csharp", NotYetAvailableTokenizer::class, 1),
+        TYPESCRIPT("TypeScript", "ts", "typescript", NotYetAvailableTokenizer::class, 1),
+        CPLUSPLUS("C++", "cpp", "cpp", NotYetAvailableTokenizer::class, 1),
+        JAVA("Java", "java", "java", NotYetAvailableTokenizer::class, 1),
+        C("C", "c", "c", NotYetAvailableTokenizer::class, 1),
     }
 }

@@ -5,7 +5,6 @@ import com.moshbit.katerbase.inArray
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import io.ktor.server.sessions.*
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
 import org.golfcoder.database.Solution
@@ -30,8 +29,6 @@ object LeaderboardDayView {
                 // This could be done also with an aggregate query?
                 // But then we could also combine the 2 queries (1 per part) into 1 query?
                 .limit(200)
-                // Filter out solutions that errored during analysis
-                .filter { it.tokenCountAnalyzeDate == null || it.tokenCount != null }
                 .toList()
         }
         val userIds = solutions.flatten().map { it.userId }.distinct()
@@ -172,18 +169,14 @@ object LeaderboardDayView {
                 .groupBy { it.userId + it.language }
                 .forEach { (userId, solutions) ->
                     scoresByUserId[userId] =
-                        (scoresByUserId[userId] ?: emptyList()) + solutions.minBy { it.tokenCount ?: 0 }
+                        (scoresByUserId[userId] ?: emptyList()) + solutions.minBy { it.tokenCount }
                 }
         }
 
         val sortedScores: List<Pair<List<Solution>, Int>> = scoresByUserId.values.associateWith { userSolutions ->
             (1..parts).sumOf { part ->
-                val solution = userSolutions.find { it.part == part }
-                when {
-                    solution == null -> 10_000// No solution for part yet submitted
-                    solution.tokenCount == null -> 0 // Score not calculated yet: show "Calculating..." on top for a short time
-                    else -> solution.tokenCount!!
-                }
+                userSolutions.find { it.part == part }?.tokenCount
+                    ?: 10_000 // No solution for part yet submitted
             }
         }.toList().sortedBy { it.second }
 
@@ -230,10 +223,8 @@ object LeaderboardDayView {
                                 if (solution == null) {
                                     +"-"
                                 } else {
-                                    if (solution.tokenCount == null) {
-                                        a(href = "") { // Just reload site, calculation should have finished by then
-                                            +"Calculating..."
-                                        }
+                                    if (solution.tokenizerVersion < solution.language.tokenizerVersion) {
+                                        +"Recalculating..."
                                     } else {
                                         +"${solution.tokenCount}"
                                     }

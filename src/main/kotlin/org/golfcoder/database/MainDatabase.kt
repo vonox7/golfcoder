@@ -2,7 +2,6 @@ package org.golfcoder.database
 
 import com.moshbit.katerbase.MongoDatabase
 import com.moshbit.katerbase.child
-import com.moshbit.katerbase.equal
 import org.golfcoder.Sysinfo
 
 class MainDatabase(uri: String) : MongoDatabase(
@@ -35,9 +34,8 @@ class MainDatabase(uri: String) : MongoDatabase(
                 Solution::tokenCount.descending()
             )
             index(
-                Solution::tokenCountAnalyzeDate.descending(),
-                Solution::uploadDate.descending(),
-                partialIndex = arrayOf(Solution::tokenCountAnalyzeDate equal null)
+                Solution::language.descending(),
+                Solution::tokenizerVersion.descending(),
             )
         }
     }
