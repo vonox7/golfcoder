@@ -97,6 +97,7 @@ private fun Application.ktorServerModule() {
             get("/create-random-user") { DebugView.createRandomUser(call) }
         }
 
+        get("/solution/{solutionFileName}") { SolutionView.download(call) }
         get("/template/{templateFileName}") { TemplateView.download(call) }
         staticResources("/static/css-${Sysinfo.release}", "static/css")
         staticResources("/static/js-${Sysinfo.release}", "static/js")

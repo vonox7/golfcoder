@@ -186,7 +186,6 @@ object LeaderboardDayView {
                     (1..parts).forEach { part ->
                         th(classes = "right-align") { +"Tokens Part $part" }
                     }
-                    // TODO add download link to source (if public), and add external links.
                     th(classes = "right-align") { +"Last change" }
                 }
             }
@@ -217,7 +216,13 @@ object LeaderboardDayView {
                                     if (solution.tokenizerVersion < solution.language.tokenizerVersion) {
                                         +"Recalculating..."
                                     } else {
-                                        +"${solution.tokenCount}"
+                                        if (solution.codePubliclyVisible) {
+                                            a(href = "/solution/${solution._id}.${solution.language.fileEnding}") {
+                                                +"${solution.tokenCount}"
+                                            }
+                                        } else {
+                                            +"${solution.tokenCount}"
+                                        }
                                     }
                                 }
                             }
