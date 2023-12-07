@@ -83,18 +83,6 @@ object LeaderboardDayView {
                     maxLength = UploadSolutionApi.MAX_CODE_LENGTH.toString()
                 }
                 br()
-                textArea { // TODO remove input once we load the input from database
-                    name = "input"
-                    rows = "10"
-                    cols = "80"
-                    placeholder = "Paste your input.txt here.\n" +
-                            "This is a temporary solution.\n" +
-                            "In the future, the input get synced with adventofcode.com.\n" +
-                            "Your solution will then get re-tested with the official input.\n" +
-                            "Please ensure before uploading that your solution works with the official input and prints the correct output."
-                    maxLength = UploadSolutionApi.MAX_CODE_LENGTH.toString()
-                }
-                br()
                 b { +"Rules" }
                 ul {
                     li {
@@ -124,6 +112,9 @@ object LeaderboardDayView {
                     }
                     li {
                         +"Please refrain from making network requests, reading data from files, or storing data in variable/function/class names for reflection."
+                    }
+                    li {
+                        +"Note that OneCompiler currently supports only Kotlin 1.3, so newer functions like sumOf are not yet supported. I've already contacted OneCompiler to update to a newer Kotlin version."
                     }
                 }
                 label("checkbox-container") {

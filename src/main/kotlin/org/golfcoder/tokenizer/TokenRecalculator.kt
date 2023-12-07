@@ -6,7 +6,7 @@ import org.golfcoder.database.Solution
 import org.golfcoder.mainDatabase
 import kotlin.reflect.full.primaryConstructor
 
-object Recalculation {
+object TokenRecalculator {
     suspend fun recalculateSolutions() {
         println("Recalculate solutions...")
         var recalculationCount = 0

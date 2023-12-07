@@ -1,5 +1,6 @@
 package org.golfcoder.endpoints.api
 
+import com.moshbit.katerbase.equal
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -9,6 +10,7 @@ import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
+import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.database.Solution
 import org.golfcoder.httpClient
 import org.golfcoder.mainDatabase
@@ -51,7 +53,6 @@ object UploadSolutionApi {
         val day: String,
         val part: String,
         val code: String,
-        val input: String, // TODO remove and load from database
         val language: Solution.Language,
         val codeIsPublic: String = "off",
         val externalLinks: List<String> = emptyList(), // TODO UI needed (with explanation)
@@ -86,6 +87,22 @@ object UploadSolutionApi {
             return
         }
 
+        val expectedOutput = mainDatabase.getSuspendingCollection<ExpectedOutput>()
+            .findOne(
+                ExpectedOutput::year equal request.year.toInt(),
+                ExpectedOutput::day equal request.day.toInt(),
+                ExpectedOutput::part equal request.part.toInt(),
+            ) ?: run {
+            call.respond(
+                ApiCallResult(
+                    buttonText = "Please wait",
+                    alertText = "Please wait a few hours until submitting your solution for this day.\n" +
+                            "We need to solve it first ;)."
+                )
+            )
+            return
+        }
+
         val onecompilerResponse = httpClient.post("https://onecompiler-apis.p.rapidapi.com/api/v1/run") {
             contentType(ContentType.Application.Json)
             header("X-RapidAPI-Key", System.getenv("RAPIDAPI_KEY"))
@@ -93,7 +110,7 @@ object UploadSolutionApi {
             setBody(
                 OnecompilerRequest(
                     language = request.language.onecompilerLanguageId,
-                    stdin = request.input,
+                    stdin = expectedOutput.input,
                     files = listOf(
                         OnecompilerRequest.File(
                             name = "index.${request.language.fileEnding}",
@@ -136,7 +153,17 @@ object UploadSolutionApi {
             )
             return
         }
-        // TODO validate for correct outputNumber
+        // Validate for correct outputNumber
+        if (outputNumber != expectedOutput.output) {
+            call.respond(
+                ApiCallResult(
+                    buttonText = "Wrong stdout",
+                    alertText = "Wrong stdout. The number does not match the expected output.\n" +
+                            "If you think this is a bug, please report it to Golfcoder (see About & FAQ)."
+                )
+            )
+            return
+        }
 
         // Save solution to database
         mainDatabase.getSuspendingCollection<Solution>().insertOne(Solution().apply {

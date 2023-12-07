@@ -55,3 +55,16 @@ class Solution : MongoMainEntry() {
         C("C", "c", "c", NotYetAvailableTokenizer::class, 1),
     }
 }
+
+class ExpectedOutput : MongoMainEntry() {
+    var year: Int = 0
+    var day: Int = 0
+    var part: Int = 0
+    var input: String = ""
+    var output: Long = 0L
+    lateinit var source: Source
+
+    enum class Source {
+        FORNWALL // Fornwall seems to be quite fast to solve problems, and has a way to get input+output. Maybe add more sources later to be faster.
+    }
+}

@@ -38,5 +38,13 @@ class MainDatabase(uri: String) : MongoDatabase(
                 Solution::tokenizerVersion.descending(),
             )
         }
+        collection<ExpectedOutput>("expectedOutputs") {
+            index(
+                ExpectedOutput::year.ascending(),
+                ExpectedOutput::day.ascending(),
+                ExpectedOutput::part.ascending(),
+                ExpectedOutput::source.ascending(),
+            )
+        }
     }
 )
