@@ -17,6 +17,7 @@ object LeaderboardYearView {
                 +"A code golf community leaderboard for "
                 a("https://adventofcode.com", "_blank") { +"adventofcode.com" }
                 +", with a focus on code size. "
+                +"Every name, including variables and functions, is considered as a single token, irrespective of its length."
                 a("/about") { +"More about Golfcoder" }
                 +"."
             }
