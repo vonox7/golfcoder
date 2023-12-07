@@ -11,11 +11,11 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-group = "golf.adventofcode"
+group = "org.golfcoder"
 version = "0.0.1"
 
 application {
-    mainClass.set("golf.adventofcode.ServerKt")
+    mainClass.set("org.golfcoder.ServerKt")
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")

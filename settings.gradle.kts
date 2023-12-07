@@ -1,1 +1,1 @@
-rootProject.name = "advent-of-code-golf"
+rootProject.name = "golfcoder"
