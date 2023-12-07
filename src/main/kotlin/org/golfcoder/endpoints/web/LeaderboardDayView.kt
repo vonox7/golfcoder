@@ -137,8 +137,8 @@ object LeaderboardDayView {
             }
         }
 
-        call.respondHtmlView("Golfcoder Advent of Code Leaderboard $year day $day") {
-            h1 { +"Golfcoder Advent of Code Leaderboard $year day $day" }
+        call.respondHtmlView("Advent of Code Leaderboard $year day $day") {
+            h1 { +"Advent of Code Leaderboard $year day $day" }
 
             renderUpload()
 
