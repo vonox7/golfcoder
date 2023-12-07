@@ -1,36 +1,24 @@
 package org.golfcoder.endpoints.api
 
-import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.Serializable
 import org.golfcoder.database.Solution
+import org.golfcoder.httpClient
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
-import org.golfcoder.tokenizer.analyzerThread
 import java.util.*
+import kotlin.reflect.full.primaryConstructor
 
 object UploadSolutionApi {
 
     const val MAX_CODE_LENGTH = 100_000
     private const val MIN_CODE_LENGTH = 10
-
-    private val onecompilerHttpClient = HttpClient(CIO) {
-        engine {
-            maxConnectionsCount = 5 // Make sure we don't overload the onecompiler API
-        }
-        install(ContentNegotiation) {
-            json()
-        }
-    }
 
     @Serializable
     private class OnecompilerRequest(
@@ -68,9 +56,11 @@ object UploadSolutionApi {
         val externalLinks: List<String> = emptyList(), // TODO UI needed (with explanation)
     )
 
+    // TODO restructure into multiple functions/classes (especially "executeCode()")
     suspend fun post(call: ApplicationCall) {
         val request = call.receive<UploadSolutionRequest>()
         val userSession = call.sessions.get<UserSession>()!!
+        val now = Date()
 
         // Validate user input
         require(request.code.length <= MAX_CODE_LENGTH)
@@ -81,8 +71,18 @@ object UploadSolutionApi {
         require(request.externalLinks.count() <= 3)
         require(request.externalLinks.all { it.length < 300 })
 
+        // Tokenize
+        val tokenizer = request.language.tokenizerClass.primaryConstructor!!.call()
+        val tokenCount = try {
+            tokenizer.getTokenCount(request.code)
+        } catch (e: Exception) {
+            // Could either be a syntax error or a tokenizer error (like network issue, bug in our code...)
+            call.respond(ApiCallResult(buttonText = "Tokenizer failed", alertText = "Tokenizer failed:\n${e.message}"))
+            return
+        }
+
         // Execute code via Onecompiler
-        val onecompilerResponse = onecompilerHttpClient.post("https://onecompiler-apis.p.rapidapi.com/api/v1/run") {
+        val onecompilerResponse = httpClient.post("https://onecompiler-apis.p.rapidapi.com/api/v1/run") {
             contentType(ContentType.Application.Json)
             header("X-RapidAPI-Key", System.getenv("RAPIDAPI_KEY"))
             header("X-RapidAPI-Host", "onecompiler-apis.p.rapidapi.com")
@@ -139,11 +139,10 @@ object UploadSolutionApi {
             language = request.language
             codePubliclyVisible = request.codeIsPublic == "on"
             externalLinks = request.externalLinks
-            uploadDate = Date()
+            uploadDate = now
+            this.tokenCount = tokenCount
+            tokenCountAnalyzeDate = now
         }, upsert = false)
-
-        // Trigger instantly analysis
-        analyzerThread.interrupt()
 
         call.respond(ApiCallResult(buttonText = "Submitted", reloadSite = true))
     }

@@ -2,13 +2,9 @@ package org.golfcoder.plugins
 
 import com.moshbit.katerbase.child
 import com.moshbit.katerbase.equal
-import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
@@ -20,14 +16,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
 import org.golfcoder.database.User
+import org.golfcoder.httpClient
 import org.golfcoder.mainDatabase
 import java.util.*
-
-private val httpClient = HttpClient(CIO) {
-    install(ContentNegotiation) {
-        json()
-    }
-}
 
 const val sessionAuthenticationName = "session-aocg"
 private const val oauthGoogleAuthenticationName = "oauth-google"

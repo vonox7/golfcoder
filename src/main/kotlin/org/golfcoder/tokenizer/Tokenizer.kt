@@ -4,7 +4,7 @@ interface Tokenizer {
     data class Token(val sourcePosition: ClosedRange<Position>, val source: String, val type: Type) {
         enum class Type {
             CODE_TOKEN, // Name, operation, etc.
-            STRING,
+            STRING, // String start/end indicators (e.g. '"') must be either included listed as CODE_TOKEN or be included in STRING
             WHITESPACE, // Space, tab, newline, BOM, etc.
             COMMENT
         }
@@ -16,9 +16,9 @@ interface Tokenizer {
         }
     }
 
-    fun tokenize(input: String): List<Token>
+    suspend fun tokenize(input: String): List<Token>
 
-    fun getTokenCount(input: String): Int {
+    suspend fun getTokenCount(input: String): Int {
         return tokenize(input).sumOf { token ->
             when (token.type) {
                 Token.Type.CODE_TOKEN -> 1
