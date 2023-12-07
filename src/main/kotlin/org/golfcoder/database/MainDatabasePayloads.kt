@@ -2,10 +2,7 @@ package org.golfcoder.database
 
 import com.moshbit.katerbase.MongoMainEntry
 import com.moshbit.katerbase.MongoSubEntry
-import org.golfcoder.tokenizer.JavascriptTokenizer
-import org.golfcoder.tokenizer.NotYetAvailableTokenizer
-import org.golfcoder.tokenizer.PythonTokenizer
-import org.golfcoder.tokenizer.Tokenizer
+import org.golfcoder.tokenizer.*
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -48,7 +45,7 @@ class Solution : MongoMainEntry() {
         PYTHON("Python", "py", "python", PythonTokenizer::class),
         RUST("Rust", "rs", "rust", NotYetAvailableTokenizer::class),
         GO("Go", "go", "go", NotYetAvailableTokenizer::class),
-        KOTLIN("Kotlin", "kt", "kotlin", NotYetAvailableTokenizer::class),
+        KOTLIN("Kotlin", "kt", "kotlin", KotlinTokenizer::class),
         JAVASCRIPT("JavaScript", "js", "javascript", JavascriptTokenizer::class),
         CSHARP("C#", "cs", "csharp", NotYetAvailableTokenizer::class),
         TYPESCRIPT("TypeScript", "ts", "typescript", NotYetAvailableTokenizer::class),

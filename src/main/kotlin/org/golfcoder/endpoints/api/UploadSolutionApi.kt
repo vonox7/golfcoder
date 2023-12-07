@@ -8,6 +8,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.Serializable
+import org.golfcoder.Sysinfo
 import org.golfcoder.database.Solution
 import org.golfcoder.httpClient
 import org.golfcoder.mainDatabase
@@ -36,7 +37,7 @@ object UploadSolutionApi {
     @Serializable
     private class OnecompilerResponse(
         val status: String, // Is even then "success" when there is an exception
-        val exception: String?,
+        val exception: String? = null, // Populated by Python compiler, but not by Kotlin compiler
         val stdout: String?,
         val stderr: String?,
         val executionTime: Int,
@@ -74,14 +75,17 @@ object UploadSolutionApi {
         // Tokenize
         val tokenizer = request.language.tokenizerClass.primaryConstructor!!.call()
         val tokenCount = try {
-            tokenizer.getTokenCount(request.code)
+            val tokens = tokenizer.tokenize(request.code)
+            if (Sysinfo.isLocal) {
+                println(tokens.joinToString("\n"))
+            }
+            tokenizer.getTokenCount(tokens)
         } catch (e: Exception) {
             // Could either be a syntax error or a tokenizer error (like network issue, bug in our code...)
             call.respond(ApiCallResult(buttonText = "Tokenizer failed", alertText = "Tokenizer failed:\n${e.message}"))
             return
         }
 
-        // Execute code via Onecompiler
         val onecompilerResponse = httpClient.post("https://onecompiler-apis.p.rapidapi.com/api/v1/run") {
             contentType(ContentType.Application.Json)
             header("X-RapidAPI-Key", System.getenv("RAPIDAPI_KEY"))
@@ -100,17 +104,23 @@ object UploadSolutionApi {
             )
         }.body<OnecompilerResponse>()
 
+        val onecompilerException = (onecompilerResponse.stderr?.takeIf { it.isNotEmpty() }
+            ?: onecompilerResponse.exception?.takeIf { it.isNotEmpty() })
+            // Sanitize output from OneCompiler (Kotlin)
+            ?.removePrefix("OpenJDK 64-Bit Server VM warning: Options -Xverify:none and -noverify were deprecated in JDK 13 and will likely be removed in a future release.\n")
+
         println(
-            "Limit remaining: ${onecompilerResponse.limitRemaining} (execution time: ${onecompilerResponse.executionTime}ms for " +
+            "Onecompiler limit remaining: ${onecompilerResponse.limitRemaining}. " +
+                    "Execution time: ${onecompilerResponse.executionTime}ms for " +
                     "${request.code.length} characters in ${request.language} from ${userSession.userId})" +
-                    if (onecompilerResponse.exception == null) " (execution failed)" else ""
+                    if (onecompilerException == null) "" else " (execution failed)"
         )
 
-        if (onecompilerResponse.exception != null) {
+        if (onecompilerException != null) {
             call.respond(
                 ApiCallResult(
                     buttonText = "Code execution failed",
-                    alertText = "Code execution failed:\n\n${onecompilerResponse.stderr ?: onecompilerResponse.exception}"
+                    alertText = "Code execution failed:\n\n${onecompilerException}"
                 )
             )
             return

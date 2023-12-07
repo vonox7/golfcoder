@@ -1,6 +1,7 @@
 const Parser = require('tree-sitter');
-const JavaScript = require('tree-sitter-javascript');
 const Python = require('tree-sitter-python');
+const JavaScript = require('tree-sitter-javascript');
+const Kotlin = require('tree-sitter-kotlin');
 
 const express = require("express");
 const app = express();
@@ -16,6 +17,8 @@ app.post('/tokenize', (request, response) => {
         parser.setLanguage(Python);
     } else if (request.body.language === "javascript") {
         parser.setLanguage(JavaScript);
+    } else if (request.body.language === "kotlin") {
+        parser.setLanguage(Kotlin);
     } else {
         throw new Error("Language not supported");
     }

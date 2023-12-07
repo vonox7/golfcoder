@@ -18,8 +18,8 @@ interface Tokenizer {
 
     suspend fun tokenize(input: String): List<Token>
 
-    suspend fun getTokenCount(input: String): Int {
-        return tokenize(input).sumOf { token ->
+    suspend fun getTokenCount(tokens: List<Token>): Int {
+        return tokens.sumOf { token ->
             when (token.type) {
                 Token.Type.CODE_TOKEN -> 1
                 Token.Type.STRING -> token.source.length

@@ -1,15 +1,7 @@
 package org.golfcoder.tokenizer
 
-import com.moshbit.katerbase.equal
-import kotlinx.coroutines.runBlocking
-import org.golfcoder.database.Solution
-import org.golfcoder.mainDatabase
-import java.util.*
-import kotlin.concurrent.thread
-import kotlin.reflect.full.primaryConstructor
-
 // TODO remove? or do we need a re-analysis on certain deployments? but then not continously, but one-time? Then probably save analysis-version, not date, to compare against min-version
-val analyzerThread = thread(start = false, isDaemon = true, name = "analyzer-worker") {
+/*val analyzerThread = thread(start = false, isDaemon = true, name = "analyzer-worker") {
     while (true) {
         try {
             mainDatabase.getCollection<Solution>()
@@ -42,4 +34,4 @@ val analyzerThread = thread(start = false, isDaemon = true, name = "analyzer-wor
             e.printStackTrace() // Print stack, but continue
         }
     }
-}
+}*/

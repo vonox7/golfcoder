@@ -61,3 +61,4 @@ abstract class TreeSitterTokenizer(private val language: String) : Tokenizer {
 
 class JavascriptTokenizer : TreeSitterTokenizer("javascript")
 class PythonTokenizer : TreeSitterTokenizer("python")
+class KotlinTokenizer : TreeSitterTokenizer("kotlin")

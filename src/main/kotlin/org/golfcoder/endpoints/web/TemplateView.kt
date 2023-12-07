@@ -57,6 +57,17 @@ object TemplateView {
                 code
             }
 
+            Solution.Language.KOTLIN -> {
+                @Language("Kotlin")
+                val code = """
+                |fun main() {
+                |    // If you want to iterate over `lines` multiple times, write `generateSequence(::readLine).toList()`
+                |    val lines = generateSequence(::readLine)
+                |    println(lines.count())
+                |}""".trimMargin()
+                code
+            }
+
             else -> null
         }
 }

@@ -21,7 +21,6 @@ import org.golfcoder.endpoints.web.*
 import org.golfcoder.plugins.configureHTTP
 import org.golfcoder.plugins.configureSecurity
 import org.golfcoder.plugins.sessionAuthenticationName
-import org.golfcoder.tokenizer.analyzerThread
 
 val container = System.getenv("CONTAINER") ?: "local"
 lateinit var mainDatabase: MainDatabase
@@ -34,7 +33,6 @@ val httpClient = HttpClient(CIO) {
 suspend fun main() {
     println("Connecting to database...")
     mainDatabase = MainDatabase(System.getenv("MONGO_URL") ?: "mongodb://localhost:27017/golfcoder")
-    analyzerThread.start()
 
     // Wait for tree-sitter server to start
     if (!Sysinfo.isLocal) {
