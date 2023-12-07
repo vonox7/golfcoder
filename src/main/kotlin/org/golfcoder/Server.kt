@@ -1,8 +1,10 @@
 package org.golfcoder
 
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -11,6 +13,7 @@ import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.coroutines.delay
 import org.golfcoder.database.MainDatabase
 import org.golfcoder.endpoints.api.EditUserApi
 import org.golfcoder.endpoints.api.UploadSolutionApi
@@ -28,10 +31,24 @@ val httpClient = HttpClient(CIO) {
     }
 }
 
-fun main() {
+suspend fun main() {
     println("Connecting to database...")
     mainDatabase = MainDatabase(System.getenv("MONGO_URL") ?: "mongodb://localhost:27017/golfcoder")
     analyzerThread.start()
+
+    // Wait for tree-sitter server to start
+    if (!Sysinfo.isLocal) {
+        println("Checking tree-sitter server...")
+        while (true) {
+            try {
+                httpClient.get("http://localhost:8031").body<String>().contains("tree-sitter")
+                break
+            } catch (e: Exception) {
+                println("Waiting for tree-sitter server to start...")
+                delay(500)
+            }
+        }
+    }
 
     println("Starting ktor...")
     embeddedServer(
