@@ -104,10 +104,12 @@ object LeaderboardDayView {
                         +"You're welcome to participate alone or in a team."
                     }
                     li {
-                        +"You may submit multiple solutions and explore different programming languages.."
+                        +"You may submit multiple solutions and explore different programming languages."
                     }
                     li {
-                        +"Stick to the standard library of your language, no further dependencies/libraries."
+                        +"Stick to the standard library of your language, no further dependencies/libraries, except the ones which "
+                        a(href = "https://onecompiler.com/", target = "_blank") { +"OneCompiler" }
+                        +" provides (e.g. NumPy for Python)."
                     }
                     li {
                         +"Ensure your code aligns to the template ("

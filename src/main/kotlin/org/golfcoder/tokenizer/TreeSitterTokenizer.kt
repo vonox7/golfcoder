@@ -4,7 +4,9 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
+import org.golfcoder.Sysinfo
 import org.golfcoder.httpClient
+import java.net.ConnectException
 
 abstract class TreeSitterTokenizer(private val language: String) : Tokenizer {
 
@@ -25,12 +27,21 @@ abstract class TreeSitterTokenizer(private val language: String) : Tokenizer {
     }
 
     override suspend fun tokenize(input: String): List<Tokenizer.Token> {
-        val response = httpClient.post("http://localhost:8031/tokenize") {
-            contentType(ContentType.Application.Json)
-            setBody(TreeSitterRequest(language, input))
-        }.body<TreeSitterResponse>()
+        val response = try {
+            httpClient.post("http://localhost:8031/tokenize") {
+                contentType(ContentType.Application.Json)
+                setBody(TreeSitterRequest(language, input))
+            }
+        } catch (e: ConnectException) {
+            if (Sysinfo.isLocal) { // Improve local development UX
+                throw Exception("tree-sitter-server not running, start it via `npm start`.", e)
+            }
+            throw e
+        }
 
-        return response.tokens.map { treeSitterToken ->
+        val body = response.body<TreeSitterResponse>()
+
+        return body.tokens.map { treeSitterToken ->
             Tokenizer.Token(
                 Tokenizer.Token.Position(
                     treeSitterToken.startRow,
@@ -40,7 +51,8 @@ abstract class TreeSitterTokenizer(private val language: String) : Tokenizer {
                 when (treeSitterToken.type) {
                     "ERROR" -> throw Exception("Syntax error on line ${treeSitterToken.startRow}:${treeSitterToken.startColumn}:\n${treeSitterToken.text}")
                     "comment" -> Tokenizer.Token.Type.COMMENT
-                    "string_content" -> Tokenizer.Token.Type.STRING
+                    "string_content" -> Tokenizer.Token.Type.STRING // Python
+                    "string_fragment" -> Tokenizer.Token.Type.STRING // Javascript
                     else -> Tokenizer.Token.Type.CODE_TOKEN
                 }
             )

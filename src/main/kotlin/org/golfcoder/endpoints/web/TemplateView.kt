@@ -30,7 +30,8 @@ object TemplateView {
     val Solution.Language.template: String?
         get() = when (this) {
             Solution.Language.PYTHON -> {
-                @Language("Python") val code = """
+                @Language("Python")
+                val code = """
                 |lines = []
                 |while True:
                 |    try:
@@ -38,6 +39,21 @@ object TemplateView {
                 |    except EOFError:
                 |        break
                 |print(len(lines))""".trimMargin()
+                code
+            }
+
+            Solution.Language.JAVASCRIPT -> {
+                @Language("JavaScript")
+                val code = """let lines = [];
+                |
+                |require('readline')
+                |    .createInterface({input: process.stdin})
+                |    .on('line', (line) => {
+                |        lines.push(line);
+                |    })
+                |    .on('close', () => {
+                |        console.log(lines.length);
+                |    });""".trimMargin()
                 code
             }
 

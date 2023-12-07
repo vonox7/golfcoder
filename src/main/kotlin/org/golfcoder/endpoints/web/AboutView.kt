@@ -104,6 +104,17 @@ object AboutView {
              */
             +"Please be patient, I will add more popular languages as soon as possible. "
 
+            h3 { +"What libraries are allowed?" }
+            +"Golfcoder uses "
+            a(href = "https://onecompiler.com/") { +"OneCompiler" }
+            +" to execute your code. "
+            +"Please check out their site and see, if they have a \"Supported libraries\" section for your programming language."
+
+            h3 { +"My code doesn't compile or returns a wrong output in Golfcoder, but works on my machine." }
+            +"Please make sure your code runs on"
+            a(href = "https://onecompiler.com/") { +"OneCompiler" }
+            +", which Golfcoder uses as code execution infrastructure."
+
             h2 { +"Credits" }
             ul {
                 li {
