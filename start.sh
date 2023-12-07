@@ -1,2 +1,2 @@
-node tree-sitter.js &
+npm start &
 java -XX:MaxJavaStackTraceDepth=0 -jar Server.jar
