@@ -10,13 +10,13 @@ object AboutView {
 
             p {
                 +"A global code golf leaderboard for "
-                a("https://adventofcode.com") { +"adventofcode.com" }
+                a("https://adventofcode.com", "_blank") { +"adventofcode.com" }
                 +", with a focus on code size."
             }
 
             p {
                 +"\"Code golf is a type of recreational computer programming competition in which participants strive to achieve the shortest possible source code that solves a certain problem.\" "
-                a("https://en.wikipedia.org/wiki/Code_golf") { +"[wikipedia.com]" }
+                a("https://en.wikipedia.org/wiki/Code_golf", "_blank") { +"[wikipedia.com]" }
                 br()
                 +" In this challenge, "
                 em { +"short" }
@@ -25,17 +25,17 @@ object AboutView {
 
             p {
                 +"Inspired by "
-                a("https://github.com/SebLague/Chess-Challenge") { +"SebLague's chess coding challenge" }
+                a("https://github.com/SebLague/Chess-Challenge", "_blank") { +"SebLague's chess coding challenge" }
                 +" and it's community leaderboard."
             }
 
             p {
                 +"This project is not affiliated with "
-                a("https://adventofcode.com") { +"adventofcode.com" }
+                a("https://adventofcode.com", "_blank") { +"adventofcode.com" }
                 +"."
                 br()
                 +"The "
-                a(href = "https://adventofcode.com/leaderboard") { +"official leaderboard" }
+                a("https://adventofcode.com/leaderboard", "_blank") { +"official leaderboard" }
                 +" calculates the score based on completion time. "
                 +"Depending on your personal timezone and your personal/work schedule, this can be a significant disadvantage. "
                 br()
@@ -49,7 +49,7 @@ object AboutView {
             h2 { +"FAQ" }
             h3 { +"What is a token?" }
             +"A token represents roughly one element in the "
-            a(href = "https://en.wikipedia.org/wiki/Abstract_syntax_tree") { +"abstract syntax tree" }
+            a("https://en.wikipedia.org/wiki/Abstract_syntax_tree", "_blank") { +"abstract syntax tree" }
             +". "
             +"Every name, including variables and functions, is considered as a single token, irrespective of its length. "
             +"Therefore, both lines of code - "
@@ -97,23 +97,34 @@ object AboutView {
             h3 { +"Why is my language not yet supported?" }
             +"Writing a tokenizer for a language is not trivial. "
             +"I therefore look for a tokenizer that is already implemented and can easily be integrated. "
-            /* TODO uncomment when public
+            +"Currently all languages Golfcoder supports are tokenized with "
+            a("https://tree-sitter.github.io/tree-sitter/", "_blank") { +"tree-sitter" }
+            +". "
+            br()
             +"Join the discussion on "
-            a(href = "https://github.com/vonox7/golfcoder/labels/language-support") { +"GitHub" }
+            a("https://github.com/vonox7/golfcoder/labels/language-support", "_blank") { +"GitHub" }
             +" and help to add support for your favorite language, or just upvote the language you want to promote! "
-             */
             +"Please be patient, I will add more popular languages as soon as possible. "
 
             h3 { +"What libraries are allowed?" }
             +"Golfcoder uses "
-            a(href = "https://onecompiler.com/") { +"OneCompiler" }
+            a("https://onecompiler.com/", "_blank") { +"OneCompiler" }
             +" to execute your code. "
             +"Please check out their site and see, if they have a \"Supported libraries\" section for your programming language."
 
             h3 { +"My code doesn't compile or returns a wrong output in Golfcoder, but works on my machine." }
-            +"Please make sure your code runs on"
-            a(href = "https://onecompiler.com/") { +"OneCompiler" }
+            +"Please make sure your code runs on "
+            a("https://onecompiler.com/", "_blank") { +"OneCompiler" }
             +", which Golfcoder uses as code execution infrastructure."
+
+            h3 { +"I found a bug/hack in the tokenization." }
+            +"Please report it on "
+            a("https://github.com/vonox7/golfcoder/issues", "_blank") { +"GitHub" }
+            +", so I can fix it. "
+            +"You might also try to fix it yourself, check out the "
+            a("https://github.com/vonox7/golfcoder", "_blank") { +"GitHub repository" }
+            +" on how to run Golfcoder locally. "
+            +"After fixing it, I will re-analyze all solutions to make sure the leaderboard is fair. "
 
             h2 { +"Credits" }
             ul {
