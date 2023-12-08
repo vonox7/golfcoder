@@ -62,7 +62,7 @@ object UploadSolutionApi {
     // TODO restructure into multiple functions/classes (especially "executeCode()")
     suspend fun post(call: ApplicationCall) {
         val request = call.receive<UploadSolutionRequest>()
-        val userSession = call.sessions.get<UserSession>()!!
+        val userSession = call.sessions.get<UserSession>()
         val now = Date()
 
         // Validate user input
@@ -90,11 +90,18 @@ object UploadSolutionApi {
 
         if (request.onlyTokenize == "on") {
             call.respond(
-                ApiCallResult(
-                    buttonText = "$tokenCount tokens. Click here to submit to the leaderboard.",
-                    resetButtonTextSeconds = null,
-                    changeInput = mapOf("onlyTokenize" to "off"),
-                )
+                if (call.sessions.get<UserSession>() == null) {
+                    ApiCallResult(
+                        buttonText = "$tokenCount tokens. Login to submit to the leaderboard.",
+                        resetButtonTextSeconds = null,
+                    )
+                } else {
+                    ApiCallResult(
+                        buttonText = "$tokenCount tokens. Click here to submit to the leaderboard.",
+                        resetButtonTextSeconds = null,
+                        changeInput = mapOf("onlyTokenize" to "off"),
+                    )
+                }
             )
             return
         }
@@ -143,7 +150,7 @@ object UploadSolutionApi {
         println(
             "Onecompiler limit remaining: ${onecompilerResponse.limitRemaining}. " +
                     "Execution time: ${onecompilerResponse.executionTime}ms for " +
-                    "${request.code.length} characters in ${request.language} from ${userSession.userId})" +
+                    "${request.code.length} characters in ${request.language} from ${userSession!!.userId})" +
                     if (onecompilerException == null) "" else " (execution failed)"
         )
 

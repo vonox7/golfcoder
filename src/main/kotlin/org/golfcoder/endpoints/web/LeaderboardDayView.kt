@@ -4,7 +4,6 @@ import com.moshbit.katerbase.equal
 import com.moshbit.katerbase.inArray
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
-import io.ktor.server.sessions.*
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
 import org.golfcoder.database.Solution
@@ -12,9 +11,34 @@ import org.golfcoder.database.User
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.endpoints.web.TemplateView.template
 import org.golfcoder.mainDatabase
-import org.golfcoder.plugins.UserSession
 import org.golfcoder.tokenizer.NotYetAvailableTokenizer
 import org.golfcoder.utils.relativeToNow
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.associateBy
+import kotlin.collections.associateWith
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.count
+import kotlin.collections.distinct
+import kotlin.collections.emptyList
+import kotlin.collections.filter
+import kotlin.collections.find
+import kotlin.collections.first
+import kotlin.collections.flatten
+import kotlin.collections.forEach
+import kotlin.collections.forEachIndexed
+import kotlin.collections.groupBy
+import kotlin.collections.map
+import kotlin.collections.mapIndexed
+import kotlin.collections.maxOf
+import kotlin.collections.minBy
+import kotlin.collections.mutableMapOf
+import kotlin.collections.plus
+import kotlin.collections.set
+import kotlin.collections.sortedBy
+import kotlin.collections.sumOf
+import kotlin.collections.toList
 
 object LeaderboardDayView {
     suspend fun getHtml(call: ApplicationCall) {
@@ -138,13 +162,9 @@ object LeaderboardDayView {
                     value = "on"
                 }
                 input(type = InputType.submit) {
+                    name = "submitButton"
                     onClick = "submitForm(event)"
-                    if (call.sessions.get<UserSession>() == null) {
-                        disabled = true
-                        value = "Please login to submit a solution"
-                    } else {
-                        value = "Calculate tokens"
-                    }
+                    value = "Calculate tokens"
                 }
             }
         }

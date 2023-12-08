@@ -82,13 +82,14 @@ private fun Application.ktorServerModule() {
             get(Regex("20(?<year>[0-9]{2})")) { LeaderboardYearView.getHtml(call) }
             get(Regex("20(?<year>[0-9]{2})/day/(?<day>[0-9]{1,2})")) { LeaderboardDayView.getHtml(call) }
             get("/logout") { LogoutView.doLogout(call) }
+
+            post("/api/solution/upload") { UploadSolutionApi.post(call) }
         }
 
         authenticate(sessionAuthenticationName) {
             get("/user/edit") { EditUserView.getHtml(call) }
 
             post("/api/user/edit") { EditUserApi.post(call) }
-            post("/api/solution/upload") { UploadSolutionApi.post(call) }
         }
 
         // TODO robots.txt, etc.
