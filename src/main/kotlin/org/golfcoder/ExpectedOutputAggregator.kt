@@ -3,12 +3,26 @@ package org.golfcoder
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.count
 import org.golfcoder.database.ExpectedOutput
 import java.util.*
 import kotlin.time.Duration.Companion.minutes
 
 object ExpectedOutputAggregator {
-    suspend fun loadAll() {
+
+    // Locally we want to load the expected output only once to have a less noisy local development experience.
+    // On production each time the server starts.
+    suspend fun loadOnStartup() {
+        if (!Sysinfo.isLocal ||
+            mainDatabase.getSuspendingCollection<ExpectedOutput>().distinct(ExpectedOutput::source).count() !=
+            ExpectedOutput.Source.entries.size
+        ) {
+            loadAll()
+            loadContinuously()
+        }
+    }
+
+    private suspend fun loadAll() {
         val year = 2023
 
         (1..24).forEach { day ->

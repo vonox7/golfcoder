@@ -64,8 +64,7 @@ fun main(): Unit = runBlocking {
     }
 
     launch {
-        ExpectedOutputAggregator.loadAll()
-        ExpectedOutputAggregator.loadContinuously()
+        ExpectedOutputAggregator.loadOnStartup()
     }
 }
 
