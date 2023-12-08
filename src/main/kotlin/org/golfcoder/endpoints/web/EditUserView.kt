@@ -44,6 +44,15 @@ object EditUserView {
                     }
                 }
 
+                label("checkbox-container") {
+                    +"Show my profile picture on the leaderboard (or use just my initials)"
+                    input(type = InputType.checkBox) {
+                        name = "profilePictureIsPublic"
+                        checked = userProfile.profilePictureIsPublic
+                        span("checkbox")
+                    }
+                }
+
                 input(type = InputType.submit) {
                     onClick = "submitForm(event)"
                     value = "Save"

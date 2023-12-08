@@ -22,9 +22,11 @@ object LeaderboardDayView {
         val day = call.parameters["day"]?.toIntOrNull() ?: throw NotFoundException("Invalid day")
         val parts = 2
         val solutions = (1..parts).map { part ->
+            @Suppress("DEPRECATION") // use excludeFields - only `code` is excluded since it is too big
             mainDatabase.getSuspendingCollection<Solution>()
                 .find(Solution::year equal year, Solution::day equal day, Solution::part equal part)
                 .sortBy(Solution::tokenCount)
+                .excludeFields(Solution::code)
                 // Load a little bit more than we display, so we show only 1 score per user.
                 // This could be done also with an aggregate query?
                 // But then we could also combine the 2 queries (1 per part) into 1 query?
@@ -34,7 +36,13 @@ object LeaderboardDayView {
         val userIds = solutions.flatten().map { it.userId }.distinct()
         val userIdsToUsers = mainDatabase.getSuspendingCollection<User>()
             .find(User::_id inArray userIds)
-            .selectedFields(User::_id, User::name, User::nameIsPublic, User::publicProfilePictureUrl)
+            .selectedFields(
+                User::_id,
+                User::name,
+                User::nameIsPublic,
+                User::profilePictureIsPublic,
+                User::publicProfilePictureUrl,
+            )
             .toList()
             .associateBy { it._id }
 

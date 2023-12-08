@@ -113,7 +113,7 @@ private fun HtmlBlockTag.header(call: ApplicationCall) {
 fun HtmlBlockTag.renderUserProfileImage(user: User?, big: Boolean = false) {
     val publicProfilePictureUrl = user?.publicProfilePictureUrl?.takeIf { it.startsWith("https://") }
     val classes = "profile-image${if (big) " big" else ""}"
-    if (publicProfilePictureUrl != null) {
+    if (publicProfilePictureUrl != null && user.profilePictureIsPublic) {
         img(classes = classes) {
             src = publicProfilePictureUrl
             attributes["referrerpolicy"] = "no-referrer"

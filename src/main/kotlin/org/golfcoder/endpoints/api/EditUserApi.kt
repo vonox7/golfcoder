@@ -14,7 +14,11 @@ object EditUserApi {
     const val MAX_USER_NAME_LENGTH = 50
 
     @Serializable
-    private class EditUserRequest(val name: String = "", val nameIsPublic: String = "off")
+    private class EditUserRequest(
+        val name: String = "",
+        val nameIsPublic: String = "off",
+        val profilePictureIsPublic: String = "off",
+    )
 
     suspend fun post(call: ApplicationCall) {
         val request = call.receive<EditUserRequest>()
@@ -26,6 +30,7 @@ object EditUserApi {
             .updateOne(User::_id equal session.userId) {
                 User::name setTo newName
                 User::nameIsPublic setTo (request.nameIsPublic == "on")
+                User::profilePictureIsPublic setTo (request.profilePictureIsPublic == "on")
             }
 
         call.sessions.set(UserSession(session.userId, newName))

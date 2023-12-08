@@ -13,6 +13,7 @@ class User : MongoMainEntry() {
     var name: String = ""
     var publicProfilePictureUrl: String? = null
     var nameIsPublic: Boolean = true
+    var profilePictureIsPublic: Boolean = true
 
     class OAuthDetails(
         val provider: String,
