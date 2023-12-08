@@ -133,13 +133,17 @@ object LeaderboardDayView {
                         span("checkbox")
                     }
                 }
+                input(type = InputType.hidden) {
+                    name = "onlyTokenize"
+                    value = "on"
+                }
                 input(type = InputType.submit) {
                     onClick = "submitForm(event)"
                     if (call.sessions.get<UserSession>() == null) {
                         disabled = true
                         value = "Please login to submit a solution"
                     } else {
-                        value = "Submit"
+                        value = "Calculate tokens"
                     }
                 }
             }

@@ -3,6 +3,7 @@ async function submitForm(event) {
 
     const originalButtonText = event.target.value;
     const form = event.target.closest("form");
+    let resetButtonTextSeconds = 2;
     event.target.value += "...";
     event.target.disabled = true;
 
@@ -29,6 +30,11 @@ async function submitForm(event) {
                     alert(responseData.alertText); // TODO use modern dialog?
                 }, 1);
             }
+            resetButtonTextSeconds = responseData.resetButtonTextSeconds;
+            // responseData.changeInput is a map<String, String> of input name to new value. Change the form input values:
+            for (const [name, value] of Object.entries(responseData.changeInput)) {
+                form.querySelector(`[name="${name}"]`).value = value;
+            }
             if (responseData.reloadSite) {
                 window.location.reload();
             }
@@ -40,7 +46,9 @@ async function submitForm(event) {
     }
 
     event.target.disabled = false;
-    setTimeout(() => {
-        event.target.value = originalButtonText;
-    }, 2000);
+    if (resetButtonTextSeconds) {
+        setTimeout(() => {
+            event.target.value = originalButtonText;
+        }, resetButtonTextSeconds * 1000);
+    }
 }

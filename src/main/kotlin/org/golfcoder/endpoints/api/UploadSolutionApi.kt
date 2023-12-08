@@ -56,6 +56,7 @@ object UploadSolutionApi {
         val language: Solution.Language,
         val codeIsPublic: String = "off",
         val externalLinks: List<String> = emptyList(), // TODO UI needed (with explanation)
+        val onlyTokenize: String,
     )
 
     // TODO restructure into multiple functions/classes (especially "executeCode()")
@@ -87,6 +88,17 @@ object UploadSolutionApi {
             return
         }
 
+        if (request.onlyTokenize == "on") {
+            call.respond(
+                ApiCallResult(
+                    buttonText = "$tokenCount tokens. Click here to submit to the leaderboard.",
+                    resetButtonTextSeconds = null,
+                    changeInput = mapOf("onlyTokenize" to "off"),
+                )
+            )
+            return
+        }
+
         val expectedOutput = mainDatabase.getSuspendingCollection<ExpectedOutput>()
             .findOne(
                 ExpectedOutput::year equal request.year.toInt(),
@@ -96,8 +108,10 @@ object UploadSolutionApi {
             call.respond(
                 ApiCallResult(
                     buttonText = "Please wait",
+                    resetButtonTextSeconds = null,
                     alertText = "Please wait a few hours until submitting your solution for this day.\n" +
-                            "We need to solve it first ;)."
+                            "We need to solve it first ;).",
+                    changeInput = mapOf("onlyTokenize" to "on"),
                 )
             )
             return
@@ -136,7 +150,9 @@ object UploadSolutionApi {
         if (onecompilerException != null) {
             call.respond(
                 ApiCallResult(
-                    buttonText = "Code execution failed",
+                    buttonText = "Calculate tokens",
+                    resetButtonTextSeconds = null,
+                    changeInput = mapOf("onlyTokenize" to "on"),
                     alertText = "Code execution failed:\n\n${onecompilerException}"
                 )
             )
@@ -147,7 +163,9 @@ object UploadSolutionApi {
         if (outputNumber == null) {
             call.respond(
                 ApiCallResult(
-                    buttonText = "Wrong stdout",
+                    buttonText = "Calculate tokens",
+                    resetButtonTextSeconds = null,
+                    changeInput = mapOf("onlyTokenize" to "on"),
                     alertText = "Wrong stdout. Expected a number, but got \"${onecompilerResponse.stdout?.trim()}\"."
                 )
             )
@@ -157,7 +175,9 @@ object UploadSolutionApi {
         if (outputNumber != expectedOutput.output) {
             call.respond(
                 ApiCallResult(
-                    buttonText = "Wrong stdout",
+                    buttonText = "Calculate tokens",
+                    resetButtonTextSeconds = null,
+                    changeInput = mapOf("onlyTokenize" to "on"),
                     alertText = "Wrong stdout. The number does not match the expected output.\n" +
                             "If you think this is a bug, please report it to Golfcoder (see About & FAQ)."
                 )
