@@ -8,7 +8,7 @@ import org.golfcoder.Sysinfo
 import org.golfcoder.httpClient
 import java.net.ConnectException
 
-abstract class TreeSitterTokenizer(private val language: String) : Tokenizer {
+class TreeSitterTokenizer(private val language: String, override val tokenizerVersion: Int) : Tokenizer {
 
     @Serializable
     private class TreeSitterRequest(val language: String, val code: String)
@@ -58,7 +58,3 @@ abstract class TreeSitterTokenizer(private val language: String) : Tokenizer {
         }
     }
 }
-
-class JavascriptTokenizer : TreeSitterTokenizer("javascript")
-class PythonTokenizer : TreeSitterTokenizer("python")
-class KotlinTokenizer : TreeSitterTokenizer("kotlin")

@@ -1,9 +1,6 @@
 package org.golfcoder.endpoints.api
 
 import com.moshbit.katerbase.equal
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -12,40 +9,15 @@ import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
 import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.database.Solution
-import org.golfcoder.httpClient
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import java.util.*
-import kotlin.reflect.full.primaryConstructor
 
 object UploadSolutionApi {
 
     const val MAX_CODE_LENGTH = 100_000
     private const val MIN_CODE_LENGTH = 10
 
-    @Serializable
-    private class OnecompilerRequest(
-        val language: String,
-        val stdin: String,
-        val files: List<File>,
-    ) {
-        @Serializable
-        class File(
-            val name: String,
-            val content: String,
-        )
-    }
-
-    @Serializable
-    private class OnecompilerResponse(
-        val status: String, // Is even then "success" when there is an exception
-        val exception: String? = null, // Populated by Python compiler, but not by Kotlin compiler
-        val stdout: String?,
-        val stderr: String?,
-        val executionTime: Int,
-        val limitRemaining: Int,
-        val stdin: String,
-    )
 
     @Serializable
     private class UploadSolutionRequest(
@@ -59,7 +31,7 @@ object UploadSolutionApi {
         val onlyTokenize: String,
     )
 
-    // TODO restructure into multiple functions/classes (especially "executeCode()")
+    // TODO restructure into multiple functions/classes
     suspend fun post(call: ApplicationCall) {
         val request = call.receive<UploadSolutionRequest>()
         val userSession = call.sessions.get<UserSession>()
@@ -75,7 +47,7 @@ object UploadSolutionApi {
         require(request.externalLinks.all { it.length < 300 })
 
         // Tokenize
-        val tokenizer = request.language.tokenizerClass.primaryConstructor!!.call()
+        val tokenizer = request.language.tokenizer
         val tokenCount = try {
             val tokens = tokenizer.tokenize(request.code)
             if (Sysinfo.isLocal) {
@@ -104,6 +76,8 @@ object UploadSolutionApi {
                 }
             )
             return
+        } else {
+            requireNotNull(userSession)
         }
 
         val expectedOutput = mainDatabase.getSuspendingCollection<ExpectedOutput>()
@@ -124,56 +98,32 @@ object UploadSolutionApi {
             return
         }
 
-        val onecompilerResponse = httpClient.post("https://onecompiler-apis.p.rapidapi.com/api/v1/run") {
-            contentType(ContentType.Application.Json)
-            header("X-RapidAPI-Key", System.getenv("RAPIDAPI_KEY"))
-            header("X-RapidAPI-Host", "onecompiler-apis.p.rapidapi.com")
-            setBody(
-                OnecompilerRequest(
-                    language = request.language.onecompilerLanguageId,
-                    stdin = expectedOutput.input,
-                    files = listOf(
-                        OnecompilerRequest.File(
-                            name = "index.${request.language.fileEnding}",
-                            content = request.code
-                        )
-                    )
-                )
-            )
-        }.body<OnecompilerResponse>()
+        // Run code
+        val coderunnerResult = request.language.coderunner.run(request.code, request.language, expectedOutput.input)
 
-        val onecompilerException = (onecompilerResponse.stderr?.takeIf { it.isNotEmpty() }
-            ?: onecompilerResponse.exception?.takeIf { it.isNotEmpty() })
-            // Sanitize output from OneCompiler (Kotlin)
-            ?.removePrefix("OpenJDK 64-Bit Server VM warning: Options -Xverify:none and -noverify were deprecated in JDK 13 and will likely be removed in a future release.\n")
-
-        println(
-            "Onecompiler limit remaining: ${onecompilerResponse.limitRemaining}. " +
-                    "Execution time: ${onecompilerResponse.executionTime}ms for " +
-                    "${request.code.length} characters in ${request.language} from ${userSession!!.userId})" +
-                    if (onecompilerException == null) "" else " (execution failed)"
-        )
-
-        if (onecompilerException != null) {
+        if (coderunnerResult.isFailure) {
+            if (Sysinfo.isLocal) coderunnerResult.exceptionOrNull()!!.printStackTrace()
             call.respond(
                 ApiCallResult(
                     buttonText = "Calculate tokens",
                     resetButtonTextSeconds = null,
                     changeInput = mapOf("onlyTokenize" to "on"),
-                    alertText = "Code execution failed:\n\n${onecompilerException}"
+                    alertText = "Code execution failed:\n\n${coderunnerResult.exceptionOrNull()!!.message}"
                 )
             )
             return
         }
 
-        val outputNumber = onecompilerResponse.stdout?.trim()?.toLongOrNull()
+        val codeRunnerStdout = coderunnerResult.getOrNull()!!.trim()
+
+        val outputNumber = codeRunnerStdout.toLongOrNull()
         if (outputNumber == null) {
             call.respond(
                 ApiCallResult(
                     buttonText = "Calculate tokens",
                     resetButtonTextSeconds = null,
                     changeInput = mapOf("onlyTokenize" to "on"),
-                    alertText = "Wrong stdout. Expected a number, but got \"${onecompilerResponse.stdout?.trim()}\"."
+                    alertText = "Wrong stdout. Expected a number, but got \"$codeRunnerStdout\"."
                 )
             )
             return
@@ -205,7 +155,7 @@ object UploadSolutionApi {
             externalLinks = request.externalLinks
             uploadDate = now
             this.tokenCount = tokenCount
-            tokenizerVersion = language.tokenizerVersion
+            tokenizerVersion = tokenizer.tokenizerVersion
         }, upsert = false)
 
         call.respond(ApiCallResult(buttonText = "Submitted", reloadSite = true))

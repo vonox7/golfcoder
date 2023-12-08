@@ -18,6 +18,8 @@ interface Tokenizer {
 
     suspend fun tokenize(input: String): List<Token>
 
+    val tokenizerVersion: Int
+
     suspend fun getTokenCount(tokens: List<Token>): Int {
         return tokens.sumOf { token ->
             when (token.type) {

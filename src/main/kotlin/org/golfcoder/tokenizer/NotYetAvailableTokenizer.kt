@@ -4,4 +4,6 @@ class NotYetAvailableTokenizer : Tokenizer {
     override suspend fun tokenize(input: String): List<Tokenizer.Token> {
         throw Exception("Tokenizer not yet available")
     }
+
+    override val tokenizerVersion: Int = 0
 }

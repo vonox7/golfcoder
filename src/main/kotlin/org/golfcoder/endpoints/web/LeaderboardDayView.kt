@@ -13,32 +13,9 @@ import org.golfcoder.endpoints.web.TemplateView.template
 import org.golfcoder.mainDatabase
 import org.golfcoder.tokenizer.NotYetAvailableTokenizer
 import org.golfcoder.utils.relativeToNow
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.associateBy
-import kotlin.collections.associateWith
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.count
-import kotlin.collections.distinct
-import kotlin.collections.emptyList
-import kotlin.collections.filter
-import kotlin.collections.find
-import kotlin.collections.first
-import kotlin.collections.flatten
-import kotlin.collections.forEach
-import kotlin.collections.forEachIndexed
-import kotlin.collections.groupBy
-import kotlin.collections.map
-import kotlin.collections.mapIndexed
-import kotlin.collections.maxOf
-import kotlin.collections.minBy
-import kotlin.collections.mutableMapOf
-import kotlin.collections.plus
 import kotlin.collections.set
-import kotlin.collections.sortedBy
-import kotlin.collections.sumOf
-import kotlin.collections.toList
 
 object LeaderboardDayView {
     suspend fun getHtml(call: ApplicationCall) {
@@ -97,7 +74,7 @@ object LeaderboardDayView {
                     Solution.Language.entries.forEach { language ->
                         option {
                             value = language.name
-                            if (language.tokenizerClass == NotYetAvailableTokenizer::class) {
+                            if (language.tokenizer is NotYetAvailableTokenizer) {
                                 disabled = true
                                 +"${language.displayName} (not yet available) "
                             } else {
@@ -144,9 +121,6 @@ object LeaderboardDayView {
                     }
                     li {
                         +"Please refrain from making network requests, reading data from files, or storing data in variable/function/class names for reflection."
-                    }
-                    li {
-                        +"Note that OneCompiler currently supports only Kotlin 1.3, so newer functions like sumOf are not yet supported. I've already contacted OneCompiler to update to a newer Kotlin version."
                     }
                 }
                 label("checkbox-container") {
@@ -244,18 +218,12 @@ object LeaderboardDayView {
                             td("right-align") {
                                 if (solution == null) {
                                     +"-"
-                                } else {
-                                    if (solution.tokenizerVersion < solution.language.tokenizerVersion) {
-                                        +"Recalculating..."
-                                    } else {
-                                        if (solution.codePubliclyVisible) {
-                                            a(href = "/solution/${solution._id}.${solution.language.fileEnding}") {
-                                                +"${solution.tokenCount}"
-                                            }
-                                        } else {
-                                            +"${solution.tokenCount}"
-                                        }
+                                } else if (solution.codePubliclyVisible) {
+                                    a(href = "/solution/${solution._id}.${solution.language.fileEnding}") {
+                                        +"${solution.tokenCount}"
                                     }
+                                } else {
+                                    +"${solution.tokenCount}"
                                 }
                             }
                         }

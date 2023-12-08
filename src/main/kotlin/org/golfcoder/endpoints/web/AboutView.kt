@@ -109,14 +109,18 @@ object AboutView {
             h3 { +"Which libraries are allowed?" }
             +"Golfcoder uses "
             a("https://onecompiler.com/", "_blank") { +"OneCompiler" }
-            +" to execute your code. "
+            +" to execute your code (except for Kotlin, there it uses "
+            a("https://play.kotlinlang.org/", "_blank") { +"Kotlin Playground" }
+            +"). "
             +"Please check out their site and see, if they have a \"Supported libraries\" section for your programming language. "
             +"The standard library of your language is always supported."
 
             h3 { +"My code doesn't compile or returns a wrong output in Golfcoder, but works on my machine." }
             +"Please make sure your code runs on "
             a("https://onecompiler.com/", "_blank") { +"OneCompiler" }
-            +", which Golfcoder uses as code execution infrastructure."
+            +" (or for Kotlin the "
+            a("https://play.kotlinlang.org/", "_blank") { +"Kotlin Playground" }
+            +"), which Golfcoder uses as code execution infrastructure."
 
             h3 { +"I found a bug/hack in the tokenization." }
             +"Please report it on "

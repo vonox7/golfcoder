@@ -2,9 +2,13 @@ package org.golfcoder.database
 
 import com.moshbit.katerbase.MongoMainEntry
 import com.moshbit.katerbase.MongoSubEntry
-import org.golfcoder.tokenizer.*
+import org.golfcoder.coderunner.Coderunner
+import org.golfcoder.coderunner.KotlinPlaygroundCoderunner
+import org.golfcoder.coderunner.OnecompilerCoderunner
+import org.golfcoder.tokenizer.NotYetAvailableTokenizer
+import org.golfcoder.tokenizer.Tokenizer
+import org.golfcoder.tokenizer.TreeSitterTokenizer
 import java.util.*
-import kotlin.reflect.KClass
 
 class User : MongoMainEntry() {
     // _id is the userId
@@ -40,20 +44,46 @@ class Solution : MongoMainEntry() {
     enum class Language(
         val displayName: String,
         val fileEnding: String,
-        val onecompilerLanguageId: String, // Find out by checking the URL after selecting a language at the dropdown at https://onecompiler.com/
-        val tokenizerClass: KClass<out Tokenizer>,
-        val tokenizerVersion: Int, // Increment this when the tokenizer changes to force re-analysis of all solutions
     ) {
-        PYTHON("Python", "py", "python", PythonTokenizer::class, 1),
-        RUST("Rust", "rs", "rust", NotYetAvailableTokenizer::class, 1),
-        GO("Go", "go", "go", NotYetAvailableTokenizer::class, 1),
-        KOTLIN("Kotlin", "kt", "kotlin", KotlinTokenizer::class, 1),
-        JAVASCRIPT("JavaScript", "js", "javascript", JavascriptTokenizer::class, 1),
-        CSHARP("C#", "cs", "csharp", NotYetAvailableTokenizer::class, 1),
-        TYPESCRIPT("TypeScript", "ts", "typescript", NotYetAvailableTokenizer::class, 1),
-        CPLUSPLUS("C++", "cpp", "cpp", NotYetAvailableTokenizer::class, 1),
-        JAVA("Java", "java", "java", NotYetAvailableTokenizer::class, 1),
-        C("C", "c", "c", NotYetAvailableTokenizer::class, 1),
+        PYTHON("Python", "py"),
+        RUST("Rust", "rs"),
+        GO("Go", "go"),
+        KOTLIN("Kotlin", "kt"),
+        JAVASCRIPT("JavaScript", "js"),
+        CSHARP("C#", "cs"),
+        TYPESCRIPT("TypeScript", "ts"),
+        CPLUSPLUS("C++", "cpp"),
+        JAVA("Java", "java"),
+        C("C", "c");
+
+        val coderunner: Coderunner
+            get() = when (this) {
+                PYTHON -> OnecompilerCoderunner("python")
+                RUST -> OnecompilerCoderunner("rust")
+                GO -> OnecompilerCoderunner("go")
+                KOTLIN -> KotlinPlaygroundCoderunner() // Onecompiler supports as of now only Kotlin version 1.3
+                JAVASCRIPT -> OnecompilerCoderunner("javascript")
+                CSHARP -> OnecompilerCoderunner("csharp")
+                TYPESCRIPT -> OnecompilerCoderunner("typescript")
+                CPLUSPLUS -> OnecompilerCoderunner("cpp")
+                JAVA -> OnecompilerCoderunner("java")
+                C -> OnecompilerCoderunner("c")
+            }
+
+
+        val tokenizer: Tokenizer
+            get() = when (this) {
+                PYTHON -> TreeSitterTokenizer("python", tokenizerVersion = 1)
+                RUST -> NotYetAvailableTokenizer()
+                GO -> NotYetAvailableTokenizer()
+                KOTLIN -> TreeSitterTokenizer("kotlin", tokenizerVersion = 1)
+                JAVASCRIPT -> TreeSitterTokenizer("javascript", tokenizerVersion = 1)
+                CSHARP -> NotYetAvailableTokenizer()
+                TYPESCRIPT -> NotYetAvailableTokenizer()
+                CPLUSPLUS -> NotYetAvailableTokenizer()
+                JAVA -> NotYetAvailableTokenizer()
+                C -> NotYetAvailableTokenizer()
+            }
     }
 }
 
