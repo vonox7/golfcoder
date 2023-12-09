@@ -63,6 +63,14 @@ code.token-string {
     padding: 0.2em 0.2em;
 }
 
+code.token-number {
+    color: #97bcda;
+}
+
+code.token-symbol {
+    color: #d18b8b;
+}
+
 header {
     font-size: 20px;
 }

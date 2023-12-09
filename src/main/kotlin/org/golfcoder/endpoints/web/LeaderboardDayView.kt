@@ -286,6 +286,14 @@ object LeaderboardDayView {
     }
 
     fun HtmlBlockTag.renderSolution(tokens: List<Tokenizer.Token>) {
+        val numberRegex = Regex("[0-9.]+[A-Za-z]?") // Matches e.g. 1.3 or 1.3f
+
+        fun String.detectTokenType(): String = when {
+            this.all { !it.isLetterOrDigit() } -> "token-symbol" // e.g. brackets, operators...
+            this.matches(numberRegex) -> "token-number"
+            else -> ""
+        }
+
         var lastLineNumber = 1
         div("solution") {
             id = "solution"
@@ -302,7 +310,7 @@ object LeaderboardDayView {
                 lastLineNumber = token.sourcePosition.start.lineNumber
 
                 when (token.type) {
-                    Tokenizer.Token.Type.CODE_TOKEN -> code { +token.source }
+                    Tokenizer.Token.Type.CODE_TOKEN -> code(token.source.detectTokenType()) { +token.source }
                     Tokenizer.Token.Type.STRING -> {
                         token.source.forEach { char ->
                             code("token-string") {
