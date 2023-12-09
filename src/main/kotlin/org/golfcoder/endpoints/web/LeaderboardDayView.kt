@@ -186,7 +186,12 @@ object LeaderboardDayView {
                                 else -> +"anonymous"
                             }
                         }
-                        renderSolution(highlightedSolution, highlightedSolutionTokenized!!)
+                        p {
+                            a(href = "/solution/${highlightedSolution._id}.${highlightedSolution.language.fileEnding}") {
+                                +"Download solution"
+                            }
+                        }
+                        renderSolution(highlightedSolutionTokenized!!)
                     }
                 }
             }
@@ -279,18 +284,12 @@ object LeaderboardDayView {
         }
     }
 
-    private fun HtmlBlockTag.renderSolution(solution: Solution, tokens: List<Tokenizer.Token>) {
-        p {
-            a(href = "/solution/${solution._id}.${solution.language.fileEnding}") {
-                +"Download solution"
-            }
-        }
+    private fun HtmlBlockTag.renderSolution(tokens: List<Tokenizer.Token>) {
         var lastLineNumber = 1
-        // TODO also do whitespacees from solution.code
         div("solution") {
             tokens.forEach { token ->
                 // This is not a perfect whitespace layout, but good enough for now
-                (lastLineNumber..<token.sourcePosition.start.lineNumber).forEach {
+                repeat((lastLineNumber..<token.sourcePosition.start.lineNumber).count()) {
                     br()
 
                     // Add indent
