@@ -5,6 +5,9 @@ import com.moshbit.katerbase.MongoSubEntry
 import org.golfcoder.coderunner.Coderunner
 import org.golfcoder.coderunner.KotlinPlaygroundCoderunner
 import org.golfcoder.coderunner.OnecompilerCoderunner
+import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator
+import org.golfcoder.expectedoutputaggregator.FornwallAggregator
+import org.golfcoder.expectedoutputaggregator.GereonsAggregator
 import org.golfcoder.tokenizer.NotYetAvailableTokenizer
 import org.golfcoder.tokenizer.Tokenizer
 import org.golfcoder.tokenizer.TreeSitterTokenizer
@@ -99,6 +102,13 @@ class ExpectedOutput : MongoMainEntry() {
     lateinit var source: Source
 
     enum class Source {
-        FORNWALL // Fornwall seems to be quite fast to solve problems, and has a way to get input+output. Maybe add more sources later to be faster.
+        FORNWALL,
+        GEREONS;
+
+        val aggregator: ExpectedOutputAggregator
+            get() = when (this) {
+                FORNWALL -> FornwallAggregator()
+                GEREONS -> GereonsAggregator()
+            }
     }
 }

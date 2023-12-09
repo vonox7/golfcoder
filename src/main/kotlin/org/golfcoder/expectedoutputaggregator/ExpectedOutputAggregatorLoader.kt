@@ -1,15 +1,14 @@
-package org.golfcoder
+package org.golfcoder.expectedoutputaggregator
 
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.count
+import org.golfcoder.Sysinfo
 import org.golfcoder.database.ExpectedOutput
+import org.golfcoder.mainDatabase
 import java.util.*
 import kotlin.time.Duration.Companion.minutes
 
-object ExpectedOutputAggregator {
-
+object ExpectedOutputAggregatorLoader {
     // Locally we want to load the expected output only once to have a less noisy local development experience.
     // On production each time the server starts.
     suspend fun loadOnStartup() {
@@ -31,38 +30,7 @@ object ExpectedOutputAggregator {
     }
 
     private suspend fun load(year: Int, day: Int) {
-        val source = ExpectedOutput.Source.FORNWALL
-
-        val input = httpClient.get(
-            "https://raw.githubusercontent.com/fornwall/advent-of-code/main/crates/core/src/" +
-                    "year$year/day${String.format("%02d", day)}_input.txt"
-        ).bodyAsText()
-
-        if (input.isEmpty()) {
-            println("No input (yet) for day $day (year $year) from $source")
-            return
-        }
-
-        (1..2).forEach { part ->
-            val output = httpClient.post("https://advent.fly.dev/solve/$year/$day/$part") {
-                setBody(input)
-            }.bodyAsText().toLong()
-
-            mainDatabase.getSuspendingCollection<ExpectedOutput>().insertOne(
-                ExpectedOutput().apply {
-                    _id = generateId(year.toString(), day.toString(), part.toString(), source.name)
-                    this.year = year
-                    this.day = day
-                    this.part = part
-                    this.source = ExpectedOutput.Source.FORNWALL
-                    this.input = input
-                    this.output = output
-                },
-                upsert = true
-            )
-
-            println("Added expected output for day $day part $part from $source")
-        }
+        ExpectedOutput.Source.entries.forEach { it.aggregator.load(year, day) }
     }
 
     // Load every 10 minutes the past, current and next day (to avoid timezone issues and to give Fornwall time to solve the problem)

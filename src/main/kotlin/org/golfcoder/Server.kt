@@ -21,6 +21,7 @@ import org.golfcoder.database.MainDatabase
 import org.golfcoder.endpoints.api.EditUserApi
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.endpoints.web.*
+import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregatorLoader
 import org.golfcoder.plugins.configureHTTP
 import org.golfcoder.plugins.configureSecurity
 import org.golfcoder.plugins.sessionAuthenticationName
@@ -76,7 +77,7 @@ fun main(): Unit = runBlocking {
     }
 
     launch {
-        ExpectedOutputAggregator.loadOnStartup()
+        ExpectedOutputAggregatorLoader.loadOnStartup()
     }
 }
 
