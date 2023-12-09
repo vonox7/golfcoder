@@ -35,6 +35,10 @@ async function submitForm(event) {
             for (const [name, value] of Object.entries(responseData.changeInput)) {
                 form.querySelector(`[name="${name}"]`).value = value;
             }
+            // responseData.setInnerHtml is a map<String, String> of element id to new innerHTML. Change the innerHTML:
+            for (const [id, innerHtml] of Object.entries(responseData.setInnerHtml)) {
+                document.getElementById(id).innerHTML = innerHtml;
+            }
             if (responseData.reloadSite) {
                 window.location.reload();
             }

@@ -176,6 +176,7 @@ object LeaderboardDayView {
                 }
 
                 div("right") {
+                    id = "solution-submit-preview" // innerHtml will be set by UploadSolutionApi when submitting code
                     if (highlightedSolution != null) {
                         h2 {
                             +"${highlightedSolution.tokenCount} tokens in ${highlightedSolution.language.displayName} "
@@ -265,11 +266,11 @@ object LeaderboardDayView {
                                 if (solution == null) {
                                     +"-"
                                 } else if (solution.codePubliclyVisible) {
-                                    a(href = "?solution=${solution._id}") {
+                                    a(href = "?solution=${solution._id}#solution") {
                                         +"${solution.tokenCount}"
                                     }
                                 } else if (solution.userId == user?._id) {
-                                    a(href = "?solution=${solution._id}") {
+                                    a(href = "?solution=${solution._id}#solution") {
                                         +"${solution.tokenCount} (only accessible by you)"
                                     }
                                 } else {
@@ -284,9 +285,10 @@ object LeaderboardDayView {
         }
     }
 
-    private fun HtmlBlockTag.renderSolution(tokens: List<Tokenizer.Token>) {
+    fun HtmlBlockTag.renderSolution(tokens: List<Tokenizer.Token>) {
         var lastLineNumber = 1
         div("solution") {
+            id = "solution"
             tokens.forEach { token ->
                 // This is not a perfect whitespace layout, but good enough for now
                 repeat((lastLineNumber..<token.sourcePosition.start.lineNumber).count()) {

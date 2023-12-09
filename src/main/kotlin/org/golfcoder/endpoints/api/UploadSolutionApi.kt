@@ -5,13 +5,19 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
+import kotlinx.html.div
+import kotlinx.html.h2
+import kotlinx.html.p
+import kotlinx.html.stream.createHTML
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
 import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
+import org.golfcoder.endpoints.web.LeaderboardDayView
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
+import org.golfcoder.tokenizer.Tokenizer
 import java.util.*
 
 object UploadSolutionApi {
@@ -49,12 +55,14 @@ object UploadSolutionApi {
 
         // Tokenize
         val tokenizer = request.language.tokenizer
-        val tokenCount = try {
-            val tokens = tokenizer.tokenize(request.code)
+        val tokens: List<Tokenizer.Token>
+        val tokenCount: Int
+        try {
+            tokens = tokenizer.tokenize(request.code)
             if (Sysinfo.isLocal) {
                 println(tokens.joinToString("\n"))
             }
-            tokenizer.getTokenCount(tokens)
+            tokenCount = tokenizer.getTokenCount(tokens)
         } catch (e: Exception) {
             // Could either be a syntax error or a tokenizer error (like network issue, bug in our code...)
             call.respond(ApiCallResult(buttonText = "Tokenizer failed", alertText = "Tokenizer failed:\n${e.message}"))
@@ -71,17 +79,26 @@ object UploadSolutionApi {
         }
 
         if (request.onlyTokenize == "on") {
+            val solutionsHtml = with(LeaderboardDayView) {
+                createHTML().div {
+                    h2 { +"Preview: $tokenCount tokens" }
+                    p { +"Click the submit button again to add this solution to the leaderboard." }
+                    renderSolution(tokens)
+                }
+            }
             call.respond(
                 if (call.sessions.get<UserSession>() == null) {
                     ApiCallResult(
                         buttonText = "$tokenCount tokens. Login to submit to the leaderboard.",
                         resetButtonTextSeconds = null,
+                        setInnerHtml = mapOf("solution-submit-preview" to solutionsHtml),
                     )
                 } else {
                     ApiCallResult(
                         buttonText = "$tokenCount tokens. Click here to submit to the leaderboard.",
                         resetButtonTextSeconds = null,
                         changeInput = mapOf("onlyTokenize" to "off"),
+                        setInnerHtml = mapOf("solution-submit-preview" to solutionsHtml),
                     )
                 }
             )
