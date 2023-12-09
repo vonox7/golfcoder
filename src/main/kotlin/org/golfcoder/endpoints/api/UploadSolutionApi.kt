@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
 import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.database.Solution
+import org.golfcoder.database.User
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import java.util.*
@@ -58,6 +59,15 @@ object UploadSolutionApi {
             // Could either be a syntax error or a tokenizer error (like network issue, bug in our code...)
             call.respond(ApiCallResult(buttonText = "Tokenizer failed", alertText = "Tokenizer failed:\n${e.message}"))
             return
+        }
+
+        // Log to user object
+        mainDatabase.getSuspendingCollection<User>().updateOne(User::_id equal userSession!!.userId) {
+            User::defaultLanguage setTo request.language
+            User::tokenizedCodeCount incrementBy 1
+            if (request.onlyTokenize != "on") {
+                User::codeRunCount incrementBy 1
+            }
         }
 
         if (request.onlyTokenize == "on") {

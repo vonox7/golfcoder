@@ -4,6 +4,7 @@ import com.moshbit.katerbase.equal
 import com.moshbit.katerbase.inArray
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
+import io.ktor.server.sessions.*
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
 import org.golfcoder.database.Solution
@@ -11,6 +12,7 @@ import org.golfcoder.database.User
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.endpoints.web.TemplateView.template
 import org.golfcoder.mainDatabase
+import org.golfcoder.plugins.UserSession
 import org.golfcoder.tokenizer.NotYetAvailableTokenizer
 import org.golfcoder.utils.relativeToNow
 import kotlin.collections.component1
@@ -19,6 +21,10 @@ import kotlin.collections.set
 
 object LeaderboardDayView {
     suspend fun getHtml(call: ApplicationCall) {
+        val session = call.sessions.get<UserSession>()
+        val user = session?.let {
+            mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)
+        }
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
         val day = call.parameters["day"]?.toIntOrNull() ?: throw NotFoundException("Invalid day")
         val parts = 2
@@ -71,9 +77,11 @@ object LeaderboardDayView {
                 br()
                 select { // TODO design: either prettify select, or use radio (similar style as checkbox)
                     name = "language"
+                    val defaultLanguage = user?.defaultLanguage ?: Solution.Language.PYTHON
                     Solution.Language.entries.forEach { language ->
                         option {
                             value = language.name
+                            selected = language == defaultLanguage
                             if (language.tokenizer is NotYetAvailableTokenizer) {
                                 disabled = true
                                 +"${language.displayName} (not yet available) "

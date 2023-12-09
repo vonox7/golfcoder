@@ -18,6 +18,9 @@ class User : MongoMainEntry() {
     var publicProfilePictureUrl: String? = null
     var nameIsPublic: Boolean = true
     var profilePictureIsPublic: Boolean = true
+    var defaultLanguage: Solution.Language? = null
+    var tokenizedCodeCount: Int = 0 // Needed to show "highscores" in the future?
+    var codeRunCount: Int = 0 // Needed to show "highscores" in the future?
 
     class OAuthDetails(
         val provider: String,
