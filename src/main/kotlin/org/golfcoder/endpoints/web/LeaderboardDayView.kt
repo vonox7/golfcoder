@@ -176,7 +176,7 @@ object LeaderboardDayView {
                 }
 
                 div("right") {
-                    id = "solution-submit-preview" // innerHtml will be set by UploadSolutionApi when submitting code
+                    id = "solution" // innerHtml will be set by UploadSolutionApi when submitting code
                     if (highlightedSolution != null) {
                         h2 {
                             +"${highlightedSolution.tokenCount} tokens in ${highlightedSolution.language.displayName} "
@@ -229,6 +229,15 @@ object LeaderboardDayView {
             return
         }
 
+        renderLeaderboard(sortedScores, parts, userIdsToUsers, currentUser)
+    }
+
+    private fun HtmlBlockTag.renderLeaderboard(
+        sortedScores: List<Pair<List<Solution>, Int>>,
+        parts: Int,
+        userIdsToUsers: Map<String, User>,
+        currentUser: User?,
+    ) {
         table("leaderboard") {
             thead {
                 tr {
@@ -296,7 +305,6 @@ object LeaderboardDayView {
 
         var lastLineNumber = 1
         div("solution") {
-            id = "solution"
             tokens.forEach { token ->
                 // This is not a perfect whitespace layout, but good enough for now
                 repeat((lastLineNumber..<token.sourcePosition.start.lineNumber).count()) {

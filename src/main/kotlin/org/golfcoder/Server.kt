@@ -16,6 +16,7 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import org.golfcoder.database.MainDatabase
 import org.golfcoder.endpoints.api.EditUserApi
 import org.golfcoder.endpoints.api.UploadSolutionApi
@@ -29,7 +30,18 @@ val container = System.getenv("CONTAINER") ?: "local"
 lateinit var mainDatabase: MainDatabase
 val httpClient = HttpClient(CIO) {
     install(ContentNegotiation) {
-        json()
+        json(Json {
+            // DefaultJson
+            encodeDefaults = true
+            isLenient = true
+            allowSpecialFloatingPointValues = true
+            allowStructuredMapKeys = true
+            prettyPrint = false
+            useArrayPolymorphism = false
+
+            // additional parameters
+            ignoreUnknownKeys = true
+        })
     }
 }
 

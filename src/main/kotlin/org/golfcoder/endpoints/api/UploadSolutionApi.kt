@@ -91,14 +91,14 @@ object UploadSolutionApi {
                     ApiCallResult(
                         buttonText = "$tokenCount tokens. Login to submit to the leaderboard.",
                         resetButtonTextSeconds = null,
-                        setInnerHtml = mapOf("solution-submit-preview" to solutionsHtml),
+                        setInnerHtml = mapOf("solution" to solutionsHtml),
                     )
                 } else {
                     ApiCallResult(
                         buttonText = "$tokenCount tokens. Click here to submit to the leaderboard.",
                         resetButtonTextSeconds = null,
                         changeInput = mapOf("onlyTokenize" to "off"),
-                        setInnerHtml = mapOf("solution-submit-preview" to solutionsHtml),
+                        setInnerHtml = mapOf("solution" to solutionsHtml),
                     )
                 }
             )

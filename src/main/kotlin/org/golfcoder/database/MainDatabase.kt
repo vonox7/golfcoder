@@ -21,13 +21,6 @@ class MainDatabase(uri: String) : MongoDatabase(
         }
         collection<Solution>("solutions") {
             index(
-                Solution::userId.ascending(),
-                Solution::year.ascending(),
-                Solution::day.ascending(),
-                Solution::part.ascending(),
-                Solution::tokenCount.descending()
-            )
-            index(
                 Solution::year.ascending(),
                 Solution::day.ascending(),
                 Solution::part.ascending(),
@@ -36,6 +29,10 @@ class MainDatabase(uri: String) : MongoDatabase(
             index(
                 Solution::language.descending(),
                 Solution::tokenizerVersion.descending(),
+            )
+            index(
+                Solution::userId.descending(),
+                Solution::uploadDate.descending(),
             )
         }
         collection<ExpectedOutput>("expectedOutputs") {
