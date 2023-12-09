@@ -80,13 +80,13 @@ class KotlinPlaygroundCoderunner : Coderunner {
 
         val playgroundErrorString = response.exception?.takeIf { it.isNotEmpty() }
             ?: response.errors.values.flatten().takeIf { it.isNotEmpty() }?.joinToString("\n") { error ->
-                "${error.message} at line ${error.interval.start.line}:${error.interval.start.ch}"
+                "${error.message} at line ${error.interval.start.line + 1}:${error.interval.start.ch + 1}"
             }
 
         return if (playgroundErrorString == null) {
             Result.success(response.text.substringAfter("<outStream>").substringBeforeLast("</outStream>").trim())
         } else {
-            Result.failure(Exception(response.exception))
+            Result.failure(Exception(playgroundErrorString))
         }
     }
 }
