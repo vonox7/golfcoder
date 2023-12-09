@@ -44,6 +44,25 @@ code {
     margin: 2px;
 }
 
+code.token-comment {
+    background: transparent;
+    color: #bbb;
+}
+
+code.token-whitespace {
+    background: transparent;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+}
+
+code.token-string {
+    color: #99da97;
+    margin-left: 1px;
+    margin-right: 1px;
+    padding: 0.2em 0.2em;
+}
+
 header {
     font-size: 20px;
 }
@@ -123,6 +142,37 @@ header .github-star-button {
 
 .leaderboard .right-align {
     text-align: right;
+}
+
+/* LEFT-RIGHT LAYOUT */
+
+.left-right-layout {
+    display: flex;
+    justify-content: space-between;
+    column-gap: 64px;
+}
+
+.left-right-layout .left {
+    width: 50%;
+}
+
+.left-right-layout .right {
+    width: 50%;
+}
+
+/* mobile: stack left and right */
+@media (max-width: 1000px) {
+    .left-right-layout {
+        flex-direction: column;
+    }
+
+    .left-right-layout .left {
+        width: 100%;
+    }
+
+    .left-right-layout .right {
+        width: 100%;
+    }
 }
 
 /* FORM */

@@ -14,6 +14,7 @@ import org.golfcoder.endpoints.web.TemplateView.template
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.tokenizer.NotYetAvailableTokenizer
+import org.golfcoder.tokenizer.Tokenizer
 import org.golfcoder.utils.relativeToNow
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -28,6 +29,18 @@ object LeaderboardDayView {
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
         val day = call.parameters["day"]?.toIntOrNull() ?: throw NotFoundException("Invalid day")
         val parts = 2
+        val highlightedSolution: Solution? = call.parameters["solution"]?.let { solutionId ->
+            mainDatabase.getSuspendingCollection<Solution>().findOne(Solution::_id equal solutionId)
+                ?.takeIf { it.codePubliclyVisible || it.userId == user?._id }
+                ?: throw NotFoundException("Invalid solution parameter")
+        }
+        val highlightedSolutionUser: User? = highlightedSolution?.let {
+            mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal it.userId)!!
+        }
+        val highlightedSolutionTokenized: List<Tokenizer.Token>? = highlightedSolution?.let { solution ->
+            solution.language.tokenizer.tokenize(solution.code)
+        }
+
         val solutions = (1..parts).map { part ->
             @Suppress("DEPRECATION") // use excludeFields - only `code` is excluded since it is too big
             mainDatabase.getSuspendingCollection<Solution>()
@@ -154,16 +167,36 @@ object LeaderboardDayView {
         call.respondHtmlView("Advent of Code Leaderboard $year day $day") {
             h1 { +"Advent of Code Leaderboard $year day $day" }
 
-            renderUpload()
+            div("left-right-layout") {
+                div("left") {
+                    renderUpload()
 
-            h2 { +"Leaderboard" }
-            renderLeaderboardTable(solutions, userIdsToUsers)
+                    h2 { +"Leaderboard" }
+                    renderLeaderboardTable(solutions, userIdsToUsers, user)
+                }
+
+                div("right") {
+                    if (highlightedSolution != null) {
+                        h2 {
+                            +"${highlightedSolution.tokenCount} tokens in ${highlightedSolution.language.displayName} "
+                            +"for part ${highlightedSolution.part} by "
+                            when {
+                                highlightedSolutionUser!!._id == user?._id -> +"you"
+                                highlightedSolutionUser.nameIsPublic -> +highlightedSolutionUser.name
+                                else -> +"anonymous"
+                            }
+                        }
+                        renderSolution(highlightedSolution, highlightedSolutionTokenized!!)
+                    }
+                }
+            }
         }
     }
 
     private fun HtmlBlockTag.renderLeaderboardTable(
         solutions: List<List<Solution>>,
         userIdsToUsers: Map<String, User>,
+        user: User?,
     ) {
         // We need to do some transformations here, so we get per user the best solution per part (also per language).
         // And to calculate the total score (for all parts) (per user+language).
@@ -227,8 +260,12 @@ object LeaderboardDayView {
                                 if (solution == null) {
                                     +"-"
                                 } else if (solution.codePubliclyVisible) {
-                                    a(href = "/solution/${solution._id}.${solution.language.fileEnding}") {
+                                    a(href = "?solution=${solution._id}") {
                                         +"${solution.tokenCount}"
+                                    }
+                                } else if (solution.userId == user?._id) {
+                                    a(href = "?solution=${solution._id}") {
+                                        +"${solution.tokenCount} (only accessible by you)"
                                     }
                                 } else {
                                     +"${solution.tokenCount}"
@@ -237,6 +274,44 @@ object LeaderboardDayView {
                         }
                         td("right-align") { +solutions.maxOf { it.uploadDate }.relativeToNow }
                     }
+                }
+            }
+        }
+    }
+
+    private fun HtmlBlockTag.renderSolution(solution: Solution, tokens: List<Tokenizer.Token>) {
+        p {
+            a(href = "/solution/${solution._id}.${solution.language.fileEnding}") {
+                +"Download solution"
+            }
+        }
+        var lastLineNumber = 1
+        // TODO also do whitespacees from solution.code
+        div("solution") {
+            tokens.forEach { token ->
+                // This is not a perfect whitespace layout, but good enough for now
+                (lastLineNumber..<token.sourcePosition.start.lineNumber).forEach {
+                    br()
+
+                    // Add indent
+                    if (token.type != Tokenizer.Token.Type.WHITESPACE && token.sourcePosition.start.columnNumber > 1) {
+                        code("token-whitespace") { +" ".repeat(token.sourcePosition.start.columnNumber) }
+                    }
+                }
+                lastLineNumber = token.sourcePosition.start.lineNumber
+
+                when (token.type) {
+                    Tokenizer.Token.Type.CODE_TOKEN -> code { +token.source }
+                    Tokenizer.Token.Type.STRING -> {
+                        token.source.forEach { char ->
+                            code("token-string") {
+                                +char.toString()
+                            }
+                        }
+                    }
+
+                    Tokenizer.Token.Type.WHITESPACE -> code("token-whitespace") { +token.source }
+                    Tokenizer.Token.Type.COMMENT -> code("token-comment") { +token.source }
                 }
             }
         }
