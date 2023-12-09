@@ -30,7 +30,13 @@ object ExpectedOutputAggregatorLoader {
     }
 
     private suspend fun load(year: Int, day: Int) {
-        ExpectedOutput.Source.entries.forEach { it.aggregator.load(year, day) }
+        ExpectedOutput.Source.entries.forEach { source ->
+            try {
+                source.aggregator.load(year, day)
+            } catch (exception: Exception) {
+                println("Could not load expected output for day $day from $source: $exception")
+            }
+        }
     }
 
     // Load every 10 minutes the past, current and next day (to avoid timezone issues and to give Fornwall time to solve the problem)

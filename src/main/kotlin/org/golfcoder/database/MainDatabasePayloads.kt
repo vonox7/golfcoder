@@ -8,6 +8,7 @@ import org.golfcoder.coderunner.OnecompilerCoderunner
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator
 import org.golfcoder.expectedoutputaggregator.FornwallAggregator
 import org.golfcoder.expectedoutputaggregator.GereonsAggregator
+import org.golfcoder.expectedoutputaggregator.SevenRebuxAggregator
 import org.golfcoder.tokenizer.NotYetAvailableTokenizer
 import org.golfcoder.tokenizer.Tokenizer
 import org.golfcoder.tokenizer.TreeSitterTokenizer
@@ -103,12 +104,15 @@ class ExpectedOutput : MongoMainEntry() {
 
     enum class Source {
         FORNWALL,
-        GEREONS;
+        GEREONS,
+        SEVEN_REBUX
+        ;
 
         val aggregator: ExpectedOutputAggregator
             get() = when (this) {
                 FORNWALL -> FornwallAggregator()
                 GEREONS -> GereonsAggregator()
+                SEVEN_REBUX -> SevenRebuxAggregator()
             }
     }
 }
