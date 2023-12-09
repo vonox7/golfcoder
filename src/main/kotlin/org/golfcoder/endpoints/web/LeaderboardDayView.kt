@@ -23,7 +23,7 @@ import kotlin.collections.set
 object LeaderboardDayView {
     suspend fun getHtml(call: ApplicationCall) {
         val session = call.sessions.get<UserSession>()
-        val user = session?.let {
+        val currentUser = session?.let {
             mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)
         }
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
@@ -31,7 +31,7 @@ object LeaderboardDayView {
         val parts = 2
         val highlightedSolution: Solution? = call.parameters["solution"]?.let { solutionId ->
             mainDatabase.getSuspendingCollection<Solution>().findOne(Solution::_id equal solutionId)
-                ?.takeIf { it.codePubliclyVisible || it.userId == user?._id }
+                ?.takeIf { it.codePubliclyVisible || it.userId == currentUser?._id }
                 ?: throw NotFoundException("Invalid solution parameter")
         }
         val highlightedSolutionUser: User? = highlightedSolution?.let {
@@ -90,7 +90,7 @@ object LeaderboardDayView {
                 br()
                 select { // TODO design: either prettify select, or use radio (similar style as checkbox)
                     name = "language"
-                    val defaultLanguage = user?.defaultLanguage ?: Solution.Language.PYTHON
+                    val defaultLanguage = currentUser?.defaultLanguage ?: Solution.Language.PYTHON
                     Solution.Language.entries.forEach { language ->
                         option {
                             value = language.name
@@ -172,7 +172,7 @@ object LeaderboardDayView {
                     renderUpload()
 
                     h2 { +"Leaderboard" }
-                    renderLeaderboardTable(solutions, userIdsToUsers, user)
+                    renderLeaderboardTable(solutions, userIdsToUsers, currentUser)
                 }
 
                 div("right") {
@@ -182,7 +182,7 @@ object LeaderboardDayView {
                             +"${highlightedSolution.tokenCount} tokens in ${highlightedSolution.language.displayName} "
                             +"for part ${highlightedSolution.part} by "
                             when {
-                                highlightedSolutionUser!!._id == user?._id -> +"you"
+                                highlightedSolutionUser!!._id == currentUser?._id -> +"you"
                                 highlightedSolutionUser.nameIsPublic -> +highlightedSolutionUser.name
                                 else -> +"anonymous"
                             }
@@ -202,7 +202,7 @@ object LeaderboardDayView {
     private fun HtmlBlockTag.renderLeaderboardTable(
         solutions: List<List<Solution>>,
         userIdsToUsers: Map<String, User>,
-        user: User?,
+        currentUser: User?,
     ) {
         // We need to do some transformations here, so we get per user the best solution per part (also per language).
         // And to calculate the total score (for all parts) (per user+language).
@@ -269,7 +269,7 @@ object LeaderboardDayView {
                                     a(href = "?solution=${solution._id}#solution") {
                                         +"${solution.tokenCount}"
                                     }
-                                } else if (solution.userId == user?._id) {
+                                } else if (solution.userId == currentUser?._id) {
                                     a(href = "?solution=${solution._id}#solution") {
                                         +"${solution.tokenCount} (only accessible by you)"
                                     }
