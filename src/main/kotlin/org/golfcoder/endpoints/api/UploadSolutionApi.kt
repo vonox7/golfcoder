@@ -70,13 +70,14 @@ object UploadSolutionApi {
         }
 
         // Log to user object
-        mainDatabase.getSuspendingCollection<User>().updateOne(User::_id equal userSession!!.userId) {
-            User::defaultLanguage setTo request.language
-            User::tokenizedCodeCount incrementBy 1
-            if (request.onlyTokenize != "on") {
-                User::codeRunCount incrementBy 1
+        if (userSession != null)
+            mainDatabase.getSuspendingCollection<User>().updateOne(User::_id equal userSession.userId) {
+                User::defaultLanguage setTo request.language
+                User::tokenizedCodeCount incrementBy 1
+                if (request.onlyTokenize != "on") {
+                    User::codeRunCount incrementBy 1
+                }
             }
-        }
 
         if (request.onlyTokenize == "on") {
             val solutionsHtml = with(LeaderboardDayView) {
