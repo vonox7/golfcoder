@@ -29,7 +29,7 @@ object EditUserView {
                 +currentUser.name
             }
             p {
-                +"User was created ${currentUser.createdOn.relativeToNow}. "
+                +"You joined Golfcoder ${currentUser.createdOn.relativeToNow}. "
             }
             form(action = "/api/user/edit") {
                 label {
