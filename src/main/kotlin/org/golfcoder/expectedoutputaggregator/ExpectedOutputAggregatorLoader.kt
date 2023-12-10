@@ -4,6 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.count
 import org.golfcoder.Sysinfo
 import org.golfcoder.database.ExpectedOutput
+import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.mainDatabase
 import java.util.*
 import kotlin.time.Duration.Companion.minutes
@@ -24,7 +25,7 @@ object ExpectedOutputAggregatorLoader {
     private suspend fun loadAll() {
         val year = 2023
 
-        (1..24).forEach { day ->
+        UploadSolutionApi.DAYS_RANGE.forEach { day ->
             load(year, day)
         }
     }
@@ -45,7 +46,7 @@ object ExpectedOutputAggregatorLoader {
             try {
                 val now = Calendar.getInstance()
                 (now.get(Calendar.DAY_OF_MONTH) - 1..now.get(Calendar.DAY_OF_MONTH) + 1)
-                    .intersect(1..24)
+                    .intersect(UploadSolutionApi.DAYS_RANGE)
                     .forEach { day ->
                         load(now.get(Calendar.YEAR), day)
                     }
