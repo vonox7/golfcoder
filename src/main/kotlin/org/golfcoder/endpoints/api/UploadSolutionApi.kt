@@ -23,6 +23,7 @@ import java.util.*
 object UploadSolutionApi {
 
     const val MAX_CODE_LENGTH = 100_000
+    val DAYS_RANGE = 1..25
     private const val MIN_CODE_LENGTH = 10
 
 

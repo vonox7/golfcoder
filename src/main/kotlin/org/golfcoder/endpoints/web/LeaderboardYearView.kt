@@ -5,6 +5,7 @@ import io.ktor.server.plugins.*
 import kotlinx.html.a
 import kotlinx.html.h1
 import kotlinx.html.p
+import org.golfcoder.endpoints.api.UploadSolutionApi
 
 object LeaderboardYearView {
     suspend fun getHtml(call: ApplicationCall) {
@@ -22,7 +23,7 @@ object LeaderboardYearView {
                 +"."
             }
 
-            (1..24).forEach { day ->
+            UploadSolutionApi.DAYS_RANGE.forEach { day ->
                 p {
                     a("/$year/day/$day") { +"Day $day" }
                     // TODO: Show best solutions for each day next to day link
