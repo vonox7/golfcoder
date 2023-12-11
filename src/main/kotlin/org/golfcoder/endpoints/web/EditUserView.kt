@@ -100,7 +100,7 @@ object EditUserView {
                                 +solution.tokenCount.toString()
                             }
                         }
-                        td("right-align") { +solutions.maxOf { it.uploadDate }.relativeToNow }
+                        td("right-align") { +solution.uploadDate.relativeToNow }
                     }
                 }
             }
