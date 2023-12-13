@@ -50,6 +50,7 @@ object LeaderboardDayView {
         fun HtmlBlockTag.renderUpload() {
             h2 { +"Submit solution" }
             // TODO: Fix design. Maybe use dialog?
+            // TODO: Allow recalculation of tokenCount and "submit now". Maybe 2 buttons?
             form(action = "/api/solution/upload") {
                 input(type = InputType.hidden) {
                     name = "year"
@@ -213,7 +214,14 @@ object LeaderboardDayView {
                             // All solutions in sortedScores have per entry the same user
                             val user = userIdsToUsers[leaderboardPosition.userId]
                             renderUserProfileImage(user, big = false)
-                            +(user?.name?.takeIf { user.nameIsPublic } ?: "anonymous")
+                            val userName = (user?.name?.takeIf { user.nameIsPublic } ?: "anonymous")
+                            val adventOfCodeRepositoryUrl =
+                                user?.getAdventOfCodeRepositoryUrl(year)?.takeIf { user.nameIsPublic }
+                            if (adventOfCodeRepositoryUrl == null) {
+                                +userName
+                            } else {
+                                a(href = adventOfCodeRepositoryUrl, target = "_blank") { +userName }
+                            }
                         }
                         // All solutions in sortedScores have per entry the same language
                         td { +leaderboardPosition.language.displayName }

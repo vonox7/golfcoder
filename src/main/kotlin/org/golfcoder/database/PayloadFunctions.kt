@@ -14,6 +14,7 @@ suspend fun getUserProfiles(userIds: Set<String>): Map<String, User> {
             User::nameIsPublic,
             User::profilePictureIsPublic,
             User::publicProfilePictureUrl,
+            User::adventOfCodeRepositoryInfo,
         )
         .toList()
         .associateBy { it._id }

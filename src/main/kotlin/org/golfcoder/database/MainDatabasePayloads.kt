@@ -25,12 +25,24 @@ class User : MongoMainEntry() {
     var defaultLanguage: Solution.Language? = null
     var tokenizedCodeCount: Int = 0 // Needed to show "highscores" in the future?
     var codeRunCount: Int = 0 // Needed to show "highscores" in the future?
+    var adventOfCodeRepositoryInfo: AdventOfCodeRepositoryInfo? = null
 
     class OAuthDetails(
         val provider: String,
         val providerUserId: String,
         val createdOn: Date,
     ) : MongoSubEntry()
+
+    // Either singleAocRepositoryUrl, yearAocRepositoryUrl or none will be set
+    class AdventOfCodeRepositoryInfo(
+        var singleAocRepositoryUrl: String? = null,
+        var yearAocRepositoryUrl: Map<String, String> = emptyMap(), // year-string to repository-Url
+    ) : MongoSubEntry()
+
+    fun getAdventOfCodeRepositoryUrl(year: Int): String? {
+        return adventOfCodeRepositoryInfo?.singleAocRepositoryUrl
+            ?: adventOfCodeRepositoryInfo?.yearAocRepositoryUrl?.get(year.toString())
+    }
 }
 
 class Solution : MongoMainEntry() {

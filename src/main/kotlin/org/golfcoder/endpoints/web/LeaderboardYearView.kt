@@ -68,7 +68,14 @@ object LeaderboardYearView {
                                     // All solutions in sortedScores have per entry the same user
                                     val user = positionOneUserIdsToUsers[positionOne.userId]
                                     renderUserProfileImage(user, big = false)
-                                    +(user?.name?.takeIf { user.nameIsPublic } ?: "anonymous")
+                                    val userName = (user?.name?.takeIf { user.nameIsPublic } ?: "anonymous")
+                                    val adventOfCodeRepositoryUrl =
+                                        user?.getAdventOfCodeRepositoryUrl(year)?.takeIf { user.nameIsPublic }
+                                    if (adventOfCodeRepositoryUrl == null) {
+                                        +userName
+                                    } else {
+                                        a(href = adventOfCodeRepositoryUrl, target = "_blank") { +userName }
+                                    }
                                 }
                                 td {
                                     +positionOne.language.displayName

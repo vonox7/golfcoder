@@ -67,6 +67,51 @@ object EditUserView {
                     }
                 }
 
+                val singleAocRepositoryUrl = currentUser.adventOfCodeRepositoryInfo?.singleAocRepositoryUrl
+                val yearAocRepositoryUrl = currentUser.adventOfCodeRepositoryInfo?.yearAocRepositoryUrl
+
+                label {
+                    attributes["for"] = "githubProfileUrl"
+                    +"GitHub profile name to be linked next to your submissions: "
+                    input(type = InputType.text) {
+                        name = "githubProfileUrl"
+                        // Transform e.g. "https://github.com/user/repo" to "user"
+                        value = (singleAocRepositoryUrl ?: yearAocRepositoryUrl?.values?.firstOrNull())
+                            ?.substringBeforeLast("/")?.substringAfterLast("/") ?: ""
+                    }
+                }
+                p("text-secondary-info") {
+                    +"If your GitHub profile is set, your advent-of-code repository will get automatically linked. "
+                    +"You might name your repository e.g. advent-of-code, my-aoc-solutions, AdventOfCodeInPython or AoC-XXX."
+                    br()
+                    +"If you add years (e.g. 2023) to your repo names, the corresponding repository will be linked to your submission. "
+                    +"So you might name your repositories also advent-of-code-2023, my-aoc2023-solutions, AdventOfCode_2023 or XXX-2023-AoC."
+                }
+                p {
+                    when {
+                        singleAocRepositoryUrl == null && yearAocRepositoryUrl.isNullOrEmpty() -> {
+                            +"No advent-of-code repository linked."
+                        }
+
+                        singleAocRepositoryUrl != null -> {
+                            +"Linked advent-of-code repository (1 for all years): "
+                            a(href = singleAocRepositoryUrl) { +singleAocRepositoryUrl }
+                        }
+
+                        else -> {
+                            +"Linked advent-of-code repositories per year:"
+                            ul {
+                                yearAocRepositoryUrl?.forEach { (year, repositoryUrl) ->
+                                    li {
+                                        +"$year: "
+                                        a(href = repositoryUrl, target = "_blank") { +repositoryUrl }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 input(type = InputType.submit) {
                     onClick = "submitForm(event)"
                     value = "Save"
