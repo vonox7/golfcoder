@@ -50,7 +50,7 @@ object LeaderboardDayView {
         fun HtmlBlockTag.renderUpload() {
             h2 { +"Submit solution" }
             // TODO: Fix design. Maybe use dialog?
-            // TODO: Allow recalculation of tokenCount and "submit now". Maybe 2 buttons?
+            // TODO: Allow recalculation of tokenCount on textarea/language change
             form(action = "/api/solution/upload") {
                 input(type = InputType.hidden) {
                     name = "year"

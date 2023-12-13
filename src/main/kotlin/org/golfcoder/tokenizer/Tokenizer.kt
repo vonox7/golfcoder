@@ -20,7 +20,6 @@ interface Tokenizer {
 
     val tokenizerVersion: Int
 
-    // TODO why is "#" as kt char missing?
     suspend fun getTokenCount(tokens: List<Token>): Int {
         return tokens.sumOf { token ->
             when (token.type) {

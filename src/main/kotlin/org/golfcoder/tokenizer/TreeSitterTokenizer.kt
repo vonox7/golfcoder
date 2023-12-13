@@ -50,7 +50,8 @@ class TreeSitterTokenizer(private val language: String, override val tokenizerVe
                     when {
                         "error" in type -> throw Exception("Syntax error on line ${treeSitterToken.startRow}:${treeSitterToken.startColumn}:\n${treeSitterToken.text}")
                         "comment" in type -> Tokenizer.Token.Type.COMMENT
-                        "string" in type -> Tokenizer.Token.Type.STRING // e.g. Python reports "string_content", Javascript "string_fragment"
+                        "string" in type -> Tokenizer.Token.Type.STRING // e.g. Python reports "string_content", Javascript "string_fragment".
+                        "character" in type -> Tokenizer.Token.Type.STRING // Kotlin reports "character_literal" for e.g. 'a'.
                         else -> Tokenizer.Token.Type.CODE_TOKEN
                     }
                 }
