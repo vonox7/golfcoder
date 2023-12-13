@@ -64,7 +64,12 @@ object EditUserApi {
         // Allow "https://github.com/user", "github.com/user/" or just "user"
         val profileName = githubProfileUrl.removeSuffix("/").substringAfter("/")
         val repos = httpClient
-            .get("https://api.github.com/users/${profileName}/repos")
+            .get("https://api.github.com/users/${profileName}/repos") {
+                header(
+                    HttpHeaders.Authorization, "token " + (System.getenv("GITHUB_APP_ACCESS_TOKEN")
+                        ?: error("No GITHUB_APP_ACCESS_TOKEN env-var set"))
+                )
+            }
             .takeIf { it.status == HttpStatusCode.OK } // will be !=OK on e.g. invalid username
             ?.body<List<GithubReposResponse>>()
 
