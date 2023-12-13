@@ -34,19 +34,22 @@ object LoginView {
                 }
             } else {
                 val currentLoginProviders = currentUser.oAuthDetails.map { it.provider }
+                val newLoginProviders = oauth2Providers.filter { it.key !in currentLoginProviders }
                 h1 {
                     +"Link Account"
                 }
                 p {
                     +"You are already logged in via ${currentLoginProviders.joinToString { oauth2Providers[it]!! }}."
                 }
-                p {
-                    +"If you want to link another account, select one of these providers."
-                }
-                ul {
-                    for ((providerName, providerDisplayName) in oauth2Providers.filter { it.key !in currentLoginProviders }) {
-                        li {
-                            a(href = "/login/$providerName") { +providerDisplayName }
+                if (newLoginProviders.isNotEmpty()) {
+                    p {
+                        +"If you want to link another account, select one of these providers."
+                    }
+                    ul {
+                        for ((providerName, providerDisplayName) in newLoginProviders) {
+                            li {
+                                a(href = "/login/$providerName") { +providerDisplayName }
+                            }
                         }
                     }
                 }
