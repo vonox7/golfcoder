@@ -76,6 +76,7 @@ fun Application.configureSecurity() {
         providerName: String,
         authorizeUrl: String,
         accessTokenUrl: String,
+        accessTokenRequiresBasicAuth: Boolean = false,
         defaultScopes: List<String>,
         userInfoUrl: String,
         userInfoClassTypeInfo: TypeInfo,
@@ -91,6 +92,7 @@ fun Application.configureSecurity() {
                         name = providerName,
                         authorizeUrl = authorizeUrl,
                         accessTokenUrl = accessTokenUrl,
+                        accessTokenRequiresBasicAuth = accessTokenRequiresBasicAuth,
                         requestMethod = HttpMethod.Post,
                         clientId = System.getenv("OAUTH_${providerName.uppercase()}_CLIENT_ID")
                             ?: error("No OAUTH_${providerName.uppercase()}_CLIENT_ID env-var set"),
@@ -211,6 +213,16 @@ fun Application.configureSecurity() {
             }
         }
     )
+
+    addOauthProvider(
+        providerName = "reddit",
+        authorizeUrl = "https://www.reddit.com/api/v1/authorize",
+        accessTokenUrl = "https://www.reddit.com/api/v1/access_token",
+        accessTokenRequiresBasicAuth = true, // See https://www.reddit.com/r/redditdev/comments/si7cnj/reddit_error_message_unauthorized_error_401/
+        defaultScopes = listOf("identity"),
+        userInfoUrl = "https://oauth.reddit.com/api/v1/me",
+        userInfoClassTypeInfo = typeInfo<RedditUserInfo>(),
+    )
 }
 
 class UserSession(val userId: String, val displayName: String) : Principal
@@ -233,6 +245,14 @@ private data class GithubUserInfo(
     override val id: String
         get() = idLong.toString()
 }
+
+@Serializable
+private data class RedditUserInfo(
+    override val id: String,
+    override val name: String,
+    @SerialName("icon_img") override val pictureUrl: String,
+    // A bunch of more fields which we don't need
+) : OauthUserInfoResponse
 
 interface OauthUserInfoResponse {
     val id: String
