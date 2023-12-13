@@ -72,7 +72,6 @@ fun Application.configureSecurity() {
         }
     }
 
-    // TODO change google & github redirect urls
     fun addOauthProvider(
         providerName: String,
         authorizeUrl: String,
