@@ -88,25 +88,25 @@ object EditUserView {
                     }
                 }
                 p("text-secondary-info") {
-                    +"If your GitHub profile is set, your advent-of-code repository will get automatically linked. "
+                    +"If your GitHub profile name is set, your name in the leaderboard will get automatically linked with your advent-of-code repository. "
                     +"You might name your repository e.g. advent-of-code, my-aoc-solutions, AdventOfCodeInPython or AoC-XXX."
                     br()
-                    +"If you add years (e.g. 2023) to your repo names, the corresponding repository will be linked to your submission. "
+                    +"If you add years (e.g. 2023) to your repo names, the corresponding repository will be linked to your leaderboard. "
                     +"So you might name your repositories also advent-of-code-2023, my-aoc2023-solutions, AdventOfCode_2023 or XXX-2023-AoC."
                 }
                 p {
                     when {
                         singleAocRepositoryUrl == null && yearAocRepositoryUrl.isNullOrEmpty() -> {
-                            +"No advent-of-code repository linked."
+                            +"No advent-of-code GitHub repository linked."
                         }
 
                         singleAocRepositoryUrl != null -> {
-                            +"Linked advent-of-code repository (1 for all years): "
+                            +"Linked advent-of-code GitHub repository (1 for all years): "
                             a(href = singleAocRepositoryUrl) { +singleAocRepositoryUrl }
                         }
 
                         else -> {
-                            +"Linked advent-of-code repositories per year:"
+                            +"Linked advent-of-code GitHub repositories per year:"
                             ul {
                                 yearAocRepositoryUrl?.forEach { (year, repositoryUrl) ->
                                     li {
