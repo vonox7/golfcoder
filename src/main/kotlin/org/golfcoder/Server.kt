@@ -112,8 +112,8 @@ private fun Application.ktorServerModule() {
 
         get("/solution/{solutionFileName}") { SolutionView.download(call) }
         get("/template/{templateFileName}") { TemplateView.download(call) }
-        staticResources("/static/css-${Sysinfo.release}", "static/css")
-        staticResources("/static/js-${Sysinfo.release}", "static/js")
+        staticResources("/static/css-{release}", "static/css")
+        staticResources("/static/js-{release}", "static/js")
         staticResources("/static/images", "static/images")
     }
 }
