@@ -79,6 +79,12 @@ fun main(): Unit = runBlocking {
     launch {
         ExpectedOutputAggregatorLoader.loadOnStartup()
     }
+
+    launch {
+        // During container restart we might interrupt score calculation.
+        // So ensure that on startup all scores get recalculated.
+        UploadSolutionApi.recalculateAllScores()
+    }
 }
 
 private fun Application.ktorServerModule() {

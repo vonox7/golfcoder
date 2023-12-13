@@ -5,6 +5,7 @@ import io.ktor.server.application.*
 import io.ktor.server.sessions.*
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
+import org.golfcoder.database.LeaderboardPosition
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
 import org.golfcoder.endpoints.api.EditUserApi
@@ -22,6 +23,12 @@ object EditUserView {
             .find(Solution::userId equal session.userId)
             .sortByDescending(Solution::uploadDate)
             .toList()
+
+        val myLeaderboardPositions = mainDatabase.getSuspendingCollection<LeaderboardPosition>()
+            .find(LeaderboardPosition::userId equal session.userId)
+            .toList()
+            .sortedByDescending { it.year * 10000 + it.day }
+            .groupBy { it.year * 10000 + it.day }
 
         call.respondHtmlView("Golfcoder ${currentUser.name}") {
             h1 {
@@ -63,6 +70,22 @@ object EditUserView {
                 input(type = InputType.submit) {
                     onClick = "submitForm(event)"
                     value = "Save"
+                }
+            }
+
+            h2 { +"My leaderboard positions" }
+            if (mySolutions.isEmpty()) {
+                p { +"No solutions uploaded yet." }
+            } else {
+                myLeaderboardPositions.forEach { (_, leaderboardPositionPerDay) ->
+                    h3 { +"${leaderboardPositionPerDay.first().year} day ${leaderboardPositionPerDay.first().day}" }
+                    with(LeaderboardDayView) {
+                        renderLeaderboard(
+                            leaderboardPositionPerDay,
+                            userIdsToUsers = mapOf(session.userId to currentUser),
+                            currentUser = currentUser
+                        )
+                    }
                 }
             }
 

@@ -1,24 +1,23 @@
 package org.golfcoder.endpoints.web
 
 import com.moshbit.katerbase.equal
-import com.moshbit.katerbase.inArray
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import io.ktor.server.sessions.*
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
+import org.golfcoder.database.LeaderboardPosition
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
+import org.golfcoder.database.getUserProfiles
 import org.golfcoder.endpoints.api.UploadSolutionApi
+import org.golfcoder.endpoints.api.UploadSolutionApi.PART_RANGE
 import org.golfcoder.endpoints.web.TemplateView.template
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.tokenizer.NotYetAvailableTokenizer
 import org.golfcoder.tokenizer.Tokenizer
 import org.golfcoder.utils.relativeToNow
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.set
 
 object LeaderboardDayView {
     suspend fun getHtml(call: ApplicationCall) {
@@ -28,7 +27,6 @@ object LeaderboardDayView {
         }
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
         val day = call.parameters["day"]?.toIntOrNull() ?: throw NotFoundException("Invalid day")
-        val parts = 2
         val highlightedSolution: Solution? = call.parameters["solution"]?.let { solutionId ->
             mainDatabase.getSuspendingCollection<Solution>().findOne(Solution::_id equal solutionId)
                 ?.takeIf { it.codePubliclyVisible || it.userId == currentUser?._id }
@@ -41,30 +39,13 @@ object LeaderboardDayView {
             solution.language.tokenizer.tokenize(solution.code)
         }
 
-        val solutions = (1..parts).map { part ->
-            @Suppress("DEPRECATION") // use excludeFields - only `code` is excluded since it is too big
-            mainDatabase.getSuspendingCollection<Solution>()
-                .find(Solution::year equal year, Solution::day equal day, Solution::part equal part)
-                .sortBy(Solution::tokenCount)
-                .excludeFields(Solution::code)
-                // Load a little bit more than we display, so we show only 1 score per user.
-                // This could be done also with an aggregate query?
-                // But then we could also combine the 2 queries (1 per part) into 1 query?
-                .limit(200)
-                .toList()
-        }
-        val userIds = solutions.flatten().map { it.userId }.distinct()
-        val userIdsToUsers = mainDatabase.getSuspendingCollection<User>()
-            .find(User::_id inArray userIds)
-            .selectedFields(
-                User::_id,
-                User::name,
-                User::nameIsPublic,
-                User::profilePictureIsPublic,
-                User::publicProfilePictureUrl,
-            )
+        val leaderboardPositions = mainDatabase.getSuspendingCollection<LeaderboardPosition>()
+            .find(LeaderboardPosition::year equal year, LeaderboardPosition::day equal day)
+            .sortByDescending(LeaderboardPosition::tokenSum)
             .toList()
-            .associateBy { it._id }
+
+
+        val userIdsToUsers = getUserProfiles(leaderboardPositions.map { it.userId }.toSet())
 
         fun HtmlBlockTag.renderUpload() {
             h2 { +"Submit solution" }
@@ -80,7 +61,7 @@ object LeaderboardDayView {
                 }
                 select {
                     name = "part"
-                    (1..parts).forEach { part ->
+                    PART_RANGE.forEach { part ->
                         option {
                             value = part.toString()
                             +"Part $part"
@@ -172,7 +153,11 @@ object LeaderboardDayView {
                     renderUpload()
 
                     h2 { +"Leaderboard" }
-                    renderLeaderboardTable(solutions, userIdsToUsers, currentUser)
+                    if (leaderboardPositions.isEmpty()) {
+                        p { +"No solutions submitted yet. Submit now your own solution." }
+                    } else {
+                        renderLeaderboard(leaderboardPositions, userIdsToUsers, currentUser)
+                    }
                 }
 
                 div("right") {
@@ -199,42 +184,8 @@ object LeaderboardDayView {
         }
     }
 
-    private fun HtmlBlockTag.renderLeaderboardTable(
-        solutions: List<List<Solution>>,
-        userIdsToUsers: Map<String, User>,
-        currentUser: User?,
-    ) {
-        // We need to do some transformations here, so we get per user the best solution per part (also per language).
-        // And to calculate the total score (for all parts) (per user+language).
-        val parts = solutions.count()
-        val scoresByUserId = mutableMapOf<String, List<Solution>>()
-        solutions.forEach { solutionsPerPart ->
-            solutionsPerPart
-                .groupBy { it.userId + it.language }
-                .forEach { (userId, solutions) ->
-                    scoresByUserId[userId] =
-                        (scoresByUserId[userId] ?: emptyList()) + solutions.minBy { it.tokenCount }
-                }
-        }
-
-        val sortedScores: List<Pair<List<Solution>, Int>> = scoresByUserId.values.associateWith { userSolutions ->
-            (1..parts).sumOf { part ->
-                userSolutions.find { it.part == part }?.tokenCount
-                    ?: 10_000 // No solution for part yet submitted
-            }
-        }.toList().sortedBy { it.second }
-
-        if (sortedScores.isEmpty()) {
-            p { +"No solutions submitted yet. Submit now your own solution." }
-            return
-        }
-
-        renderLeaderboard(sortedScores, parts, userIdsToUsers, currentUser)
-    }
-
-    private fun HtmlBlockTag.renderLeaderboard(
-        sortedScores: List<Pair<List<Solution>, Int>>,
-        parts: Int,
+    fun HtmlBlockTag.renderLeaderboard(
+        leaderboardPositions: List<LeaderboardPosition>,
         userIdsToUsers: Map<String, User>,
         currentUser: User?,
     ) {
@@ -245,7 +196,7 @@ object LeaderboardDayView {
                     th(classes = "left-align") { +"Name" }
                     th(classes = "left-align") { +"Language" }
                     th(classes = "right-align") { +"Tokens Sum" }
-                    (1..parts).forEach { part ->
+                    PART_RANGE.forEach { part ->
                         th(classes = "right-align") { +"Tokens Part $part" }
                     }
                     th(classes = "right-align") { +"Last change" }
@@ -253,41 +204,45 @@ object LeaderboardDayView {
             }
             tbody {
                 // Render leaderboard
-                sortedScores.forEachIndexed { index, (solutions, totalScore) ->
+                leaderboardPositions.forEach { leaderboardPosition ->
+                    val year = leaderboardPosition.year
+                    val day = leaderboardPosition.day
                     tr {
-                        td("rank") { +"${index + 1}" }
+                        td("rank") { +"${leaderboardPosition.position}" }
                         td {
                             // All solutions in sortedScores have per entry the same user
-                            val user = userIdsToUsers[solutions.first().userId]
+                            val user = userIdsToUsers[leaderboardPosition.userId]
                             renderUserProfileImage(user, big = false)
                             +(user?.name?.takeIf { user.nameIsPublic } ?: "anonymous")
                         }
                         // All solutions in sortedScores have per entry the same language
-                        td { +solutions.first().language.displayName }
+                        td { +leaderboardPosition.language.displayName }
 
                         td("right-align") {
-                            +"$totalScore"
+                            +"${leaderboardPosition.tokenSum}"
                         }
 
-                        (1..parts).forEach { part ->
-                            val solution = solutions.find { it.part == part }
+                        PART_RANGE.forEach { part ->
+                            val partInfo = leaderboardPosition.partInfos[part]
                             td("right-align") {
-                                if (solution == null) {
+                                if (partInfo == null) {
                                     +"-"
-                                } else if (solution.codePubliclyVisible) {
-                                    a(href = "?solution=${solution._id}#solution") {
-                                        +"${solution.tokenCount}"
+                                } else if (partInfo.codePubliclyVisible) {
+                                    a(href = "/$year/day/$day?solution=${partInfo.solutionId}#solution") {
+                                        +"${partInfo.tokens}"
                                     }
-                                } else if (solution.userId == currentUser?._id) {
-                                    a(href = "?solution=${solution._id}#solution") {
-                                        +"${solution.tokenCount} (only accessible by you)"
+                                } else if (leaderboardPosition.userId == currentUser?._id) {
+                                    a(href = "/$year/day/$day?solution=${partInfo.solutionId}#solution") {
+                                        +"${partInfo.tokens} (only accessible by you)"
                                     }
                                 } else {
-                                    +"${solution.tokenCount}"
+                                    +"${partInfo.tokens}"
                                 }
                             }
                         }
-                        td("right-align") { +solutions.maxOf { it.uploadDate }.relativeToNow }
+                        td("right-align") {
+                            +leaderboardPosition.partInfos.values.maxOf { it.uploadDate }.relativeToNow
+                        }
                     }
                 }
             }

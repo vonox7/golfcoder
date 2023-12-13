@@ -1,10 +1,12 @@
 package org.golfcoder.endpoints.api
 
+import com.moshbit.katerbase.MongoMainEntry.Companion.generateId
 import com.moshbit.katerbase.equal
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
+import kotlinx.coroutines.flow.toList
 import kotlinx.html.div
 import kotlinx.html.h2
 import kotlinx.html.p
@@ -12,6 +14,7 @@ import kotlinx.html.stream.createHTML
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
 import org.golfcoder.database.ExpectedOutput
+import org.golfcoder.database.LeaderboardPosition
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
 import org.golfcoder.endpoints.web.LeaderboardDayView
@@ -24,6 +27,7 @@ object UploadSolutionApi {
 
     const val MAX_CODE_LENGTH = 100_000
     val DAYS_RANGE = 1..25
+    val PART_RANGE = 1..2
     private const val MIN_CODE_LENGTH = 10
 
 
@@ -187,6 +191,84 @@ object UploadSolutionApi {
             tokenizerVersion = tokenizer.tokenizerVersion
         }, upsert = false)
 
+        recalculateScore(year = request.year.toInt(), day = request.day.toInt())
+
         call.respond(ApiCallResult(buttonText = "Submitted", reloadSite = true))
+    }
+
+    private suspend fun recalculateScore(year: Int, day: Int) {
+        // The whole recalculation could be done also with 1 single aggregate query?
+        val solutions = PART_RANGE.map { part ->
+            @Suppress("DEPRECATION") // use excludeFields - only `code` is excluded since it is too big
+            mainDatabase.getSuspendingCollection<Solution>()
+                .find(Solution::year equal year, Solution::day equal day, Solution::part equal part)
+                .sortBy(Solution::tokenCount)
+                .excludeFields(Solution::code)
+                .limit(200)
+                .toList()
+        }
+
+        // We need to do some transformations here, so we get per user the best solution per part (also per language).
+        // And to calculate the total score (for all parts) (per user+language).
+        val scoresByUserId = mutableMapOf<String, List<Solution>>()
+        solutions.forEach { solutionsPerPart ->
+            solutionsPerPart
+                .groupBy { it.userId + it.language }
+                .forEach { (userId, solutions) ->
+                    scoresByUserId[userId] =
+                        (scoresByUserId[userId] ?: emptyList()) + solutions.minBy { it.tokenCount }
+                }
+        }
+
+        val sortedScores: List<Pair<List<Solution>, Int>> = scoresByUserId.values.associateWith { userSolutions ->
+            PART_RANGE.sumOf { part ->
+                userSolutions.find { it.part == part }?.tokenCount
+                    ?: 10_000 // No solution for part yet submitted
+            }
+        }.toList().sortedBy { it.second }
+
+        mainDatabase.getSuspendingCollection<LeaderboardPosition>().bulkWrite {
+            deleteMany(LeaderboardPosition::year equal year, LeaderboardPosition::day equal day)
+            sortedScores.forEachIndexed { scoreIndex, (solutions, score) ->
+                insertOne(LeaderboardPosition().also { leaderboardPosition ->
+                    leaderboardPosition._id = generateId(
+                        solutions.first().userId,
+                        solutions.first().language.name,
+                        year.toString(),
+                        day.toString()
+                    )
+                    leaderboardPosition.year = year
+                    leaderboardPosition.day = day
+                    leaderboardPosition.position = scoreIndex + 1
+                    leaderboardPosition.userId = solutions.first().userId
+                    leaderboardPosition.language = solutions.first().language
+                    leaderboardPosition.tokenSum = score
+                    leaderboardPosition.partInfos = solutions.associate { solution ->
+                        solution.part to LeaderboardPosition.PartInfo(
+                            tokens = solution.tokenCount,
+                            solutionId = solution._id,
+                            codePubliclyVisible = solution.codePubliclyVisible,
+                            uploadDate = solution.uploadDate,
+                        )
+                    }
+                }, upsert = true)
+            }
+        }
+    }
+
+    suspend fun recalculateAllScores() {
+        var leaderboards = 0
+        val years = mainDatabase.getSuspendingCollection<Solution>().distinct(Solution::year).toList()
+
+        years.forEach { year ->
+            val days = mainDatabase.getSuspendingCollection<Solution>().distinct(Solution::day).toList()
+
+            days.forEach { day ->
+                leaderboards++
+                recalculateScore(year, day)
+            }
+        }
+
+        println("Recalculated all scores for $leaderboards leaderboards.")
     }
 }

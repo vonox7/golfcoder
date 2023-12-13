@@ -94,6 +94,23 @@ class Solution : MongoMainEntry() {
     }
 }
 
+class LeaderboardPosition : MongoMainEntry() {
+    var year: Int = 0
+    var day: Int = 0
+    var position: Int = 0
+    lateinit var userId: String
+    lateinit var language: Solution.Language
+    var tokenSum: Int = 0
+    var partInfos: Map<Int, PartInfo> = emptyMap() // part to PartInfo
+
+    class PartInfo(
+        val tokens: Int,
+        val solutionId: String,
+        val codePubliclyVisible: Boolean,
+        val uploadDate: Date,
+    ) : MongoSubEntry()
+}
+
 class ExpectedOutput : MongoMainEntry() {
     var year: Int = 0
     var day: Int = 0

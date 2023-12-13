@@ -1,15 +1,28 @@
 package org.golfcoder.endpoints.web
 
+import com.moshbit.katerbase.equal
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
-import kotlinx.html.a
-import kotlinx.html.h1
-import kotlinx.html.p
+import io.ktor.server.sessions.*
+import kotlinx.coroutines.flow.toList
+import kotlinx.html.*
+import org.golfcoder.database.LeaderboardPosition
+import org.golfcoder.database.getUserProfiles
 import org.golfcoder.endpoints.api.UploadSolutionApi
+import org.golfcoder.mainDatabase
+import org.golfcoder.plugins.UserSession
+import org.golfcoder.utils.relativeToNow
 
 object LeaderboardYearView {
     suspend fun getHtml(call: ApplicationCall) {
+        val session = call.sessions.get<UserSession>()
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
+        val positionOneLeaderboardPositions = mainDatabase.getSuspendingCollection<LeaderboardPosition>()
+            .find(LeaderboardPosition::year equal year, LeaderboardPosition::position equal 1)
+            .toList()
+            .associateBy { it.day }
+        val positionOneUserIdsToUsers =
+            getUserProfiles(positionOneLeaderboardPositions.values.map { it.userId }.toSet())
 
         call.respondHtmlView("Advent of Code Leaderboard $year") {
             h1 { +"Advent of Code Leaderboard $year" }
@@ -23,11 +36,77 @@ object LeaderboardYearView {
                 +"."
             }
 
-            UploadSolutionApi.DAYS_RANGE.forEach { day ->
-                p {
-                    a("/$year/day/$day") { +"Day $day" }
-                    // TODO: Show best solutions for each day next to day link
+            table("leaderboard") {
+                thead {
+                    tr {
+                        th {}
+                        th(classes = "left-align") { +"Highscore" }
+                        th(classes = "left-align") { +"Language" }
+                        th(classes = "right-align") { +"Tokens Sum" }
+                        UploadSolutionApi.PART_RANGE.forEach { part ->
+                            th(classes = "right-align") { +"Tokens Part $part" }
+                        }
+                        th(classes = "right-align") { +"Last change" }
+                    }
                 }
+                tbody {
+                    UploadSolutionApi.DAYS_RANGE.forEach { day ->
+                        val positionOne = positionOneLeaderboardPositions[day]
+
+                        tr {
+                            td("text-big") {
+                                a("/$year/day/$day") { +"Day $day" }
+                            }
+
+                            if (positionOne == null) {
+                                td("text-secondary-info") {
+                                    colSpan = "3"
+                                    +" No submissions yet"
+                                }
+                            } else {
+                                td {
+                                    // All solutions in sortedScores have per entry the same user
+                                    val user = positionOneUserIdsToUsers[positionOne.userId]
+                                    renderUserProfileImage(user, big = false)
+                                    +(user?.name?.takeIf { user.nameIsPublic } ?: "anonymous")
+                                }
+                                td {
+                                    +positionOne.language.displayName
+                                }
+                                td("right-align") {
+                                    +positionOne.tokenSum.toString()
+                                }
+
+                                UploadSolutionApi.PART_RANGE.forEach { part ->
+                                    val partInfo = positionOne.partInfos[part]
+                                    td("right-align") {
+                                        if (partInfo == null) {
+                                            +"-"
+                                        } else if (partInfo.codePubliclyVisible) {
+                                            a(href = "/$year/day/$day?solution=${partInfo.solutionId}#solution") {
+                                                +"${partInfo.tokens}"
+                                            }
+                                        } else if (positionOne.userId == session?.userId) {
+                                            a(href = "/$year/day/$day?solution=${partInfo.solutionId}#solution") {
+                                                +"${partInfo.tokens} (only accessible by you)"
+                                            }
+                                        } else {
+                                            +"${partInfo.tokens}"
+                                        }
+                                    }
+                                }
+
+                                td("right-align") {
+                                    +positionOne.partInfos.values.maxOf { it.uploadDate }.relativeToNow
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            p {
+                +"Click on a day to submit your solution."
             }
         }
     }

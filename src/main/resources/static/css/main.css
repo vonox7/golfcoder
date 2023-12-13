@@ -306,3 +306,11 @@ textarea {
     margin-bottom: 8px;
     max-width: calc(100% - 4px);
 }
+
+.text-secondary-info {
+    color: #888;
+}
+
+.text-big {
+    font-size: 120%;
+}

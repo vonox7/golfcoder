@@ -2,6 +2,7 @@ package org.golfcoder.database
 
 import com.moshbit.katerbase.MongoDatabase
 import com.moshbit.katerbase.child
+import com.moshbit.katerbase.equal
 import org.golfcoder.Sysinfo
 
 class MainDatabase(uri: String) : MongoDatabase(
@@ -33,6 +34,21 @@ class MainDatabase(uri: String) : MongoDatabase(
             index(
                 Solution::userId.descending(),
                 Solution::uploadDate.descending(),
+            )
+        }
+        collection<LeaderboardPosition>("leaderboards") {
+            index(
+                LeaderboardPosition::year.ascending(),
+                LeaderboardPosition::day.ascending(),
+                LeaderboardPosition::tokenSum.ascending(),
+            )
+            index(
+                LeaderboardPosition::userId.ascending(),
+            )
+            index(
+                LeaderboardPosition::year.ascending(),
+                LeaderboardPosition::position.ascending(),
+                partialIndex = arrayOf(LeaderboardPosition::position equal 1)
             )
         }
         collection<ExpectedOutput>("expectedOutputs") {
