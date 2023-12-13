@@ -38,6 +38,13 @@ object EditUserView {
             p {
                 +"You joined Golfcoder ${currentUser.createdOn.relativeToNow}. "
             }
+
+            val currentLoginProviders = currentUser.oAuthDetails.map { it.provider }
+            p {
+                +"Logged in via ${currentLoginProviders.joinToString { LoginView.oauth2Providers[it]!! }}. "
+                a(href = "/login") { +"Add another OAuth2 provider." }
+            }
+
             form(action = "/api/user/edit") {
                 label {
                     attributes["for"] = "name"

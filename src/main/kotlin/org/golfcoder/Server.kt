@@ -99,6 +99,7 @@ private fun Application.ktorServerModule() {
             get(Regex("about")) { AboutView.getHtml(call) }
             get(Regex("20(?<year>[0-9]{2})")) { LeaderboardYearView.getHtml(call) }
             get(Regex("20(?<year>[0-9]{2})/day/(?<day>[0-9]{1,2})")) { LeaderboardDayView.getHtml(call) }
+            get("/login") { LoginView.getHtml(call) }
             get("/logout") { LogoutView.doLogout(call) }
 
             post("/api/solution/upload") { UploadSolutionApi.post(call) }

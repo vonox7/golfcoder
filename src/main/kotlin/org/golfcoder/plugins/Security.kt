@@ -11,18 +11,22 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.util.*
+import io.ktor.util.reflect.*
 import kotlinx.coroutines.flow.count
+import kotlinx.html.h1
+import kotlinx.html.p
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
 import org.golfcoder.database.User
 import org.golfcoder.endpoints.api.EditUserApi
+import org.golfcoder.endpoints.web.LoginView
+import org.golfcoder.endpoints.web.respondHtmlView
 import org.golfcoder.httpClient
 import org.golfcoder.mainDatabase
 import java.util.*
 
 const val sessionAuthenticationName = "session-aocg"
-private const val oauthGoogleAuthenticationName = "oauth-google"
 
 fun Application.configureSecurity() {
     install(Sessions) {
@@ -68,79 +72,171 @@ fun Application.configureSecurity() {
         }
     }
 
-    authentication {
-        oauth(oauthGoogleAuthenticationName) {
-            urlProvider = {
-                if (Sysinfo.isLocal) "http://localhost:8030/oauth-callback" else "https://golfcoder.org/oauth-callback"
-            }
-            providerLookup = {
-                OAuthServerSettings.OAuth2ServerSettings(
-                    name = "google",
-                    authorizeUrl = "https://accounts.google.com/o/oauth2/auth",
-                    accessTokenUrl = "https://accounts.google.com/o/oauth2/token",
-                    requestMethod = HttpMethod.Post,
-                    clientId = System.getenv("OAUTH_GOOGLE_CLIENT_ID")
-                        ?: error("No OAUTH_GOOGLE_CLIENT_ID env-var set"),
-                    clientSecret = System.getenv("OAUTH_GOOGLE_CLIENT_SECRET")
-                        ?: error("No OAUTH_GOOGLE_CLIENT_SECRET env-var set"),
-                    defaultScopes = listOf("https://www.googleapis.com/auth/userinfo.profile")
-                )
-            }
-            client = httpClient
-        }
-    }
-    routing {
-        authenticate(oauthGoogleAuthenticationName) {
-            get("login") { // TODO rename later to /login-with-google when we have multiple oauth providers
-                // Ktor automatically redirects to authorizeUrl, this lambda gets never called
-            }
-
-            get("/oauth-callback") {
-                val principal: OAuthAccessTokenResponse.OAuth2 =
-                    call.authentication.principal() ?: error("No principal")
-
-                val userInfo: GoogleUserInfo = httpClient.get("https://www.googleapis.com/oauth2/v2/userinfo") {
-                    headers {
-                        append(HttpHeaders.Authorization, "Bearer ${principal.accessToken}")
-                    }
-                }.body()
-
-                // Create user in db (if not exists), otherwise just update lastUsedOn
-                val date = Date()
-                val userInDatabase = mainDatabase.getSuspendingCollection<User>().findOneOrInsert(
-                    User::oAuthDetails.child(User.OAuthDetails::provider) equal "google",
-                    User::oAuthDetails.child(User.OAuthDetails::providerUserId) equal userInfo.id
-                ) {
-                    User().apply {
-                        _id = randomId()
-                        oAuthDetails = listOf(
-                            User.OAuthDetails(
-                                provider = "google",
-                                providerUserId = userInfo.id,
-                                createdOn = date,
-                            )
-                        )
-                        createdOn = date
-                        name = userInfo.name.take(EditUserApi.MAX_USER_NAME_LENGTH)
-                        publicProfilePictureUrl = userInfo.picture
-                    }
+    // TODO change google & github redirect urls
+    fun addOauthProvider(
+        providerName: String,
+        authorizeUrl: String,
+        accessTokenUrl: String,
+        defaultScopes: List<String>,
+        userInfoUrl: String,
+        userInfoClassTypeInfo: TypeInfo,
+        postprocessLogin: (suspend (User, OauthUserInfoResponse) -> Unit)? = null,
+    ) {
+        authentication {
+            oauth(providerName) {
+                urlProvider = {
+                    if (Sysinfo.isLocal) "http://localhost:8030/login/$providerName" else "https://golfcoder.org/login/$providerName"
                 }
+                providerLookup = {
+                    OAuthServerSettings.OAuth2ServerSettings(
+                        name = providerName,
+                        authorizeUrl = authorizeUrl,
+                        accessTokenUrl = accessTokenUrl,
+                        requestMethod = HttpMethod.Post,
+                        clientId = System.getenv("OAUTH_${providerName.uppercase()}_CLIENT_ID")
+                            ?: error("No OAUTH_${providerName.uppercase()}_CLIENT_ID env-var set"),
+                        clientSecret = System.getenv("OAUTH_${providerName.uppercase()}_CLIENT_SECRET")
+                            ?: error("No OAUTH_${providerName.uppercase()}_CLIENT_SECRET env-var set"),
+                        defaultScopes = defaultScopes,
+                    )
+                }
+                client = httpClient
+            }
+        }
 
-                call.sessions.set(UserSession(userInDatabase._id, userInDatabase.name))
-                call.respondRedirect("/")
+        routing {
+            // This function creates new users, logs users in and links oauth2 accounts to existing users
+            authenticate(providerName) {
+                get("/login/$providerName") {  // Ktor automatically redirects first to authorizeUrl
+                    val principal: OAuthAccessTokenResponse.OAuth2 =
+                        call.authentication.principal() ?: error("No principal")
+
+                    val userInfo: OauthUserInfoResponse = httpClient.get(userInfoUrl) {
+                        headers {
+                            append(HttpHeaders.Authorization, "Bearer ${principal.accessToken}")
+                        }
+                    }.body(userInfoClassTypeInfo)
+
+                    val currentSession = call.sessions.get<UserSession>()
+                    val currentUser = currentSession?.let {
+                        mainDatabase.getSuspendingCollection<User>()
+                            .findOne(User::_id equal currentSession.userId)
+                    }
+
+                    val authenticatedUser: User // User which is now logged in, newly created, or linked to existing user
+
+                    if (currentUser == null) {
+                        // Login or register user
+                        // Create user in db (if not exists), otherwise just update lastUsedOn
+                        val date = Date()
+                        authenticatedUser = mainDatabase.getSuspendingCollection<User>().findOneOrInsert(
+                            User::oAuthDetails.child(User.OAuthDetails::provider) equal providerName,
+                            User::oAuthDetails.child(User.OAuthDetails::providerUserId) equal userInfo.id
+                        ) {
+                            User().apply {
+                                _id = randomId()
+                                oAuthDetails = listOf(
+                                    User.OAuthDetails(
+                                        provider = providerName,
+                                        providerUserId = userInfo.id,
+                                        createdOn = date,
+                                    )
+                                )
+                                createdOn = date
+                                name = userInfo.name.take(EditUserApi.MAX_USER_NAME_LENGTH)
+                                publicProfilePictureUrl = userInfo.pictureUrl
+                            }
+                        }
+                    } else {
+                        // Link oauth2 account to existing user
+                        val existingUserWithThisProviderId = mainDatabase.getSuspendingCollection<User>().findOne(
+                            User::oAuthDetails.child(User.OAuthDetails::provider) equal providerName,
+                            User::oAuthDetails.child(User.OAuthDetails::providerUserId) equal userInfo.id
+                        )
+                        if (existingUserWithThisProviderId == null) {
+                            // Link oauth2 account to existing user
+                            authenticatedUser = mainDatabase.getSuspendingCollection<User>()
+                                .updateOneAndFind(User::_id equal currentUser._id) {
+                                    User::oAuthDetails push User.OAuthDetails(
+                                        provider = providerName,
+                                        providerUserId = userInfo.id,
+                                        createdOn = Date(),
+                                    )
+                                    if (currentUser.publicProfilePictureUrl.isNullOrEmpty()) {
+                                        User::publicProfilePictureUrl setTo userInfo.pictureUrl
+                                    }
+                                }!!
+                        } else if (existingUserWithThisProviderId._id == currentUser._id) {
+                            // User already exists and is already linked to this oauth2 account - nothing to do
+                            authenticatedUser = existingUserWithThisProviderId
+                        } else {
+                            // User already exists and is linked to another oauth2 account - error
+                            call.respondHtmlView("Account Link Error") {
+                                h1 { +"Account Link Error" }
+                                p { +"This ${LoginView.oauth2Providers[providerName]} account is already linked to another Golfcoder account." }
+                            }
+                            return@get
+                        }
+                    }
+
+                    postprocessLogin?.invoke(authenticatedUser, userInfo)
+
+                    call.sessions.set(UserSession(authenticatedUser._id, authenticatedUser.name))
+                    call.respondRedirect("/")
+                }
             }
         }
     }
+
+    addOauthProvider(
+        providerName = "google",
+        authorizeUrl = "https://accounts.google.com/o/oauth2/auth",
+        accessTokenUrl = "https://accounts.google.com/o/oauth2/token",
+        defaultScopes = listOf("https://www.googleapis.com/auth/userinfo.profile"),
+        userInfoUrl = "https://www.googleapis.com/oauth2/v1/userinfo",
+        userInfoClassTypeInfo = typeInfo<GoogleUserInfo>(),
+    )
+
+    addOauthProvider(
+        providerName = "github",
+        authorizeUrl = "https://github.com/login/oauth/authorize",
+        accessTokenUrl = "https://github.com/login/oauth/access_token",
+        defaultScopes = emptyList(),
+        userInfoUrl = "https://api.github.com/user",
+        userInfoClassTypeInfo = typeInfo<GithubUserInfo>(),
+        postprocessLogin = { user, userInfo ->
+            EditUserApi.getAdventOfCodeRepositoryInfo((userInfo as GithubUserInfo).login)?.let { repoInfo ->
+                mainDatabase.getSuspendingCollection<User>().updateOne(User::_id equal user._id) {
+                    User::adventOfCodeRepositoryInfo setTo repoInfo
+                }
+            }
+        }
+    )
 }
 
 class UserSession(val userId: String, val displayName: String) : Principal
 
 @Serializable
 private data class GoogleUserInfo(
-    val id: String,
-    val name: String,
-    @SerialName("given_name") val givenName: String,
-    @SerialName("family_name") val familyName: String,
-    val picture: String,
-    val locale: String
-)
+    override val id: String,
+    override val name: String,
+    @SerialName("picture") override val pictureUrl: String,
+) : OauthUserInfoResponse
+
+@Serializable
+private data class GithubUserInfo(
+    @SerialName("id") val idLong: Long,
+    val login: String, // e.g. vonox7, is changeable
+    override val name: String,
+    @SerialName("avatar_url") override val pictureUrl: String,
+    // A bunch of more fields which we don't need
+) : OauthUserInfoResponse {
+    override val id: String
+        get() = idLong.toString()
+}
+
+interface OauthUserInfoResponse {
+    val id: String
+    val name: String
+    val pictureUrl: String
+}

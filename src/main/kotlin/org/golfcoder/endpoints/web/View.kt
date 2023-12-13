@@ -2,8 +2,8 @@ package org.golfcoder.endpoints.web
 
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.html.*
+import io.ktor.server.sessions.*
 import kotlinx.html.*
 import org.golfcoder.Sysinfo
 import org.golfcoder.database.User
@@ -85,7 +85,7 @@ private fun HtmlBlockTag.header(call: ApplicationCall) {
             +"About & FAQ".replace(" ", "\u00A0") // Non-breaking space
         }
         +" "
-        val userSession = call.principal<UserSession>()
+        val userSession = call.sessions.get<UserSession>()
         if (userSession == null) {
             a(href = "/login") {
                 +"Login"

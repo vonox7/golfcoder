@@ -57,7 +57,6 @@ object EditUserApi {
     }
 
     // Find advent-of-code github repository/repositories: Auto detect aoc-repo-urls (either 1 or 1 per year)
-    // TODO run this function also on "register with github"
     suspend fun getAdventOfCodeRepositoryInfo(githubProfileUrl: String?): User.AdventOfCodeRepositoryInfo? {
         if (githubProfileUrl.isNullOrEmpty()) return null
 
