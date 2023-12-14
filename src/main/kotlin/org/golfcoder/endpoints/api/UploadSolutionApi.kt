@@ -13,6 +13,7 @@ import kotlinx.html.p
 import kotlinx.html.stream.createHTML
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
+import org.golfcoder.coderunner.Coderunner
 import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.database.LeaderboardPosition
 import org.golfcoder.database.Solution
@@ -132,68 +133,96 @@ object UploadSolutionApi {
         }
 
         // Run code
-        val coderunnerResult = request.language.coderunner.run(request.code, request.language, expectedOutput.input)
-
-        if (coderunnerResult.isFailure) {
-            if (Sysinfo.isLocal) coderunnerResult.exceptionOrNull()!!.printStackTrace()
-            call.respond(
-                ApiCallResult(
-                    buttonText = "Calculate tokens",
-                    resetButtonTextSeconds = null,
-                    changeInput = mapOf("onlyTokenize" to "on"),
-                    alertText = "Code execution failed:\n\n${coderunnerResult.exceptionOrNull()!!.message}"
-                )
+        val coderunnerResult = try {
+            request.language.coderunner.run(request.code, request.language, expectedOutput.input)
+        } catch (e: Exception) {
+            if (Sysinfo.isLocal) e.printStackTrace()
+            Coderunner.RunResult(
+                stdout = "",
+                error = "Code execution failed:\n\n${e.message}",
             )
-            return
         }
 
-        val codeRunnerStdout = coderunnerResult.getOrNull()!!.trim()
 
+        val codeRunnerStdout = coderunnerResult.stdout.trim()
         val outputNumber = codeRunnerStdout.toLongOrNull()
-        if (outputNumber == null) {
-            call.respond(
-                ApiCallResult(
-                    buttonText = "Calculate tokens",
-                    resetButtonTextSeconds = null,
-                    changeInput = mapOf("onlyTokenize" to "on"),
-                    alertText = "Wrong stdout. Expected a number, but got \"$codeRunnerStdout\"."
+
+        when {
+            outputNumber == expectedOutput.output -> {
+                // Correct solution. Save solution to database
+                mainDatabase.getSuspendingCollection<Solution>().insertOne(Solution().apply {
+                    _id = randomId()
+                    userId = userSession.userId
+                    year = request.year.toInt()
+                    day = request.day.toInt()
+                    part = request.part.toInt()
+                    code = request.code
+                    language = request.language
+                    codePubliclyVisible = request.codeIsPublic == "on"
+                    externalLinks = request.externalLinks
+                    uploadDate = now
+                    this.tokenCount = tokenCount
+                    tokenizerVersion = tokenizer.tokenizerVersion
+                }, upsert = false)
+
+                recalculateScore(year = request.year.toInt(), day = request.day.toInt())
+
+                call.respond(ApiCallResult(buttonText = "Submitted", reloadSite = true))
+            }
+
+            outputNumber != null -> {
+                // Incorrect solution, but code execution worked
+                call.respond(
+                    ApiCallResult(
+                        buttonText = "Calculate tokens",
+                        resetButtonTextSeconds = null,
+                        changeInput = mapOf("onlyTokenize" to "on"),
+                        alertText = "Wrong stdout. The number does not match the expected output.\n" +
+                                "If you think this is a bug, please report it to Golfcoder (see About & FAQ)."
+                    )
                 )
-            )
-            return
-        }
-        // Validate for correct outputNumber
-        if (outputNumber != expectedOutput.output) {
-            call.respond(
-                ApiCallResult(
-                    buttonText = "Calculate tokens",
-                    resetButtonTextSeconds = null,
-                    changeInput = mapOf("onlyTokenize" to "on"),
-                    alertText = "Wrong stdout. The number does not match the expected output.\n" +
-                            "If you think this is a bug, please report it to Golfcoder (see About & FAQ)."
+                return
+            }
+
+            codeRunnerStdout.isNotEmpty() -> {
+                // Code got executed, but could not be cast to a number
+                call.respond(
+                    ApiCallResult(
+                        buttonText = "Calculate tokens",
+                        resetButtonTextSeconds = null,
+                        changeInput = mapOf("onlyTokenize" to "on"),
+                        alertText = "Wrong stdout. Expected a number, but got \"$codeRunnerStdout\"."
+                    )
                 )
-            )
-            return
+                return
+            }
+
+            coderunnerResult.error.isNullOrEmpty() -> {
+                // Code got executed, but no stdout and no error (e.g. missing print statement)
+                call.respond(
+                    ApiCallResult(
+                        buttonText = "Calculate tokens",
+                        resetButtonTextSeconds = null,
+                        changeInput = mapOf("onlyTokenize" to "on"),
+                        alertText = "Missing stdout. Expected a number. Ensure that your code prints the solution to stdout."
+                    )
+                )
+                return
+            }
+
+            else -> {
+                // Code execution failed
+                call.respond(
+                    ApiCallResult(
+                        buttonText = "Calculate tokens",
+                        resetButtonTextSeconds = null,
+                        changeInput = mapOf("onlyTokenize" to "on"),
+                        alertText = "Code execution failed:\n\n${coderunnerResult.error}"
+                    )
+                )
+                return
+            }
         }
-
-        // Save solution to database
-        mainDatabase.getSuspendingCollection<Solution>().insertOne(Solution().apply {
-            _id = randomId()
-            userId = userSession.userId
-            year = request.year.toInt()
-            day = request.day.toInt()
-            part = request.part.toInt()
-            code = request.code
-            language = request.language
-            codePubliclyVisible = request.codeIsPublic == "on"
-            externalLinks = request.externalLinks
-            uploadDate = now
-            this.tokenCount = tokenCount
-            tokenizerVersion = tokenizer.tokenizerVersion
-        }, upsert = false)
-
-        recalculateScore(year = request.year.toInt(), day = request.day.toInt())
-
-        call.respond(ApiCallResult(buttonText = "Submitted", reloadSite = true))
     }
 
     private suspend fun recalculateScore(year: Int, day: Int) {

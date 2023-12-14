@@ -51,7 +51,7 @@ class KotlinPlaygroundCoderunner : Coderunner {
     }
 
 
-    override suspend fun run(code: String, language: Solution.Language, stdin: String): Result<String> = runCatching {
+    override suspend fun run(code: String, language: Solution.Language, stdin: String): Coderunner.RunResult {
         require(language == Solution.Language.KOTLIN)
         val stdInAsListString = stdin.split("\n").joinToString(",") { "\"\"\"$it\"\"\"" }
 
@@ -83,10 +83,13 @@ class KotlinPlaygroundCoderunner : Coderunner {
                 "${error.message} at line ${error.interval.start.line + 1}:${error.interval.start.ch + 1}"
             }
 
-        return if (playgroundErrorString == null) {
-            Result.success(response.text.substringAfter("<outStream>").substringBeforeLast("</outStream>").trim())
-        } else {
-            Result.failure(Exception(playgroundErrorString))
-        }
+        val resultString = response.text
+            .substringAfter("<outStream>", missingDelimiterValue = "")
+            .substringBeforeLast("</outStream>", missingDelimiterValue = "")
+
+        return Coderunner.RunResult(
+            stdout = resultString,
+            error = playgroundErrorString,
+        )
     }
 }

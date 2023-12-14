@@ -34,7 +34,7 @@ class OnecompilerCoderunner(private val onecompilerLanguageId: String) : Coderun
         val stdin: String,
     )
 
-    override suspend fun run(code: String, language: Solution.Language, stdin: String): Result<String> = runCatching {
+    override suspend fun run(code: String, language: Solution.Language, stdin: String): Coderunner.RunResult {
         val onecompilerResponse = httpClient.post("https://onecompiler-apis.p.rapidapi.com/api/v1/run") {
             contentType(ContentType.Application.Json)
             header("X-RapidAPI-Key", System.getenv("RAPIDAPI_KEY"))
@@ -65,10 +65,9 @@ class OnecompilerCoderunner(private val onecompilerLanguageId: String) : Coderun
                     if (onecompilerException == null) "" else " (execution failed)"
         )
 
-        return if (onecompilerException == null) {
-            Result.success(onecompilerResponse.stdout!!)
-        } else {
-            Result.failure(Exception(onecompilerException))
-        }
+        return Coderunner.RunResult(
+            stdout = onecompilerResponse.stdout ?: "",
+            error = onecompilerException,
+        )
     }
 }
