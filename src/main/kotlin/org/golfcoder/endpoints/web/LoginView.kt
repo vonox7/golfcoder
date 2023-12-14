@@ -10,7 +10,8 @@ import org.golfcoder.plugins.UserSession
 
 object LoginView {
     // providerName to providerDisplayName
-    val oauth2Providers = mapOf("github" to "GitHub", "google" to "Google", "reddit" to "Reddit")
+    val oauth2Providers =
+        mapOf("github" to "GitHub", "google" to "Google", "reddit" to "Reddit", "twitter" to "Twitter")
 
     suspend fun getHtml(call: ApplicationCall) {
         val session = call.sessions.get<UserSession>()

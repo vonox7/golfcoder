@@ -4,6 +4,7 @@ import com.moshbit.katerbase.child
 import com.moshbit.katerbase.equal
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -77,6 +78,8 @@ fun Application.configureSecurity() {
         authorizeUrl: String,
         accessTokenUrl: String,
         accessTokenRequiresBasicAuth: Boolean = false,
+        extraAuthParameters: List<Pair<String, String>> = emptyList(),
+        extraTokenParameters: List<Pair<String, String>> = emptyList(),
         defaultScopes: List<String>,
         userInfoUrl: String,
         userInfoClassTypeInfo: TypeInfo,
@@ -99,6 +102,8 @@ fun Application.configureSecurity() {
                         clientSecret = System.getenv("OAUTH_${providerName.uppercase()}_CLIENT_SECRET")
                             ?: error("No OAUTH_${providerName.uppercase()}_CLIENT_SECRET env-var set"),
                         defaultScopes = defaultScopes,
+                        extraAuthParameters = extraAuthParameters,
+                        extraTokenParameters = extraTokenParameters,
                     )
                 }
                 client = httpClient
@@ -112,11 +117,19 @@ fun Application.configureSecurity() {
                     val principal: OAuthAccessTokenResponse.OAuth2 =
                         call.authentication.principal() ?: error("No principal")
 
-                    val userInfo: OauthUserInfoResponse = httpClient.get(userInfoUrl) {
+                    val response = httpClient.get(userInfoUrl) {
                         headers {
                             append(HttpHeaders.Authorization, "Bearer ${principal.accessToken}")
                         }
-                    }.body(userInfoClassTypeInfo)
+                    }
+
+                    val userInfo: OauthUserInfoResponse = try {
+                        response.body(userInfoClassTypeInfo)
+                    } catch (e: Exception) {
+                        println("Error while parsing oauth2 user info: ${e.message}")
+                        println("Response body: ${response.bodyAsText()}")
+                        throw e
+                    }
 
                     val currentSession = call.sessions.get<UserSession>()
                     val currentUser = currentSession?.let {
@@ -223,6 +236,26 @@ fun Application.configureSecurity() {
         userInfoUrl = "https://oauth.reddit.com/api/v1/me",
         userInfoClassTypeInfo = typeInfo<RedditUserInfo>(),
     )
+
+    addOauthProvider(
+        providerName = "twitter",
+        authorizeUrl = "https://twitter.com/i/oauth2/authorize",
+        accessTokenUrl = "https://api.twitter.com/2/oauth2/token",
+        accessTokenRequiresBasicAuth = true,
+        // See https://developer.twitter.com/en/docs/authentication/oauth-2-0/authorization-code
+        extraAuthParameters = listOf(
+            "code_challenge" to "challenge",
+            "code_challenge_method" to "plain",
+        ),
+        // See https://developer.twitter.com/en/docs/authentication/oauth-2-0/user-access-token
+        extraTokenParameters = listOf(
+            "code_verifier" to "challenge",
+        ),
+        // Scopes needed for https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-me
+        defaultScopes = listOf("users.read", "tweet.read"),
+        userInfoUrl = "https://api.twitter.com/2/users/me",
+        userInfoClassTypeInfo = typeInfo<TwitterUserInfo>(),
+    )
 }
 
 class UserSession(val userId: String, val displayName: String) : Principal
@@ -253,6 +286,22 @@ private data class RedditUserInfo(
     @SerialName("icon_img") override val pictureUrl: String,
     // A bunch of more fields which we don't need
 ) : OauthUserInfoResponse
+
+@Serializable
+private data class TwitterUserInfo(
+    val data: TwitterUserData,
+) : OauthUserInfoResponse {
+    override val id: String get() = data.id
+    override val name: String get() = data.name
+    override val pictureUrl: String get() = data.pictureUrl
+
+    @Serializable
+    class TwitterUserData(
+        val id: String,
+        val name: String,
+        @SerialName("profile_image_url") val pictureUrl: String = "",
+    )
+}
 
 interface OauthUserInfoResponse {
     val id: String
