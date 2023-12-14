@@ -56,3 +56,9 @@ async function submitForm(event) {
         }, resetButtonTextSeconds * 1000);
     }
 }
+
+function resetSubmitForm(event) {
+    const form = event.target.closest("form");
+    form.querySelector("[name=onlyTokenize]").value = "on";
+    form.querySelector("[name=submitButton]").value = "Calculate tokens";
+}

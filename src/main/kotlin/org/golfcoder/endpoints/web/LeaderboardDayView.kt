@@ -50,7 +50,6 @@ object LeaderboardDayView {
         fun HtmlBlockTag.renderUpload() {
             h2 { +"Submit solution" }
             // TODO: Fix design. Maybe use dialog?
-            // TODO: Allow recalculation of tokenCount on textarea/language change
             form(action = "/api/solution/upload") {
                 input(type = InputType.hidden) {
                     name = "year"
@@ -72,6 +71,7 @@ object LeaderboardDayView {
                 br()
                 select { // TODO design: either prettify select, or use radio (similar style as checkbox)
                     name = "language"
+                    onChange = "resetSubmitForm(event)"
                     val defaultLanguage = currentUser?.defaultLanguage ?: Solution.Language.PYTHON
                     Solution.Language.entries.forEach { language ->
                         option {
@@ -91,7 +91,9 @@ object LeaderboardDayView {
                     name = "code"
                     rows = "10"
                     cols = "80"
-                    placeholder = "Paste your code here"
+                    placeholder = "Paste your code here. Download a template for your language below."
+                    onChange = "resetSubmitForm(event)"
+                    onKeyDown = "resetSubmitForm(event)"
                     maxLength = UploadSolutionApi.MAX_CODE_LENGTH.toString()
                 }
                 br()
