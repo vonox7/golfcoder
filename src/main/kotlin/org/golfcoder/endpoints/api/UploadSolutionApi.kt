@@ -38,7 +38,6 @@ object UploadSolutionApi {
         val code: String,
         val language: Solution.Language,
         val codeIsPublic: String = "off",
-        val externalLinks: List<String> = emptyList(), // TODO UI needed (with explanation)
         val onlyTokenize: String,
     )
 
@@ -54,8 +53,6 @@ object UploadSolutionApi {
             call.respond(ApiCallResult(buttonText = "Forgot to paste your code?"))
             return
         }
-        require(request.externalLinks.count() <= 3)
-        require(request.externalLinks.all { it.length < 300 })
 
         // Tokenize
         val tokenizer = request.language.tokenizer
@@ -164,7 +161,6 @@ object UploadSolutionApi {
                     code = request.code
                     language = request.language
                     codePubliclyVisible = request.codeIsPublic == "on"
-                    externalLinks = request.externalLinks
                     uploadDate = now
                     this.tokenCount = tokenCount
                     tokenizerVersion = tokenizer.tokenizerVersion

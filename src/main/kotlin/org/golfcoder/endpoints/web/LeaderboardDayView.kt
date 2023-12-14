@@ -49,7 +49,6 @@ object LeaderboardDayView {
 
         fun HtmlBlockTag.renderUpload() {
             h2 { +"Submit solution" }
-            // TODO: Fix design. Maybe use dialog?
             form(action = "/api/solution/upload") {
                 input(type = InputType.hidden) {
                     name = "year"
@@ -59,7 +58,7 @@ object LeaderboardDayView {
                     name = "day"
                     value = day.toString()
                 }
-                select {
+                select("right-spacing") {
                     name = "part"
                     PART_RANGE.forEach { part ->
                         option {
@@ -68,8 +67,7 @@ object LeaderboardDayView {
                         }
                     }
                 }
-                br()
-                select { // TODO design: either prettify select, or use radio (similar style as checkbox)
+                select {
                     name = "language"
                     onChange = "resetSubmitForm(event)"
                     val defaultLanguage = currentUser?.defaultLanguage ?: Solution.Language.PYTHON
@@ -95,6 +93,7 @@ object LeaderboardDayView {
                     onChange = "resetSubmitForm(event)"
                     onKeyDown = "resetSubmitForm(event)"
                     maxLength = UploadSolutionApi.MAX_CODE_LENGTH.toString()
+                    spellCheck = false
                 }
                 br()
                 b { +"Rules" }

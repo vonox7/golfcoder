@@ -168,6 +168,10 @@ header .github-star-button {
     width: 50%;
 }
 
+.left-right-layout div h2:first-child {
+    margin-top: 0;
+}
+
 /* mobile: stack left and right */
 @media (max-width: 1000px) {
     .left-right-layout {
@@ -283,7 +287,7 @@ button:active, input[type=submit]:active {
 button:disabled, input[type=submit]:disabled {
     background-color: #c9c9b4;
     color: #434343;
-    cursor: not-allowed;
+    cursor: wait;
 }
 
 input[type=text] {
@@ -304,6 +308,7 @@ select {
     font-weight: bold;
     border: none;
     border-radius: 2px;
+    cursor: pointer;
 }
 
 textarea {
@@ -312,6 +317,30 @@ textarea {
     max-width: calc(100% - 4px);
     border: none;
     border-radius: 2px;
+    background-color: #2b2b2b;
+    color: #eaeaea;
+    padding: 0.4em 0.6em;
+    line-height: 160%;
+    resize: none;
+}
+
+textarea:focus, input:focus, select:focus, button:focus, .checkbox-container input:focus ~ .checkbox {
+    outline: none;
+    box-shadow: 0 0 6px 4px #cccccc52;
+}
+
+a:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px #cccccc52;
+}
+
+dialog:focus {
+    outline: none;
+}
+
+a {
+    border-radius: 2px;
+    border: 1px solid transparent;
 }
 
 .text-secondary-info {
@@ -320,6 +349,10 @@ textarea {
 
 .text-big {
     font-size: 120%;
+}
+
+.right-spacing {
+    margin-right: 16px;
 }
 
 /* Error-Dialog */

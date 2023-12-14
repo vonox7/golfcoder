@@ -53,7 +53,6 @@ class Solution : MongoMainEntry() {
     var day: Int = 0
     var part: Int = 0
     var codePubliclyVisible: Boolean = false
-    var externalLinks: List<String> = emptyList() // e.g. Github, Blog explaining stuff...
     var tokenCount: Int = 0
     var tokenizerVersion: Int = 0
 
