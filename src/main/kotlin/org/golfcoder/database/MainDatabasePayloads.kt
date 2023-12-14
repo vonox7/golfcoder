@@ -93,9 +93,9 @@ class Solution : MongoMainEntry() {
         val tokenizer: Tokenizer
             get() = when (this) {
                 PYTHON -> TreeSitterTokenizer("python", tokenizerVersion = 1)
-                RUST -> NotYetAvailableTokenizer()
+                RUST -> TreeSitterTokenizer("rust", tokenizerVersion = 1)
                 GO -> NotYetAvailableTokenizer()
-                KOTLIN -> TreeSitterTokenizer("kotlin", tokenizerVersion = 2)
+                KOTLIN -> TreeSitterTokenizer("kotlin", tokenizerVersion = 3)
                 JAVASCRIPT -> TreeSitterTokenizer("javascript", tokenizerVersion = 1)
                 CSHARP -> NotYetAvailableTokenizer()
                 TYPESCRIPT -> NotYetAvailableTokenizer()

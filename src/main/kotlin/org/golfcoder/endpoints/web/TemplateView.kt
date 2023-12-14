@@ -29,6 +29,18 @@ object TemplateView {
 
     val Solution.Language.template: String?
         get() = when (this) {
+            Solution.Language.RUST -> {
+                @Language("Rust")
+                val code = """
+                |use std::io::BufRead;
+                |
+                |fn main() {
+                |    let lines = std::io::stdin().lock().lines();
+                |    println!("{}", lines.count());
+                |}""".trimMargin()
+                code
+            }
+
             Solution.Language.PYTHON -> {
                 @Language("Python")
                 val code = """
@@ -58,7 +70,7 @@ object TemplateView {
             }
 
             Solution.Language.KOTLIN -> {
-                @Language("Kotlin")
+                @Language("kotlin")
                 val code = """
                 |fun main() {
                 |    // If you want to iterate over `lines` multiple times, write `generateSequence(::readLine).toList()`

@@ -1,4 +1,5 @@
 const Parser = require('tree-sitter');
+const Rust = require('tree-sitter-rust');
 const Python = require('tree-sitter-python');
 const JavaScript = require('tree-sitter-javascript');
 const Kotlin = require('tree-sitter-kotlin');
@@ -13,7 +14,9 @@ app.get('/', (request, response) => {
 app.post('/tokenize', (request, response) => {
     const parser = new Parser();
 
-    if (request.body.language === "python") {
+    if (request.body.language === "rust") {
+        parser.setLanguage(Rust);
+    } else if (request.body.language === "python") {
         parser.setLanguage(Python);
     } else if (request.body.language === "javascript") {
         parser.setLanguage(JavaScript);
@@ -40,20 +43,14 @@ app.post('/tokenize', (request, response) => {
     const traverseTree = (node) => {
         const children = node.children;
 
-        if (String(node.type) === "character_literal") {
+        if (String(node.type) === "string_literal") {
+            // tree-sitter-rust has as string_literal text ""hello"", but has only 2 children (the 2 brackets).
+            // So manually add the literal text
+            addNode(node)
+        } else if (String(node.type) === "character_literal") {
             // tree-sitter-kotlin has as character_literal text "'a'", but has only 2 children (the 2 brackets).
-            // So manually add the middle character.
-            // Not sure yet if this needs to be done for other languages - at least Python & JS don't have this bug.
-            addNode(node.children[0], "character_literal")
-            tokens.push({
-                startRow: node.children[0].endPosition.row + 1,
-                startColumn: node.children[0].endPosition.column,
-                endRow: node.children[1].startPosition.row + 1,
-                endColumn: node.children[1].startPosition.column,
-                type: "character_literal",
-                text: String(node.text).replaceAll("'", ""),
-            })
-            addNode(node.children[1], "character_literal")
+            // So manually add the literal text
+            addNode(node)
         } else if (children.length === 0) {
             addNode(node)
         } else {
