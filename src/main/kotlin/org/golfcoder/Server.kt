@@ -111,8 +111,6 @@ private fun Application.ktorServerModule() {
             post("/api/user/edit") { EditUserApi.post(call) }
         }
 
-        // TODO robots.txt, etc.
-
         if (Sysinfo.isLocal) {
             get("/create-random-user") { DebugView.createRandomUser(call) }
         }
