@@ -1,6 +1,7 @@
 const Parser = require('tree-sitter');
 const Python = require('tree-sitter-python');
 const Rust = require('tree-sitter-rust');
+const Go = require('tree-sitter-go');
 const Kotlin = require('tree-sitter-kotlin');
 const JavaScript = require('tree-sitter-javascript');
 
@@ -18,6 +19,8 @@ app.post('/tokenize', (request, response) => {
         parser.setLanguage(Python);
     } else if (request.body.language === "rust") {
         parser.setLanguage(Rust);
+    } else if (request.body.language === "go") {
+        parser.setLanguage(Go);
     } else if (request.body.language === "kotlin") {
         parser.setLanguage(Kotlin);
     } else if (request.body.language === "javascript") {
@@ -45,6 +48,10 @@ app.post('/tokenize', (request, response) => {
 
         if (String(node.type) === "string_literal") {
             // tree-sitter-rust has as string_literal text ""hello"", but has only 2 children (the 2 brackets).
+            // So manually add the literal text
+            addNode(node)
+        } else if (String(node.type) === "interpreted_string_literal") {
+            // tree-sitter-go has as interpreted_string_literal text ""hello"", but has only 2 children (the 2 brackets).
             // So manually add the literal text
             addNode(node)
         } else if (String(node.type) === "character_literal") {

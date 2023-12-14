@@ -94,7 +94,7 @@ class Solution : MongoMainEntry() {
             get() = when (this) {
                 PYTHON -> TreeSitterTokenizer("python", tokenizerVersion = 1)
                 RUST -> TreeSitterTokenizer("rust", tokenizerVersion = 1)
-                GO -> NotYetAvailableTokenizer()
+                GO -> TreeSitterTokenizer("go", tokenizerVersion = 1)
                 KOTLIN -> TreeSitterTokenizer("kotlin", tokenizerVersion = 3)
                 JAVASCRIPT -> TreeSitterTokenizer("javascript", tokenizerVersion = 1)
                 CSHARP -> NotYetAvailableTokenizer()

@@ -274,7 +274,7 @@ object LeaderboardDayView {
                     br()
 
                     // Add indent
-                    if (token.type != Tokenizer.Token.Type.WHITESPACE && token.sourcePosition.start.columnNumber > 1) {
+                    if (token.sourcePosition.start.columnNumber > 1) {
                         code("token-whitespace") { +" ".repeat(token.sourcePosition.start.columnNumber) }
                     }
                 }
@@ -289,8 +289,7 @@ object LeaderboardDayView {
                             }
                         }
                     }
-
-                    Tokenizer.Token.Type.WHITESPACE -> code("token-whitespace") { +token.source }
+                    Tokenizer.Token.Type.WHITESPACE -> Unit // Don't render whitespaces, they get added via the above indent calculation
                     Tokenizer.Token.Type.COMMENT -> code("token-comment") { +token.source }
                 }
             }

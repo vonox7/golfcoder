@@ -54,6 +54,28 @@ object TemplateView {
                 code
             }
 
+            Solution.Language.GO -> {
+                @Language("Go")
+                val code = """
+                |package main
+                |
+                |import (
+                |    "bufio"
+                |    "fmt"
+                |    "os"
+                |)
+                |
+                |func main() {
+                |    scanner := bufio.NewScanner(os.Stdin)
+                |    lines := 0
+                |    for scanner.Scan() {
+                |        lines++
+                |    }
+                |    fmt.Println(lines)
+                |}""".trimMargin()
+                code
+            }
+
             Solution.Language.KOTLIN -> {
                 @Language("kotlin")
                 val code = """
