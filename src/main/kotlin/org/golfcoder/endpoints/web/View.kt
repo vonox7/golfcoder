@@ -18,6 +18,7 @@ suspend fun ApplicationCall.respondHtmlView(
         head(pageTitle = pageTitle)
         body {
             header(this@respondHtmlView)
+            errorDialog()
             render()
         }
     }
@@ -108,6 +109,27 @@ private fun HtmlBlockTag.header(call: ApplicationCall) {
         }
     }
 }
+
+private fun HtmlBlockTag.errorDialog() {
+    dialog {
+        id = "error-dialog"
+        div {
+            div("header") {
+                +"Error"
+            }
+            div {
+                id = "error-dialog-body"
+            }
+            div("footer") {
+                button {
+                    onClick = """document.getElementById("error-dialog").close();"""
+                    +"OK"
+                }
+            }
+        }
+    }
+}
+
 
 // Render either url or initials (fallback to XX initials)
 fun HtmlBlockTag.renderUserProfileImage(user: User?, big: Boolean = false) {

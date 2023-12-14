@@ -26,9 +26,8 @@ async function submitForm(event) {
                 event.target.value = responseData.buttonText;
             }
             if (responseData.alertText) {
-                setTimeout(() => {
-                    alert(responseData.alertText); // TODO use modern dialog?
-                }, 1);
+                document.getElementById("error-dialog-body").textContent = responseData.alertText; // TODO server side html
+                document.getElementById("error-dialog").showModal();
             }
             resetButtonTextSeconds = responseData.resetButtonTextSeconds;
             // responseData.changeInput is a map<String, String> of input name to new value. Change the form input values:

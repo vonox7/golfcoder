@@ -214,6 +214,7 @@ header .github-star-button {
     height: 25px;
     width: 25px;
     background-color: #b8bec2;
+    border-radius: 2px;
 }
 
 /* On mouse-over, add a grey background color */
@@ -254,7 +255,7 @@ header .github-star-button {
     transform: rotate(45deg);
 }
 
-.button, input[type=submit] {
+button, input[type=submit] {
     background-color: #fcdd2d;
     border: none;
     padding: 12px 24px;
@@ -267,13 +268,14 @@ header .github-star-button {
     color: #0b171f;
     font-weight: bold;
     cursor: pointer;
+    border-radius: 2px;
 }
 
-.button:hover, input[type=submit]:hover {
+button:hover, input[type=submit]:hover {
     background-color: #c0b375;
 }
 
-.button:active, input[type=submit]:active {
+button:active, input[type=submit]:active {
     background-color: #a2976a;
     color: #000000;
 }
@@ -290,6 +292,7 @@ input[type=text] {
     border: none;
     margin: 2px;
     padding: 2px 6px;
+    border-radius: 2px;
 }
 
 select {
@@ -299,12 +302,16 @@ select {
     font-size: 16px;
     padding: 8px;
     font-weight: bold;
+    border: none;
+    border-radius: 2px;
 }
 
 textarea {
     margin-top: 8px;
     margin-bottom: 8px;
     max-width: calc(100% - 4px);
+    border: none;
+    border-radius: 2px;
 }
 
 .text-secondary-info {
@@ -313,4 +320,66 @@ textarea {
 
 .text-big {
     font-size: 120%;
+}
+
+/* Error-Dialog */
+
+dialog {
+    background-color: #10161b;
+    color: #dad8cd;
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 0 64px 10px #111, 0 0 10px #080808;
+}
+
+dialog .header {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+
+dialog .footer {
+    float: right;
+}
+
+dialog .footer button {
+    margin-top: 16px;
+    margin-bottom: 0;
+}
+
+/*   Open state of the dialog  */
+dialog[open] {
+    opacity: 1;
+}
+
+/*   Closed state of the dialog   */
+dialog {
+    opacity: 0;
+    transition: all 0.15s allow-discrete;
+}
+
+/*   Before-open state  */
+/* Needs to be after the previous dialog[open] rule to take effect, as the specificity is the same */
+@starting-style {
+    dialog[open] {
+        opacity: 0;
+    }
+}
+
+/* Transition the :backdrop when the dialog modal is promoted to the top layer */
+dialog::backdrop {
+    background-color: rgb(0 0 0 / 0);
+    transition: all 0.15s allow-discrete;
+}
+
+dialog[open]::backdrop {
+    background-color: rgb(33 33 33 / 0.75);
+}
+
+/* This starting-style rule cannot be nested inside the above selector
+because the nesting selector cannot represent pseudo-elements. */
+@starting-style {
+    dialog[open]::backdrop {
+        background-color: rgb(0 0 0 / 0);
+    }
 }
