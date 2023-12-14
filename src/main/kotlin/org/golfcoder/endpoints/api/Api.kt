@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 class ApiCallResult(
     val buttonText: String? = null,
     val resetButtonTextSeconds: Int? = 2,
-    val alertText: String? = null,
+    val alertHtml: String? = null,
     val reloadSite: Boolean = false,
     val changeInput: Map<String, String> = emptyMap(), // name to value
     val setInnerHtml: Map<String, String> = emptyMap(), // id to html

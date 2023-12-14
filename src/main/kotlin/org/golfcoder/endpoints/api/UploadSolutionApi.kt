@@ -7,9 +7,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 import kotlinx.coroutines.flow.toList
-import kotlinx.html.div
-import kotlinx.html.h2
-import kotlinx.html.p
+import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
@@ -71,7 +69,11 @@ object UploadSolutionApi {
             tokenCount = tokenizer.getTokenCount(tokens)
         } catch (e: Exception) {
             // Could either be a syntax error or a tokenizer error (like network issue, bug in our code...)
-            call.respond(ApiCallResult(buttonText = "Tokenizer failed", alertText = "Tokenizer failed:\n${e.message}"))
+            call.respond(ApiCallResult(buttonText = "Tokenizer failed", alertHtml = createHTML().div {
+                +"Tokenizer failed:"
+                br()
+                code { +"${e.message}" }
+            }))
             return
         }
 
@@ -124,8 +126,11 @@ object UploadSolutionApi {
                 ApiCallResult(
                     buttonText = "Please wait",
                     resetButtonTextSeconds = null,
-                    alertText = "Please wait a few hours until submitting your solution for this day.\n" +
-                            "We need to solve it first ;).",
+                    alertHtml = createHTML().div {
+                        +"Please wait a few hours until submitting your solution for this day."
+                        br()
+                        +"We need to solve it first ;)."
+                    },
                     changeInput = mapOf("onlyTokenize" to "on"),
                 )
             )
@@ -177,8 +182,16 @@ object UploadSolutionApi {
                         buttonText = "Calculate tokens",
                         resetButtonTextSeconds = null,
                         changeInput = mapOf("onlyTokenize" to "on"),
-                        alertText = "Wrong stdout. The number does not match the expected output.\n" +
-                                "If you think this is a bug, please report it to Golfcoder (see About & FAQ)."
+                        alertHtml = createHTML().div {
+                            +"Wrong stdout. Expected "
+                            code { +"${expectedOutput.output}" }
+                            +", but got "
+                            code { +codeRunnerStdout }
+                            +"."
+                            br()
+                            br()
+                            +"If you think this is a bug, please report it to Golfcoder (see About & FAQ)."
+                        }
                     )
                 )
                 return
@@ -191,7 +204,11 @@ object UploadSolutionApi {
                         buttonText = "Calculate tokens",
                         resetButtonTextSeconds = null,
                         changeInput = mapOf("onlyTokenize" to "on"),
-                        alertText = "Wrong stdout. Expected a number, but got \"$codeRunnerStdout\"."
+                        alertHtml = createHTML().div {
+                            +"Wrong stdout. Expected a number, but got "
+                            code { +codeRunnerStdout }
+                            +"."
+                        }
                     )
                 )
                 return
@@ -204,7 +221,9 @@ object UploadSolutionApi {
                         buttonText = "Calculate tokens",
                         resetButtonTextSeconds = null,
                         changeInput = mapOf("onlyTokenize" to "on"),
-                        alertText = "Missing stdout. Expected a number. Ensure that your code prints the solution to stdout."
+                        alertHtml = createHTML().div {
+                            +"Missing stdout. Expected a number. Ensure that your code prints the solution to stdout."
+                        },
                     )
                 )
                 return
@@ -217,7 +236,11 @@ object UploadSolutionApi {
                         buttonText = "Calculate tokens",
                         resetButtonTextSeconds = null,
                         changeInput = mapOf("onlyTokenize" to "on"),
-                        alertText = "Code execution failed:\n\n${coderunnerResult.error}"
+                        alertHtml = createHTML().div {
+                            +"Code execution failed:"
+                            br()
+                            code { +coderunnerResult.error }
+                        },
                     )
                 )
                 return

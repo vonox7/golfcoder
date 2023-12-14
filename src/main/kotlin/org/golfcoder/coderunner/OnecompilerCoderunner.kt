@@ -2,6 +2,7 @@ package org.golfcoder.coderunner
 
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
 import org.golfcoder.database.Solution
@@ -35,7 +36,7 @@ class OnecompilerCoderunner(private val onecompilerLanguageId: String) : Coderun
     )
 
     override suspend fun run(code: String, language: Solution.Language, stdin: String): Coderunner.RunResult {
-        val onecompilerResponse = httpClient.post("https://onecompiler-apis.p.rapidapi.com/api/v1/run") {
+        val request = httpClient.post("https://onecompiler-apis.p.rapidapi.com/api/v1/run") {
             contentType(ContentType.Application.Json)
             header("X-RapidAPI-Key", System.getenv("RAPIDAPI_KEY"))
             header("X-RapidAPI-Host", "onecompiler-apis.p.rapidapi.com")
@@ -51,7 +52,13 @@ class OnecompilerCoderunner(private val onecompilerLanguageId: String) : Coderun
                     )
                 )
             )
-        }.body<OnecompilerResponse>()
+        }
+
+        val onecompilerResponse = try {
+            request.body<OnecompilerResponse>()
+        } catch (e: Exception) {
+            throw Exception("Failed to parse response from OneCompiler: ${request.bodyAsText()}", e)
+        }
 
         val onecompilerException = (onecompilerResponse.stderr?.takeIf { it.isNotEmpty() }
             ?: onecompilerResponse.exception?.takeIf { it.isNotEmpty() })

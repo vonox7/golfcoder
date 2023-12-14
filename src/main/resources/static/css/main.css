@@ -347,6 +347,11 @@ dialog .footer button {
     margin-bottom: 0;
 }
 
+dialog code {
+    margin-top: 10px;
+    padding: 0.4em 0.8em;
+}
+
 /*   Open state of the dialog  */
 dialog[open] {
     opacity: 1;

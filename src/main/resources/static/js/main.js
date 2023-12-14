@@ -25,8 +25,8 @@ async function submitForm(event) {
             if (responseData.buttonText) {
                 event.target.value = responseData.buttonText;
             }
-            if (responseData.alertText) {
-                document.getElementById("error-dialog-body").textContent = responseData.alertText; // TODO server side html
+            if (responseData.alertHtml) {
+                document.getElementById("error-dialog-body").innerHTML = responseData.alertHtml;
                 document.getElementById("error-dialog").showModal();
             }
             resetButtonTextSeconds = responseData.resetButtonTextSeconds;
