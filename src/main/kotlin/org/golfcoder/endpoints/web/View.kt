@@ -35,7 +35,7 @@ private fun HTML.head(pageTitle: String) {
         }
         meta {
             name = "theme-color"
-            content = "#fcdd2d"
+            content = "#0c171f"
         }
         title {
             +pageTitle

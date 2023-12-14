@@ -1,6 +1,6 @@
 /* GLOBAL */
 
-body {
+html {
     font-family: 'Roboto', sans-serif;
     font-size: 1rem;
     line-height: 1.5;
@@ -13,7 +13,9 @@ a {
     color: #fcdd2d;
     font-weight: bold;
     background-color: transparent;
-    text-decoration: underline 0.1em rgba(255, 255, 255, 0);
+    text-decoration-color: rgba(255, 255, 255, 0);
+    text-decoration-line: underline;
+    text-decoration-thickness: 3px;
     transition: color 0.15s ease-in-out, text-decoration-color 0.15s;
 }
 
@@ -39,7 +41,7 @@ code {
     padding: 0.2em 0.4em;
     border-radius: 6px;
     font-size: 85%;
-    font-family: monospace;
+    font-family: "Menlo", "Courier New", monospace;
     white-space: pre;
     margin: 2px;
 }
@@ -75,12 +77,6 @@ header {
     font-size: 20px;
 }
 
-header .header-text {
-    font-weight: bold;
-    float: left;
-    margin-right: 16px;
-}
-
 header .header-logo {
     margin-right: 8px;
     margin-bottom: -2px;
@@ -107,7 +103,7 @@ header .github-star-button {
     display: inline-block;
     text-align: center;
     color: #0c171f;
-    font-family: monospace;
+    font-family: "Menlo", "Courier New", monospace;
     border: 1px solid #b8bec2;
 }
 
@@ -297,6 +293,7 @@ input[type=text] {
     margin: 2px;
     padding: 2px 6px;
     border-radius: 2px;
+    font-size: 0.85em;
 }
 
 select {
@@ -305,6 +302,7 @@ select {
     margin-bottom: 8px;
     font-size: 16px;
     padding: 8px;
+    height: 36px;
     font-weight: bold;
     border: none;
     border-radius: 2px;
@@ -322,6 +320,12 @@ textarea {
     padding: 0.4em 0.6em;
     line-height: 160%;
     resize: none;
+    font-size: 0.85em;
+    font-family: "Menlo", "Courier New", monospace;
+}
+
+textarea::placeholder {
+    color: #888;
 }
 
 textarea:focus, input:focus, select:focus, button:focus, .checkbox-container input:focus ~ .checkbox {

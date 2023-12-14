@@ -60,7 +60,7 @@ object LeaderboardYearView {
 
                             if (positionOne == null) {
                                 td("text-secondary-info") {
-                                    colSpan = "3"
+                                    colSpan = "6"
                                     +" No submissions yet"
                                 }
                             } else {
