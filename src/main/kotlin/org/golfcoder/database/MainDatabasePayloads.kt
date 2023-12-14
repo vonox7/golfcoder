@@ -72,7 +72,10 @@ class Solution : MongoMainEntry() {
         TYPESCRIPT("TypeScript", "ts"),
         CPLUSPLUS("C++", "cpp"),
         JAVA("Java", "java"),
-        C("C", "c");
+        C("C", "c"),
+        SWIFT("Swift", "swift"),
+        SCALA("Scala", "scala"),
+        ;
 
         val coderunner: Coderunner
             get() = when (this) {
@@ -86,6 +89,8 @@ class Solution : MongoMainEntry() {
                 CPLUSPLUS -> OnecompilerCoderunner("cpp")
                 JAVA -> OnecompilerCoderunner("java")
                 C -> OnecompilerCoderunner("c")
+                SWIFT -> OnecompilerCoderunner("swift")
+                SCALA -> OnecompilerCoderunner("scala")
             }
 
 
@@ -101,6 +106,8 @@ class Solution : MongoMainEntry() {
                 CPLUSPLUS -> TreeSitterTokenizer("cpp", tokenizerVersion = 1)
                 JAVA -> TreeSitterTokenizer("java", tokenizerVersion = 1)
                 C -> TreeSitterTokenizer("c", tokenizerVersion = 1)
+                SWIFT -> TreeSitterTokenizer("swift", tokenizerVersion = 1)
+                SCALA -> TreeSitterTokenizer("scala", tokenizerVersion = 1)
             }
     }
 }

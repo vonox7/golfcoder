@@ -9,6 +9,8 @@ const TypeScript = require('tree-sitter-typescript').typescript;
 const CPlusPlus = require('tree-sitter-cpp');
 const Java = require('tree-sitter-java');
 const C = require('tree-sitter-c');
+const Swift = require('tree-sitter-swift');
+const Scala = require('tree-sitter-scala');
 
 const express = require("express");
 const app = express();
@@ -31,6 +33,8 @@ app.post('/tokenize', (request, response) => {
         "cpp": CPlusPlus,
         "java": Java,
         "c": C,
+        "swift": Swift,
+        "scala": Scala,
     };
     const language = languages[request.body.language];
     if (language === undefined) {

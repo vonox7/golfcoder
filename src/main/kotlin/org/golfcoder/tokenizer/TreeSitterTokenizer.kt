@@ -53,6 +53,7 @@ class TreeSitterTokenizer(private val language: String, override val tokenizerVe
                         "\n" in treeSitterToken.text -> Tokenizer.Token.Type.WHITESPACE // Go reports "\n" for newlines
                         "string" in type -> Tokenizer.Token.Type.STRING // e.g. Python reports "string_content", Javascript "string_fragment".
                         "character" in type -> Tokenizer.Token.Type.STRING // Kotlin reports "character_literal" for e.g. 'a'.
+                        "str_text" in type -> Tokenizer.Token.Type.STRING // Swift reports "line_str_text"
                         else -> Tokenizer.Token.Type.CODE_TOKEN
                     }
                 }

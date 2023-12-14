@@ -196,6 +196,32 @@ object TemplateView {
                 code
             }
 
+            Solution.Language.SWIFT -> {
+                @Language("Swift")
+                val code = """
+                |import Foundation
+                |
+                |var lines = [String]()
+                |while let line = readLine() {
+                |    lines.append(line)
+                |}
+                |print(lines.count)
+                |""".trimMargin()
+                code
+            }
+
+            Solution.Language.SCALA -> {
+                @Language("TEXT")
+                val code = """
+                |import scala.io.StdIn
+                |
+                |object Main extends App {
+                |    val lines = Iterator.continually(StdIn.readLine()).takeWhile(_ != null).toList
+                |    println(lines.length)
+                |}""".trimMargin()
+                code
+            }
+
             else -> null
         }
 }
