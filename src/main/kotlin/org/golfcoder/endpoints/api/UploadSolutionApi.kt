@@ -41,11 +41,9 @@ object UploadSolutionApi {
         val onlyTokenize: String,
     )
 
-    // TODO restructure into multiple functions/classes
     suspend fun post(call: ApplicationCall) {
         val request = call.receive<UploadSolutionRequest>()
         val userSession = call.sessions.get<UserSession>()
-        val now = Date()
 
         // Validate user input
         require(request.code.length <= MAX_CODE_LENGTH)
@@ -135,6 +133,17 @@ object UploadSolutionApi {
         }
 
         // Run code
+        runCode(call, request, expectedOutput, userSession, tokenCount, tokenizer)
+    }
+
+    private suspend fun runCode(
+        call: ApplicationCall,
+        request: UploadSolutionRequest,
+        expectedOutput: ExpectedOutput,
+        userSession: UserSession,
+        tokenCount: Int,
+        tokenizer: Tokenizer,
+    ) {
         val coderunnerResult = try {
             request.language.coderunner.run(request.code, request.language, expectedOutput.input)
         } catch (e: Exception) {
@@ -145,11 +154,10 @@ object UploadSolutionApi {
             )
         }
 
-
         val codeRunnerStdout = coderunnerResult.stdout.trim()
         val outputNumber = codeRunnerStdout.toLongOrNull()
 
-        when {
+        call.respond(when {
             outputNumber == expectedOutput.output -> {
                 // Correct solution. Save solution to database
                 mainDatabase.getSuspendingCollection<Solution>().insertOne(Solution().apply {
@@ -161,87 +169,75 @@ object UploadSolutionApi {
                     code = request.code
                     language = request.language
                     codePubliclyVisible = request.codeIsPublic == "on"
-                    uploadDate = now
+                    uploadDate = Date()
                     this.tokenCount = tokenCount
                     tokenizerVersion = tokenizer.tokenizerVersion
                 }, upsert = false)
 
                 recalculateScore(year = request.year.toInt(), day = request.day.toInt())
 
-                call.respond(ApiCallResult(buttonText = "Submitted", reloadSite = true))
+                ApiCallResult(buttonText = "Submitted", reloadSite = true)
             }
 
             outputNumber != null -> {
                 // Incorrect solution, but code execution worked
-                call.respond(
-                    ApiCallResult(
-                        buttonText = "Calculate tokens",
-                        resetButtonTextSeconds = null,
-                        changeInput = mapOf("onlyTokenize" to "on"),
-                        alertHtml = createHTML().div {
-                            +"Wrong stdout. Expected "
-                            code { +"${expectedOutput.output}" }
-                            +", but got "
-                            code { +codeRunnerStdout }
-                            +"."
-                            br()
-                            br()
-                            +"If you think this is a bug, please report it to Golfcoder (see About & FAQ)."
-                        }
-                    )
+                ApiCallResult(
+                    buttonText = "Calculate tokens",
+                    resetButtonTextSeconds = null,
+                    changeInput = mapOf("onlyTokenize" to "on"),
+                    alertHtml = createHTML().div {
+                        +"Wrong stdout. Expected "
+                        code { +"${expectedOutput.output}" }
+                        +", but got "
+                        code { +codeRunnerStdout }
+                        +"."
+                        br()
+                        br()
+                        +"If you think this is a bug, please report it to Golfcoder (see About & FAQ)."
+                    }
                 )
-                return
             }
 
             codeRunnerStdout.isNotEmpty() -> {
                 // Code got executed, but could not be cast to a number
-                call.respond(
-                    ApiCallResult(
-                        buttonText = "Calculate tokens",
-                        resetButtonTextSeconds = null,
-                        changeInput = mapOf("onlyTokenize" to "on"),
-                        alertHtml = createHTML().div {
-                            +"Wrong stdout. Expected a number, but got "
-                            code { +codeRunnerStdout }
-                            +"."
-                        }
-                    )
+                ApiCallResult(
+                    buttonText = "Calculate tokens",
+                    resetButtonTextSeconds = null,
+                    changeInput = mapOf("onlyTokenize" to "on"),
+                    alertHtml = createHTML().div {
+                        +"Wrong stdout. Expected a number, but got "
+                        code { +codeRunnerStdout }
+                        +"."
+                    }
                 )
-                return
             }
 
             coderunnerResult.error.isNullOrEmpty() -> {
                 // Code got executed, but no stdout and no error (e.g. missing print statement)
-                call.respond(
-                    ApiCallResult(
-                        buttonText = "Calculate tokens",
-                        resetButtonTextSeconds = null,
-                        changeInput = mapOf("onlyTokenize" to "on"),
-                        alertHtml = createHTML().div {
-                            +"Missing stdout. Expected a number. Ensure that your code prints the solution to stdout."
-                        },
-                    )
+                ApiCallResult(
+                    buttonText = "Calculate tokens",
+                    resetButtonTextSeconds = null,
+                    changeInput = mapOf("onlyTokenize" to "on"),
+                    alertHtml = createHTML().div {
+                        +"Missing stdout. Expected a number. Ensure that your code prints the solution to stdout."
+                    }
                 )
-                return
             }
 
             else -> {
                 // Code execution failed
-                call.respond(
-                    ApiCallResult(
-                        buttonText = "Calculate tokens",
-                        resetButtonTextSeconds = null,
-                        changeInput = mapOf("onlyTokenize" to "on"),
-                        alertHtml = createHTML().div {
-                            +"Code execution failed:"
-                            br()
-                            code { +coderunnerResult.error }
-                        },
-                    )
+                ApiCallResult(
+                    buttonText = "Calculate tokens",
+                    resetButtonTextSeconds = null,
+                    changeInput = mapOf("onlyTokenize" to "on"),
+                    alertHtml = createHTML().div {
+                        +"Code execution failed:"
+                        br()
+                        code { +coderunnerResult.error }
+                    }
                 )
-                return
             }
-        }
+        })
     }
 
     private suspend fun recalculateScore(year: Int, day: Int) {
