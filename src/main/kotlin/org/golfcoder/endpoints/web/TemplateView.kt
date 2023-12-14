@@ -29,6 +29,19 @@ object TemplateView {
 
     val Solution.Language.template: String?
         get() = when (this) {
+            Solution.Language.PYTHON -> {
+                @Language("Python")
+                val code = """
+                |lines = []
+                |while True:
+                |    try:
+                |        lines.append(input())
+                |    except EOFError:
+                |        break
+                |print(len(lines))""".trimMargin()
+                code
+            }
+
             Solution.Language.RUST -> {
                 @Language("Rust")
                 val code = """
@@ -41,16 +54,14 @@ object TemplateView {
                 code
             }
 
-            Solution.Language.PYTHON -> {
-                @Language("Python")
+            Solution.Language.KOTLIN -> {
+                @Language("kotlin")
                 val code = """
-                |lines = []
-                |while True:
-                |    try:
-                |        lines.append(input())
-                |    except EOFError:
-                |        break
-                |print(len(lines))""".trimMargin()
+                |fun main() {
+                |    // If you want to iterate over `lines` multiple times, write `generateSequence(::readLine).toList()`
+                |    val lines = generateSequence(::readLine)
+                |    println(lines.count())
+                |}""".trimMargin()
                 code
             }
 
@@ -66,17 +77,6 @@ object TemplateView {
                 |    .on('close', () => {
                 |        console.log(lines.length);
                 |    });""".trimMargin()
-                code
-            }
-
-            Solution.Language.KOTLIN -> {
-                @Language("kotlin")
-                val code = """
-                |fun main() {
-                |    // If you want to iterate over `lines` multiple times, write `generateSequence(::readLine).toList()`
-                |    val lines = generateSequence(::readLine)
-                |    println(lines.count())
-                |}""".trimMargin()
                 code
             }
 

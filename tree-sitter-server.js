@@ -1,8 +1,8 @@
 const Parser = require('tree-sitter');
-const Rust = require('tree-sitter-rust');
 const Python = require('tree-sitter-python');
-const JavaScript = require('tree-sitter-javascript');
+const Rust = require('tree-sitter-rust');
 const Kotlin = require('tree-sitter-kotlin');
+const JavaScript = require('tree-sitter-javascript');
 
 const express = require("express");
 const app = express();
@@ -14,14 +14,14 @@ app.get('/', (request, response) => {
 app.post('/tokenize', (request, response) => {
     const parser = new Parser();
 
-    if (request.body.language === "rust") {
-        parser.setLanguage(Rust);
-    } else if (request.body.language === "python") {
+    if (request.body.language === "python") {
         parser.setLanguage(Python);
-    } else if (request.body.language === "javascript") {
-        parser.setLanguage(JavaScript);
+    } else if (request.body.language === "rust") {
+        parser.setLanguage(Rust);
     } else if (request.body.language === "kotlin") {
         parser.setLanguage(Kotlin);
+    } else if (request.body.language === "javascript") {
+        parser.setLanguage(JavaScript);
     } else {
         throw new Error("Language not supported");
     }
