@@ -9,7 +9,6 @@ import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator
 import org.golfcoder.expectedoutputaggregator.FornwallAggregator
 import org.golfcoder.expectedoutputaggregator.GereonsAggregator
 import org.golfcoder.expectedoutputaggregator.SevenRebuxAggregator
-import org.golfcoder.tokenizer.NotYetAvailableTokenizer
 import org.golfcoder.tokenizer.Tokenizer
 import org.golfcoder.tokenizer.TreeSitterTokenizer
 import java.util.*
@@ -97,11 +96,11 @@ class Solution : MongoMainEntry() {
                 GO -> TreeSitterTokenizer("go", tokenizerVersion = 1)
                 KOTLIN -> TreeSitterTokenizer("kotlin", tokenizerVersion = 3)
                 JAVASCRIPT -> TreeSitterTokenizer("javascript", tokenizerVersion = 1)
-                CSHARP -> NotYetAvailableTokenizer()
-                TYPESCRIPT -> NotYetAvailableTokenizer()
-                CPLUSPLUS -> NotYetAvailableTokenizer()
-                JAVA -> NotYetAvailableTokenizer()
-                C -> NotYetAvailableTokenizer()
+                CSHARP -> TreeSitterTokenizer("csharp", tokenizerVersion = 1)
+                TYPESCRIPT -> TreeSitterTokenizer("typescript", tokenizerVersion = 1)
+                CPLUSPLUS -> TreeSitterTokenizer("cpp", tokenizerVersion = 1)
+                JAVA -> TreeSitterTokenizer("java", tokenizerVersion = 1)
+                C -> TreeSitterTokenizer("c", tokenizerVersion = 1)
             }
     }
 }

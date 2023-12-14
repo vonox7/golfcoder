@@ -102,6 +102,100 @@ object TemplateView {
                 code
             }
 
+            Solution.Language.CSHARP -> {
+                @Language("TEXT")
+                val code = """
+                |using System;
+                |using System.Collections.Generic;
+                |using System.Linq;
+                |
+                |public class Program
+                |{
+                |    public static void Main()
+                |    {
+                |        var lines = new List<string>();
+                |        string line;
+                |        while ((line = Console.ReadLine()) != null)
+                |        {
+                |            lines.Add(line);
+                |        }
+                |        Console.WriteLine(lines.Count);
+                |    }
+                |}""".trimMargin()
+                code
+            }
+
+            Solution.Language.TYPESCRIPT -> {
+                @Language("TypeScript")
+                val code = """
+                |declare var require: any
+                |declare var process: any
+                |
+                |let lines: string[] = [];
+                |
+                |require('readline')
+                |    .createInterface({input: process.stdin})
+                |    .on('line', (line) => {
+                |        lines.push(line);
+                |    })
+                |    .on('close', () => {
+                |        console.log(lines.length);
+                |    });""".trimMargin()
+                code
+            }
+
+            Solution.Language.CPLUSPLUS -> {
+                @Language("C++")
+                val code = """
+                |#include <iostream>
+                |
+                |int main() {
+                |    std::string line;
+                |    int lines = 0;
+                |    while (std::getline(std::cin, line)) {
+                |        lines++;
+                |    }
+                |    std::cout << lines << std::endl;
+                |}""".trimMargin()
+                code
+            }
+
+            Solution.Language.JAVA -> {
+                @Language("Java")
+                val code = """
+                |import java.util.ArrayList;
+                |import java.util.Scanner;
+                |
+                |public class Main {
+                |    public static void main(String[] args) {
+                |        Scanner scanner = new Scanner(System.in);
+                |        var lines = new ArrayList<String>();
+                |        while (scanner.hasNextLine()) {
+                |            lines.add(scanner.nextLine());
+                |        }
+                |        System.out.println(lines.size());
+                |    }
+                |}""".trimMargin()
+                code
+            }
+
+            Solution.Language.C -> {
+                @Language("TEXT")
+                val code = """
+                |#include <stdio.h>
+                |
+                |int main() {
+                |    char line[1000];
+                |    int lines = 0;
+                |    while (fgets(line, sizeof(line), stdin)) {
+                |        lines++;
+                |    }
+                |    printf("%d", lines);
+                |}
+""".trimMargin()
+                code
+            }
+
             else -> null
         }
 }
