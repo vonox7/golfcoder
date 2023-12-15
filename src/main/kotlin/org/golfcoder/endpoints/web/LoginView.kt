@@ -21,7 +21,7 @@ object LoginView {
         call.respondHtmlView(if (currentUser == null) "Login" else "Link Account") {
             if (currentUser == null) {
                 h1 {
-                    +"Login"
+                    +"Login or create new account"
                 }
                 p {
                     +"Please login via OAuth2 with one of theses providers:"
