@@ -77,6 +77,17 @@ object EditUserView {
                 val singleAocRepositoryUrl = currentUser.adventOfCodeRepositoryInfo?.singleAocRepositoryUrl
                 val yearAocRepositoryUrl = currentUser.adventOfCodeRepositoryInfo?.yearAocRepositoryUrl
 
+                label("checkbox-container") {
+                    val disabled = singleAocRepositoryUrl == null && yearAocRepositoryUrl.isNullOrEmpty()
+                    +"Link my name in the leaderboard with my linked advent-of-code GitHub repository"
+                    input(type = InputType.checkBox) {
+                        name = "showAdventOfCodeRepositoryLink"
+                        checked = currentUser.adventOfCodeRepositoryInfo?.publiclyVisible == true && !disabled
+                        this.disabled = disabled
+                        span("checkbox")
+                    }
+                }
+
                 p("text-secondary-info") {
                     +"If your GitHub account is linked, your name in the leaderboard will get automatically linked with your advent-of-code repository. "
                     +"You might name your repository e.g. advent-of-code, my-aoc-solutions, AdventOfCodeInPython or AoC-XXX."

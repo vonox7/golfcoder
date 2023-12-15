@@ -26,6 +26,7 @@ object EditUserApi {
         val name: String = "",
         val nameIsPublic: String = "off",
         val profilePictureIsPublic: String = "off",
+        val showAdventOfCodeRepositoryLink: String = "off",
     )
 
     @Serializable
@@ -48,6 +49,7 @@ object EditUserApi {
                 User::name setTo newName
                 User::nameIsPublic setTo (request.nameIsPublic == "on")
                 User::profilePictureIsPublic setTo (request.profilePictureIsPublic == "on")
+                User::adventOfCodeRepositoryInfo.child(User.AdventOfCodeRepositoryInfo::publiclyVisible) setTo (request.showAdventOfCodeRepositoryLink == "on")
             }
 
         call.sessions.set(UserSession(session.userId, newName))

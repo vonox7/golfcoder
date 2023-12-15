@@ -37,11 +37,13 @@ class User : MongoMainEntry() {
         val githubProfileName: String,
         var singleAocRepositoryUrl: String? = null,
         var yearAocRepositoryUrl: Map<String, String> = emptyMap(), // year-string to repository-Url
+        var publiclyVisible: Boolean = true,
     ) : MongoSubEntry()
 
     fun getAdventOfCodeRepositoryUrl(year: Int): String? {
-        return adventOfCodeRepositoryInfo?.singleAocRepositoryUrl
-            ?: adventOfCodeRepositoryInfo?.yearAocRepositoryUrl?.get(year.toString())
+        return (adventOfCodeRepositoryInfo?.singleAocRepositoryUrl
+            ?: adventOfCodeRepositoryInfo?.yearAocRepositoryUrl?.get(year.toString()))
+            ?.takeIf { adventOfCodeRepositoryInfo?.publiclyVisible == true }
     }
 }
 
