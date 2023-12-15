@@ -64,11 +64,11 @@ private fun HTML.head(pageTitle: String) {
 
 private fun HtmlBlockTag.header(call: ApplicationCall) {
     header {
-        iframe(classes = "github-star-button") {
+        iframe(classes = "github-star-button mobile-hidden") {
             src = "https://ghbtns.com/github-btn.html?user=vonox7&repo=golfcoder&type=star&count=true&size=large"
             attributes["frameborder"] = "0"
             attributes["scrolling"] = "0"
-            width = "140"
+            width = "130"
             height = "30"
             title = "GitHub"
         }
