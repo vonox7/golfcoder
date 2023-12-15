@@ -202,7 +202,7 @@ object LeaderboardDayView {
                     PART_RANGE.forEach { part ->
                         th(classes = "right-align") { +"Tokens Part $part" }
                     }
-                    th(classes = "right-align") { +"Last change" }
+                    th(classes = "right-align mobile-hidden") { +"Last change" }
                 }
             }
             tbody {
@@ -250,7 +250,7 @@ object LeaderboardDayView {
                                 }
                             }
                         }
-                        td("right-align") {
+                        td("right-align mobile-hidden") {
                             +leaderboardPosition.partInfos.values.maxOf { it.uploadDate }.relativeToNow
                         }
                     }

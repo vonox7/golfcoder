@@ -115,6 +115,12 @@ header .github-star-button {
     font-size: 21px;
 }
 
+@media screen and (max-width: 600px) {
+    .mobile-hidden {
+        display: none;
+    }
+}
+
 /* LEADERBOARD */
 
 .leaderboard {
@@ -125,14 +131,23 @@ header .github-star-button {
 
 .leaderboard tr {
     border-bottom: 1px solid #eeeeee21;
-    padding: 12px;
     font-size: 15px;
-    line-height: 2.5;
+}
+
+.leaderboard th, .leaderboard td {
+    padding: 8px 4px;
+    line-height: 1.5;
 }
 
 .leaderboard .rank {
     padding-left: 24px;
     font-weight: bold;
+}
+
+@media screen and (max-width: 600px) {
+    .leaderboard .rank {
+        padding-left: 4px;
+    }
 }
 
 .leaderboard .username {
