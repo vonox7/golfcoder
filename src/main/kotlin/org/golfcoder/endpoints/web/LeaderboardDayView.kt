@@ -41,9 +41,8 @@ object LeaderboardDayView {
 
         val leaderboardPositions = mainDatabase.getSuspendingCollection<LeaderboardPosition>()
             .find(LeaderboardPosition::year equal year, LeaderboardPosition::day equal day)
-            .sortByDescending(LeaderboardPosition::tokenSum)
+            .sortBy(LeaderboardPosition::tokenSum)
             .toList()
-
 
         val userIdsToUsers = getUserProfiles(leaderboardPositions.map { it.userId }.toSet())
 

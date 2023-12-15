@@ -27,7 +27,7 @@ object EditUserView {
         val myLeaderboardPositions = mainDatabase.getSuspendingCollection<LeaderboardPosition>()
             .find(LeaderboardPosition::userId equal session.userId)
             .toList()
-            .sortedByDescending { it.year * 10000 + it.day }
+            .sortedBy { it.year * 10000 + it.day }
             .groupBy { it.year * 10000 + it.day }
 
         call.respondHtmlView("Golfcoder ${currentUser.name}") {
@@ -143,7 +143,7 @@ object EditUserView {
                     h3 { +"${leaderboardPositionPerDay.first().year} day ${leaderboardPositionPerDay.first().day}" }
                     with(LeaderboardDayView) {
                         renderLeaderboard(
-                            leaderboardPositionPerDay,
+                            leaderboardPositionPerDay.sortedBy { it.position },
                             userIdsToUsers = mapOf(session.userId to currentUser),
                             currentUser = currentUser
                         )
