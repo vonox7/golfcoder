@@ -157,6 +157,18 @@ object EditUserView {
             } else {
                 renderMySolutions(mySolutions)
             }
+
+            h2 { +"User actions" }
+            p {
+                a(href = "/logout") {
+                    +"Logout"
+                }
+            }
+            p {
+                a(href = "/user/delete") {
+                    +"Delete Golfcoder account"
+                }
+            }
         }
     }
 

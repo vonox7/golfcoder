@@ -32,8 +32,10 @@ object LeaderboardDayView {
                 ?.takeIf { it.codePubliclyVisible || it.userId == currentUser?._id }
                 ?: throw NotFoundException("Invalid solution parameter")
         }
+
         val highlightedSolutionUser: User? = highlightedSolution?.let {
-            mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal it.userId)!!
+            // findOne query will return null when the user was deleted
+            mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal it.userId)
         }
         val highlightedSolutionTokenized: List<Tokenizer.Token>? = highlightedSolution?.let { solution ->
             solution.language.tokenizer.tokenize(solution.code)
@@ -168,8 +170,8 @@ object LeaderboardDayView {
                             +"${highlightedSolution.tokenCount} tokens in ${highlightedSolution.language.displayName} "
                             +"for part ${highlightedSolution.part} by "
                             when {
-                                highlightedSolutionUser!!._id == currentUser?._id -> +"you"
-                                highlightedSolutionUser.nameIsPublic -> +highlightedSolutionUser.name
+                                highlightedSolutionUser != null && highlightedSolutionUser._id == currentUser?._id -> +"you"
+                                highlightedSolutionUser?.nameIsPublic == true -> +highlightedSolutionUser.name
                                 else -> +"anonymous"
                             }
                         }

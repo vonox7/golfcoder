@@ -97,10 +97,6 @@ private fun HtmlBlockTag.header(call: ApplicationCall) {
             }
         } else {
             +" "
-            a(href = "/logout") {
-                +"Logout"
-            }
-            +" "
             a(href = "/user/edit") {
                 +userSession.displayName.replace(" ", "\u00A0") // Non-breaking space
             }

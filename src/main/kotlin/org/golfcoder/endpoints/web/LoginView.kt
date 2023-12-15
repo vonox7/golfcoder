@@ -63,7 +63,7 @@ object LoginView {
                 ul {
                     currentLoginProviders.forEach { providerName ->
                         li {
-                            a(href = "/unlink/$providerName") { +oauth2Providers[providerName]!! }
+                            a(href = "/user/unlink/$providerName") { +oauth2Providers[providerName]!! }
                         }
                     }
                 }
@@ -71,7 +71,8 @@ object LoginView {
 
             p {
                 +"You can link multiple providers to the same Golfcoder user. "
-                +"This allows you to login with any of these providers."
+                +"This allows you to login with any of these providers. "
+                +"You can also unlink providers again or delete your Golfcoder account at any time."
             }
         }
     }
