@@ -16,18 +16,16 @@ import org.golfcoder.Sysinfo
 import java.time.Duration
 
 fun Application.configureHTTP() {
-    if (!Sysinfo.isLocal) {
-        install(CachingHeaders) {
-            options { _, outgoingContent ->
-                val oneDayInSeconds = 24 * 60 * 60
-                val oneDayPublic =
-                    CacheControl.MaxAge(maxAgeSeconds = oneDayInSeconds, visibility = CacheControl.Visibility.Public)
-                when (outgoingContent.contentType?.withoutParameters()) {
-                    ContentType.Text.CSS -> CachingOptions(oneDayPublic)
-                    ContentType.Application.JavaScript -> CachingOptions(oneDayPublic)
-                    ContentType.Image.XIcon -> CachingOptions(oneDayPublic)
-                    else -> null
-                }
+    install(CachingHeaders) {
+        options { _, outgoingContent ->
+            val oneDayInSeconds = 24 * 60 * 60
+            val oneDayPublic =
+                CacheControl.MaxAge(maxAgeSeconds = oneDayInSeconds, visibility = CacheControl.Visibility.Public)
+            when (outgoingContent.contentType?.withoutParameters()) {
+                ContentType.Text.CSS -> CachingOptions(oneDayPublic)
+                ContentType.Application.JavaScript -> CachingOptions(oneDayPublic)
+                ContentType.Image.XIcon -> CachingOptions(oneDayPublic)
+                else -> null
             }
         }
     }
