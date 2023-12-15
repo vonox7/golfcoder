@@ -280,9 +280,12 @@ private data class GithubUserInfo(
 private data class RedditUserInfo(
     override val id: String,
     override val name: String,
-    @SerialName("icon_img") override val pictureUrl: String,
+    @SerialName("icon_img") val fullPictureUrl: String,
     // A bunch of more fields which we don't need
-) : OauthUserInfoResponse
+) : OauthUserInfoResponse {
+    override val pictureUrl: String
+        get() = fullPictureUrl.substringBeforeLast("?") // When size parameters are present, reddit might serve an invalid response
+}
 
 @Serializable
 private data class TwitterUserInfo(
