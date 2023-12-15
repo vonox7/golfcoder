@@ -19,6 +19,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.golfcoder.database.MainDatabase
 import org.golfcoder.endpoints.api.EditUserApi
+import org.golfcoder.endpoints.api.UnlinkLoginProviderApi
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.endpoints.web.*
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregatorLoader
@@ -107,8 +108,10 @@ private fun Application.ktorServerModule() {
 
         authenticate(sessionAuthenticationName) {
             get("/user/edit") { EditUserView.getHtml(call) }
+            get("/unlink/{provider}") { UnlinkLoginProviderView.getHtml(call) }
 
             post("/api/user/edit") { EditUserApi.post(call) }
+            post("/api/user/unlink/{provider}") { UnlinkLoginProviderApi.post(call) }
         }
 
         if (Sysinfo.isLocal) {

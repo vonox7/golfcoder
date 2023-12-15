@@ -54,6 +54,19 @@ object LoginView {
                         }
                     }
                 }
+                h2 {
+                    +"Unlink Account"
+                }
+                p {
+                    +"You can unlink all but your last provider. Click on the provider to unlink it."
+                }
+                ul {
+                    currentLoginProviders.forEach { providerName ->
+                        li {
+                            a(href = "/unlink/$providerName") { +oauth2Providers[providerName]!! }
+                        }
+                    }
+                }
             }
 
             p {

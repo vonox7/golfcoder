@@ -42,7 +42,7 @@ object EditUserView {
             val currentLoginProviders = currentUser.oAuthDetails.map { it.provider }
             p {
                 +"Logged in via ${currentLoginProviders.joinToString { LoginView.oauth2Providers[it]!! }}. "
-                a(href = "/login") { +"Add another OAuth2 provider." }
+                a(href = "/login") { +"Add/remove OAuth2 providers." }
             }
 
             form(action = "/api/user/edit") {

@@ -41,6 +41,9 @@ async function submitForm(event) {
             if (responseData.reloadSite) {
                 window.location.reload();
             }
+            if (responseData.redirect) {
+                window.location.href = responseData.redirect;
+            }
         }
 
     } catch (error) {

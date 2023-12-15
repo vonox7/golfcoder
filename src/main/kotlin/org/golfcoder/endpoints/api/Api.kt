@@ -8,6 +8,7 @@ class ApiCallResult(
     val resetButtonTextSeconds: Int? = 2,
     val alertHtml: String? = null,
     val reloadSite: Boolean = false,
+    val redirect: String? = null,
     val changeInput: Map<String, String> = emptyMap(), // name to value
     val setInnerHtml: Map<String, String> = emptyMap(), // id to html
 )
