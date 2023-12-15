@@ -34,6 +34,7 @@ class User : MongoMainEntry() {
 
     // Either singleAocRepositoryUrl, yearAocRepositoryUrl or none will be set
     class AdventOfCodeRepositoryInfo(
+        val githubProfileName: String,
         var singleAocRepositoryUrl: String? = null,
         var yearAocRepositoryUrl: Map<String, String> = emptyMap(), // year-string to repository-Url
     ) : MongoSubEntry()

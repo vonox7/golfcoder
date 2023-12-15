@@ -77,18 +77,8 @@ object EditUserView {
                 val singleAocRepositoryUrl = currentUser.adventOfCodeRepositoryInfo?.singleAocRepositoryUrl
                 val yearAocRepositoryUrl = currentUser.adventOfCodeRepositoryInfo?.yearAocRepositoryUrl
 
-                label {
-                    attributes["for"] = "githubProfileUrl"
-                    +"GitHub profile name to be linked next to your submissions: "
-                    input(type = InputType.text) {
-                        name = "githubProfileUrl"
-                        // Transform e.g. "https://github.com/user/repo" to "user"
-                        value = (singleAocRepositoryUrl ?: yearAocRepositoryUrl?.values?.firstOrNull())
-                            ?.substringBeforeLast("/")?.substringAfterLast("/") ?: ""
-                    }
-                }
                 p("text-secondary-info") {
-                    +"If your GitHub profile name is set, your name in the leaderboard will get automatically linked with your advent-of-code repository. "
+                    +"If your GitHub account is linked, your name in the leaderboard will get automatically linked with your advent-of-code repository. "
                     +"You might name your repository e.g. advent-of-code, my-aoc-solutions, AdventOfCodeInPython or AoC-XXX."
                     br()
                     +"If you add years (e.g. 2023) to your repo names, the corresponding repository will be linked to your leaderboard. "
@@ -115,6 +105,15 @@ object EditUserView {
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+                p {
+                    a(href = "/login/github") {
+                        if (currentUser.oAuthDetails.any { it.provider == "github" }) {
+                            +"Refresh ${currentUser.adventOfCodeRepositoryInfo?.githubProfileName ?: ""} GitHub repositories"
+                        } else {
+                            +"Link GitHub account"
                         }
                     }
                 }

@@ -3,8 +3,10 @@ package org.golfcoder.endpoints.api
 import com.moshbit.katerbase.equal
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
@@ -24,7 +26,6 @@ object EditUserApi {
         val name: String = "",
         val nameIsPublic: String = "off",
         val profilePictureIsPublic: String = "off",
-        val githubProfileUrl: String = "",
     )
 
     @Serializable
@@ -41,14 +42,12 @@ object EditUserApi {
         val session = call.sessions.get<UserSession>()!!
 
         val newName = request.name.take(MAX_USER_NAME_LENGTH).trim().takeIf { it.isNotEmpty() } ?: "XXX"
-        val adventOfCodeRepositoryInfo = getAdventOfCodeRepositoryInfo(request.githubProfileUrl)
 
         mainDatabase.getSuspendingCollection<User>()
             .updateOne(User::_id equal session.userId) {
                 User::name setTo newName
                 User::nameIsPublic setTo (request.nameIsPublic == "on")
                 User::profilePictureIsPublic setTo (request.profilePictureIsPublic == "on")
-                User::adventOfCodeRepositoryInfo setTo adventOfCodeRepositoryInfo
             }
 
         call.sessions.set(UserSession(session.userId, newName))
@@ -57,38 +56,43 @@ object EditUserApi {
     }
 
     // Find advent-of-code github repository/repositories: Auto detect aoc-repo-urls (either 1 or 1 per year)
-    suspend fun getAdventOfCodeRepositoryInfo(githubProfileUrl: String?): User.AdventOfCodeRepositoryInfo? {
-        if (githubProfileUrl.isNullOrEmpty()) return null
-
-        // Allow "https://github.com/user", "github.com/user/" or just "user"
-        val profileName = githubProfileUrl.removeSuffix("/").substringAfter("/")
+    suspend fun getAdventOfCodeRepositoryInfo(
+        profileName: String,
+        principal: OAuthAccessTokenResponse.OAuth2,
+    ): User.AdventOfCodeRepositoryInfo {
         val repos = httpClient
             .get("https://api.github.com/users/${profileName}/repos") {
-                header(
-                    HttpHeaders.Authorization, "token " + (System.getenv("GITHUB_APP_ACCESS_TOKEN")
-                        ?: error("No GITHUB_APP_ACCESS_TOKEN env-var set"))
-                )
+                header(HttpHeaders.Authorization, "Bearer ${principal.accessToken}")
             }
-            .takeIf { it.status == HttpStatusCode.OK } // will be !=OK on e.g. invalid username
-            ?.body<List<GithubReposResponse>>()
+            .let {
+                try {
+                    it.body<List<GithubReposResponse>>()
+                } catch (e: Exception) {
+                    println("Failed to get github repos for user $profileName:\n${it.bodyAsText()}\n${e.message}")
+                    throw e
+                }
+            }
 
         // Find all repos with "advent-of-code", but if none are found then find repos with "aoc"
         val adventOfCodeRepos = repos
-            ?.filter { repo -> "adventofcode" in repo.name.lowercase().filter { it.isLetter() } }
-            ?.takeIf { it.isNotEmpty() }
+            .filter { repo -> "adventofcode" in repo.name.lowercase().filter { it.isLetter() } }
+            .takeIf { it.isNotEmpty() }
             ?: repos
-                ?.filter { repo -> "aoc" in repo.name.lowercase().filter { it.isLetter() } }
-                ?.takeIf { it.isNotEmpty() }
+                .filter { repo -> "aoc" in repo.name.lowercase().filter { it.isLetter() } }
+                .takeIf { it.isNotEmpty() }
 
         // Users might have either 1 advent-of-code repo, or 1 per year
         val yearRegex = Regex("20[0-9]{1,2}")
         return when {
             adventOfCodeRepos.isNullOrEmpty() -> {
-                null
+                User.AdventOfCodeRepositoryInfo(githubProfileName = profileName)
             }
 
             adventOfCodeRepos.count() == 1 || adventOfCodeRepos.none { it.name.contains(yearRegex) } -> {
-                User.AdventOfCodeRepositoryInfo(singleAocRepositoryUrl = adventOfCodeRepos.maxBy { it.pushedAt }.htmlUrl)
+                User.AdventOfCodeRepositoryInfo(
+                    githubProfileName = profileName,
+                    singleAocRepositoryUrl = adventOfCodeRepos.maxBy { it.pushedAt }.htmlUrl
+                )
             }
 
             else -> {
@@ -99,7 +103,10 @@ object EditUserApi {
                         yearAocRepositoryUrl[year.toString()] = yearRepo.htmlUrl
                     }
                 }
-                User.AdventOfCodeRepositoryInfo(yearAocRepositoryUrl = yearAocRepositoryUrl)
+                User.AdventOfCodeRepositoryInfo(
+                    githubProfileName = profileName,
+                    yearAocRepositoryUrl = yearAocRepositoryUrl
+                )
             }
         }
     }

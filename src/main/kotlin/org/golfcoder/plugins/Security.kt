@@ -83,7 +83,7 @@ fun Application.configureSecurity() {
         defaultScopes: List<String>,
         userInfoUrl: String,
         userInfoClassTypeInfo: TypeInfo,
-        postprocessLogin: (suspend (User, OauthUserInfoResponse) -> Unit)? = null,
+        postprocessLogin: (suspend (User, OauthUserInfoResponse, OAuthAccessTokenResponse.OAuth2) -> Unit)? = null,
     ) {
         authentication {
             oauth(providerName) {
@@ -118,9 +118,7 @@ fun Application.configureSecurity() {
                         call.authentication.principal() ?: error("No principal")
 
                     val response = httpClient.get(userInfoUrl) {
-                        headers {
-                            append(HttpHeaders.Authorization, "Bearer ${principal.accessToken}")
-                        }
+                        header(HttpHeaders.Authorization, "Bearer ${principal.accessToken}")
                     }
 
                     val userInfo: OauthUserInfoResponse = try {
@@ -193,7 +191,7 @@ fun Application.configureSecurity() {
                         }
                     }
 
-                    postprocessLogin?.invoke(authenticatedUser, userInfo)
+                    postprocessLogin?.invoke(authenticatedUser, userInfo, principal)
 
                     call.sessions.set(UserSession(authenticatedUser._id, authenticatedUser.name))
                     call.respondRedirect("/")
@@ -218,11 +216,10 @@ fun Application.configureSecurity() {
         defaultScopes = emptyList(),
         userInfoUrl = "https://api.github.com/user",
         userInfoClassTypeInfo = typeInfo<GithubUserInfo>(),
-        postprocessLogin = { user, userInfo ->
-            EditUserApi.getAdventOfCodeRepositoryInfo((userInfo as GithubUserInfo).login)?.let { repoInfo ->
-                mainDatabase.getSuspendingCollection<User>().updateOne(User::_id equal user._id) {
-                    User::adventOfCodeRepositoryInfo setTo repoInfo
-                }
+        postprocessLogin = { user, userInfo, principal ->
+            val repoInfo = EditUserApi.getAdventOfCodeRepositoryInfo((userInfo as GithubUserInfo).login, principal)
+            mainDatabase.getSuspendingCollection<User>().updateOne(User::_id equal user._id) {
+                User::adventOfCodeRepositoryInfo setTo repoInfo
             }
         }
     )
