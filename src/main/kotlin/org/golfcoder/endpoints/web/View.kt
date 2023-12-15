@@ -51,10 +51,8 @@ private fun HTML.head(pageTitle: String) {
         }
 
         link {
-            rel = "preload stylesheet"
-            attributes["as"] = "style"
+            rel = "stylesheet"
             type = "text/css"
-            attributes["crossorigin"] = "anonymous"
             href = "/static/css-${Sysinfo.release}/main.css"
         }
         script {
