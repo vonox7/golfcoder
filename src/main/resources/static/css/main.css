@@ -238,8 +238,7 @@ header .github-star-button {
 }
 
 .checkbox-container:active input ~ .checkbox {
-    background-color: #a2976a;
-!important;
+    background-color: #a2976a !important;
 }
 
 /* When the checkbox is checked, add a yellow background */
