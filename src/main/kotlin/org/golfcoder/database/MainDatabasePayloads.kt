@@ -105,9 +105,9 @@ class Solution : MongoMainEntry() {
                 JAVASCRIPT -> TreeSitterTokenizer("javascript", tokenizerVersion = 1)
                 CSHARP -> TreeSitterTokenizer("csharp", tokenizerVersion = 1)
                 TYPESCRIPT -> TreeSitterTokenizer("typescript", tokenizerVersion = 1)
-                CPLUSPLUS -> TreeSitterTokenizer("cpp", tokenizerVersion = 2)
+                CPLUSPLUS -> TreeSitterTokenizer("cpp", tokenizerVersion = 3)
                 JAVA -> TreeSitterTokenizer("java", tokenizerVersion = 1)
-                C -> TreeSitterTokenizer("c", tokenizerVersion = 1)
+                C -> TreeSitterTokenizer("c", tokenizerVersion = 2)
                 SWIFT -> TreeSitterTokenizer("swift", tokenizerVersion = 1)
                 SCALA -> TreeSitterTokenizer("scala", tokenizerVersion = 1)
             }

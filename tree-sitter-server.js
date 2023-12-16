@@ -59,7 +59,12 @@ app.post('/tokenize', (request, response) => {
     const traverseTree = (node) => {
         const children = node.children;
 
-        if (String(node.type) === "string_literal") {
+        if (String(node.type) === "preproc_arg") {
+            // tree-sitter-cpp/c doesn't evaluate defines, so manually parse the content
+            const prefix = "\n".repeat(node.startPosition.row) + " ".repeat(node.startPosition.column);
+            const defineTree = parser.parse(prefix + node.text);
+            traverseTree(defineTree.rootNode);
+        } else if (String(node.type) === "string_literal") {
             // tree-sitter-rust has as string_literal text ""hello"", but has only 2 children (the 2 brackets).
             // So manually add the literal text
             addNode(node)
