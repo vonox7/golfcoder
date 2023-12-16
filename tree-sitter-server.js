@@ -11,6 +11,7 @@ const Java = require('tree-sitter-java');
 const C = require('tree-sitter-c');
 const Swift = require('tree-sitter-swift');
 const Scala = require('tree-sitter-scala');
+const Ruby = require('tree-sitter-ruby');
 
 const express = require("express");
 const app = express();
@@ -35,6 +36,7 @@ app.post('/tokenize', (request, response) => {
         "c": C,
         "swift": Swift,
         "scala": Scala,
+        "ruby": Ruby,
     };
     const language = languages[request.body.language];
     if (language === undefined) {

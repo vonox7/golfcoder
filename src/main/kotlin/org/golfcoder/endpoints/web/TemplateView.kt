@@ -222,6 +222,15 @@ object TemplateView {
                 code
             }
 
-            else -> null
+            Solution.Language.RUBY -> {
+                @Language("TEXT") val code = """
+                |lines = []
+                |while line = gets
+                |    lines << line
+                |end
+                |puts lines.length
+                |""".trimMargin()
+                code
+            }
         }
 }

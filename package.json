@@ -10,6 +10,7 @@
     "tree-sitter-javascript": "^0.20.1",
     "tree-sitter-kotlin": "^0.3.1",
     "tree-sitter-python": "^0.20.4",
+    "tree-sitter-ruby": "^0.19.0",
     "tree-sitter-rust": "^0.20.4",
     "tree-sitter-scala": "^0.19.0",
     "tree-sitter-swift": "^0.3.6",
