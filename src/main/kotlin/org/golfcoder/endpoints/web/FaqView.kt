@@ -3,10 +3,10 @@ package org.golfcoder.endpoints.web
 import io.ktor.server.application.*
 import kotlinx.html.*
 
-object AboutView {
+object FaqView {
     suspend fun getHtml(call: ApplicationCall) {
-        call.respondHtmlView("About Golfcoder") {
-            h1 { +"About Golfcoder" }
+        call.respondHtmlView("Golfcoder FAQ") {
+            h1 { +"Golfcoder FAQ" }
 
             p {
                 +"A code golf community leaderboard for "

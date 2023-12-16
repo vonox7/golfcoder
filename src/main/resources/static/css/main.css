@@ -9,6 +9,29 @@ html {
     padding: 16px;
 }
 
+h1, .center {
+    text-align: center;
+    display: block;
+}
+
+h1 {
+    clear: both;
+}
+
+.subheader {
+    margin-top: -20px;
+    margin-bottom: 40px;
+}
+
+.max-width-800 {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+header .right {
+    float: right;
+}
+
 a {
     color: #fcdd2d;
     font-weight: bold;
@@ -87,8 +110,14 @@ header a {
     margin-right: 16px;
 }
 
-header .github-star-button {
+.github-star-button {
     float: right;
+    margin-bottom: 16px;
+}
+
+.cta {
+    margin-top: 24px;
+    margin-bottom: 24px;
 }
 
 .profile-image {
@@ -113,18 +142,24 @@ header .github-star-button {
     width: 42px;
     line-height: 42px;
     font-size: 21px;
+    margin-top: -4px;
 }
 
 @media screen and (max-width: 600px) {
     .mobile-hidden {
         display: none;
     }
+
+    header .right {
+        float: none;
+        margin: 0 auto;
+        display: block;
+    }
 }
 
 /* LEADERBOARD */
 
 .leaderboard {
-    max-width: 800px;
     width: 100%;
     border-collapse: collapse;
 }
@@ -155,11 +190,11 @@ header .github-star-button {
     overflow-wrap: anywhere;
 }
 
-.leaderboard .left-align {
+.left-align {
     text-align: left;
 }
 
-.leaderboard .right-align {
+.right-align {
     text-align: right;
 }
 
@@ -269,7 +304,7 @@ header .github-star-button {
     transform: rotate(45deg);
 }
 
-button, input[type=submit] {
+button, .button, input[type=submit] {
     background-color: #fcdd2d;
     border: none;
     padding: 12px 24px;
@@ -285,16 +320,17 @@ button, input[type=submit] {
     border-radius: 2px;
 }
 
-button:hover, input[type=submit]:hover {
+button:hover, .button:hover, input[type=submit]:hover {
     background-color: #c0b375;
+    color: #0b171f;
 }
 
-button:active, input[type=submit]:active {
+button:active, .button:active, input[type=submit]:active {
     background-color: #a2976a;
     color: #000000;
 }
 
-button:disabled, input[type=submit]:disabled {
+button:disabled, .button:disabled, input[type=submit]:disabled {
     background-color: #c9c9b4;
     color: #434343;
     cursor: wait;
@@ -342,7 +378,7 @@ textarea::placeholder {
     color: #888;
 }
 
-textarea:focus, input:focus, select:focus, button:focus, .checkbox-container input:focus ~ .checkbox {
+textarea:focus, input:focus, select:focus, button:focus, .button:focus, .checkbox-container input:focus ~ .checkbox {
     outline: none;
     box-shadow: 0 0 6px 4px #cccccc52;
 }

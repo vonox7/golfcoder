@@ -11,6 +11,7 @@ import org.golfcoder.plugins.UserSession
 
 suspend fun ApplicationCall.respondHtmlView(
     pageTitle: String,
+    maxWidth: Boolean = true,
     status: HttpStatusCode = HttpStatusCode.OK,
     render: HtmlBlockTag.() -> Unit,
 ) {
@@ -19,7 +20,10 @@ suspend fun ApplicationCall.respondHtmlView(
         body {
             header(this@respondHtmlView)
             errorDialog()
-            render()
+            div(if (maxWidth) "max-width-800" else "") {
+                render()
+            }
+            footer(this@respondHtmlView)
         }
     }
 }
@@ -64,14 +68,6 @@ private fun HTML.head(pageTitle: String) {
 
 private fun HtmlBlockTag.header(call: ApplicationCall) {
     header {
-        iframe(classes = "github-star-button mobile-hidden") {
-            src = "https://ghbtns.com/github-btn.html?user=vonox7&repo=golfcoder&type=star&count=true&size=large"
-            attributes["frameborder"] = "0"
-            attributes["scrolling"] = "0"
-            width = "130"
-            height = "30"
-            title = "GitHub"
-        }
         a(href = "/", classes = "header-text") {
             img(src = "/static/images/favicon.ico", alt = "Logo", classes = "header-logo") {
                 width = "20"
@@ -80,25 +76,27 @@ private fun HtmlBlockTag.header(call: ApplicationCall) {
             +"Golfcoder"
         }
         +" "
-        a(href = "/about") {
-            +"About & FAQ".replace(" ", "\u00A0") // Non-breaking space
-        }
-        +" "
-        val userSession = call.sessions.get<UserSession>()
-        if (userSession == null) {
-            a(href = "/login") {
-                +"Login"
+        span("right") {
+            a(href = "/faq") {
+                +"FAQ"
             }
             +" "
-            if (Sysinfo.isLocal) {
-                a(href = "/create-random-user") {
-                    +"Create random user (local only)".replace(" ", "\u00A0") // Non-breaking space
+            val userSession = call.sessions.get<UserSession>()
+            if (userSession == null) {
+                a(href = "/login") {
+                    +"LOGIN"
                 }
-            }
-        } else {
-            +" "
-            a(href = "/user/edit") {
-                +userSession.displayName.replace(" ", "\u00A0") // Non-breaking space
+                +" "
+                if (Sysinfo.isLocal) {
+                    a(href = "/create-random-user") {
+                        +"Create random user (local only)".replace(" ", "\u00A0") // Non-breaking space
+                    }
+                }
+            } else {
+                +" "
+                a(href = "/user/edit") {
+                    +userSession.displayName.replace(" ", "\u00A0") // Non-breaking space
+                }
             }
         }
     }
@@ -124,6 +122,18 @@ private fun HtmlBlockTag.errorDialog() {
     }
 }
 
+private fun HtmlBlockTag.footer(call: ApplicationCall) {
+    footer {
+        iframe(classes = "github-star-button") {
+            src = "https://ghbtns.com/github-btn.html?user=vonox7&repo=golfcoder&type=star&count=true&size=large"
+            attributes["frameborder"] = "0"
+            attributes["scrolling"] = "0"
+            width = "130"
+            height = "30"
+            title = "GitHub"
+        }
+    }
+}
 
 // Render either url or initials (fallback to XX initials)
 fun HtmlBlockTag.renderUserProfileImage(user: User?, big: Boolean = false) {

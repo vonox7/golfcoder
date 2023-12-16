@@ -98,7 +98,7 @@ private fun Application.ktorServerModule() {
         get("/favicon.ico") { call.respondRedirect("/static/images/favicon.ico", permanent = true) }
 
         authenticate(sessionAuthenticationName, optional = true) {
-            get("/about") { AboutView.getHtml(call) }
+            get("/faq") { FaqView.getHtml(call) }
             get(Regex("/20(?<year>[0-9]{2})")) { LeaderboardYearView.getHtml(call) }
             get(Regex("/20(?<year>[0-9]{2})/day/(?<day>[0-9]{1,2})")) { LeaderboardDayView.getHtml(call) }
             get("/login") { LoginView.getHtml(call) }

@@ -193,7 +193,7 @@ object UploadSolutionApi {
                         +"."
                         br()
                         br()
-                        +"If you think this is a bug, please report it to Golfcoder (see About & FAQ)."
+                        +"If you think this is a bug, please report it to Golfcoder (see FAQ)."
                     }
                 )
             }

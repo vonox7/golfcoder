@@ -30,6 +30,9 @@ object LoginView {
                     for ((providerName, providerDisplayName) in oauth2Providers) {
                         li {
                             a(href = "/login/$providerName") { +providerDisplayName }
+                            if (providerName == "github") {
+                                +" (recommended to link your leaderboard solutions to your public advent-of-code repository)"
+                            }
                         }
                     }
                 }
@@ -58,7 +61,11 @@ object LoginView {
                     +"Unlink Account"
                 }
                 p {
-                    +"You can unlink all but your last provider. Click on the provider to unlink it."
+                    if (currentLoginProviders.count() > 1) {
+                        +"You can unlink all but your last provider. Click on the provider to unlink it."
+                    } else {
+                        +"You can't unlink your last provider. Login first via another provider to be able to unlink this one."
+                    }
                 }
                 ul {
                     currentLoginProviders.forEach { providerName ->

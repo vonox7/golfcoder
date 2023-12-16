@@ -148,8 +148,13 @@ object LeaderboardDayView {
             }
         }
 
-        call.respondHtmlView("Advent of Code Leaderboard $year day $day") {
-            h1 { +"Advent of Code Leaderboard $year day $day" }
+        call.respondHtmlView("Advent of Code Leaderboard $year / Day $day", maxWidth = false) {
+            h1 { +"Advent of Code Leaderboard $year / Day $day" }
+            div("center subheader") {
+                a(href = "https://adventofcode.com/$year/day/$day", target = "_blank") {
+                    +"View puzzle on adventofcode.com"
+                }
+            }
 
             div("left-right-layout") {
                 div("left") {
