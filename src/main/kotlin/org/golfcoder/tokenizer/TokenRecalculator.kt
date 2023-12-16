@@ -3,6 +3,7 @@ package org.golfcoder.tokenizer
 import com.moshbit.katerbase.equal
 import com.moshbit.katerbase.lower
 import org.golfcoder.database.Solution
+import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.mainDatabase
 
 object TokenRecalculator {
@@ -33,6 +34,10 @@ object TokenRecalculator {
                         e.printStackTrace() // Tokenizer might fail, but continue with next solution
                     }
                 }
+        }
+        if (recalculationCount > 0) {
+            // Leaderboard might have changed
+            UploadSolutionApi.recalculateAllScores()
         }
         println("All necessary $recalculationCount solutions recalculated")
     }
