@@ -267,13 +267,16 @@ private data class GoogleUserInfo(
 @Serializable
 private data class GithubUserInfo(
     @SerialName("id") val idLong: Long,
-    val login: String, // e.g. vonox7, is changeable
-    override val name: String,
+    val login: String, // username, e.g. vonox7, is changeable
+    @SerialName("name") val givenName: String? = null, // e.g. "John Doe", or null if only username(="login") is set
     @SerialName("avatar_url") override val pictureUrl: String,
     // A bunch of more fields which we don't need
 ) : OauthUserInfoResponse {
     override val id: String
         get() = idLong.toString()
+
+    override val name: String
+        get() = givenName ?: login
 }
 
 @Serializable
