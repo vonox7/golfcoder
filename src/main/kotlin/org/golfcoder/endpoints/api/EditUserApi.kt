@@ -41,6 +41,7 @@ object EditUserApi {
     suspend fun post(call: ApplicationCall) {
         val request = call.receive<EditUserRequest>()
         val session = call.sessions.get<UserSession>()!!
+        val currentUser = mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)!!
 
         val newName = request.name.take(MAX_USER_NAME_LENGTH).trim().takeIf { it.isNotEmpty() } ?: "XXX"
 
@@ -49,7 +50,9 @@ object EditUserApi {
                 User::name setTo newName
                 User::nameIsPublic setTo (request.nameIsPublic == "on")
                 User::profilePictureIsPublic setTo (request.profilePictureIsPublic == "on")
-                User::adventOfCodeRepositoryInfo.child(User.AdventOfCodeRepositoryInfo::publiclyVisible) setTo (request.showAdventOfCodeRepositoryLink == "on")
+                if (currentUser.adventOfCodeRepositoryInfo != null) {
+                    User::adventOfCodeRepositoryInfo.child(User.AdventOfCodeRepositoryInfo::publiclyVisible) setTo (request.showAdventOfCodeRepositoryLink == "on")
+                }
             }
 
         call.sessions.set(UserSession(session.userId, newName))
