@@ -32,7 +32,8 @@ object TemplateView {
             Solution.Language.PYTHON -> {
                 @Language("Python")
                 val code = """
-                |# Template for reading all lines from stdin and printing the line count to stdout
+                |# Template for reading all lines from stdin and printing the line count to stdout.
+                |# Copy this code to your IDE to get started.
                 |
                 |lines = []
                 |while True:
@@ -47,7 +48,8 @@ object TemplateView {
             Solution.Language.RUST -> {
                 @Language("TEXT")
                 val code = """
-                |// Template for reading lines from stdin and printing the line count to stdout
+                |// Template for reading lines from stdin and printing the line count to stdout.
+                |// Copy this code to your IDE to get started.
                 |
                 |use std::io::BufRead;
                 |
@@ -62,7 +64,8 @@ object TemplateView {
             Solution.Language.GO -> {
                 @Language("Go")
                 val code = """
-                |// Template for reading lines from stdin and printing the line count to stdout
+                |// Template for reading lines from stdin and printing the line count to stdout.
+                |// Copy this code to your IDE to get started.
                 |
                 |package main
                 |
@@ -86,7 +89,8 @@ object TemplateView {
             Solution.Language.KOTLIN -> {
                 @Language("kotlin")
                 val code = """
-                |// Template for reading lines from stdin and printing the line count to stdout
+                |// Template for reading lines from stdin and printing the line count to stdout.
+                |// Copy this code to your IDE to get started.
                 |
                 |fun main() {
                 |    // If you want to iterate over `lines` multiple times, write `generateSequence(::readLine).toList()`
@@ -99,7 +103,8 @@ object TemplateView {
             Solution.Language.JAVASCRIPT -> {
                 @Language("JavaScript")
                 val code = """
-                |// Template for reading lines from stdin and printing the line count to stdout
+                |// Template for reading lines from stdin and printing the line count to stdout.
+                |// Copy this code to your IDE to get started.
                 |let lines = [];
                 |
                 |require('readline')
@@ -116,7 +121,8 @@ object TemplateView {
             Solution.Language.CSHARP -> {
                 @Language("TEXT")
                 val code = """
-                |// Template for reading lines from stdin and printing the line count to stdout
+                |// Template for reading lines from stdin and printing the line count to stdout.
+                |// Copy this code to your IDE to get started.
                 |
                 |using System;
                 |using System.Collections.Generic;
@@ -141,7 +147,8 @@ object TemplateView {
             Solution.Language.TYPESCRIPT -> {
                 @Language("TypeScript")
                 val code = """
-                |// Template for reading lines from stdin and printing the line count to stdout
+                |// Template for reading lines from stdin and printing the line count to stdout.
+                |// Copy this code to your IDE to get started.
                 |
                 |declare var require: any
                 |declare var process: any
@@ -162,7 +169,8 @@ object TemplateView {
             Solution.Language.CPLUSPLUS -> {
                 @Language("C++")
                 val code = """
-                |// Template for reading lines from stdin and printing the line count to stdout
+                |// Template for reading lines from stdin and printing the line count to stdout.
+                |// Copy this code to your IDE to get started.
                 |
                 |#include <iostream>
                 |
@@ -180,7 +188,8 @@ object TemplateView {
             Solution.Language.JAVA -> {
                 @Language("Java")
                 val code = """
-                |// Template for reading lines from stdin and printing the line count to stdout
+                |// Template for reading lines from stdin and printing the line count to stdout.
+                |// Copy this code to your IDE to get started.
                 |
                 |import java.util.ArrayList;
                 |import java.util.Scanner;
@@ -201,7 +210,8 @@ object TemplateView {
             Solution.Language.C -> {
                 @Language("TEXT")
                 val code = """
-                |// Template for reading lines from stdin and printing the line count to stdout
+                |// Template for reading lines from stdin and printing the line count to stdout.
+                |// Copy this code to your IDE to get started.
                 |
                 |#include <stdio.h>
                 |
@@ -220,7 +230,8 @@ object TemplateView {
             Solution.Language.SWIFT -> {
                 @Language("Swift")
                 val code = """
-                |// Template for reading lines from stdin and printing the line count to stdout
+                |// Template for reading lines from stdin and printing the line count to stdout.
+                |// Copy this code to your IDE to get started.
                 |
                 |import Foundation
                 |
@@ -236,7 +247,8 @@ object TemplateView {
             Solution.Language.SCALA -> {
                 @Language("TEXT")
                 val code = """
-                |// Template for reading lines from stdin and printing the line count to stdout
+                |// Template for reading lines from stdin and printing the line count to stdout.
+                |// Copy this code to your IDE to get started.
                 |
                 |import scala.io.StdIn
                 |
@@ -249,7 +261,8 @@ object TemplateView {
 
             Solution.Language.RUBY -> {
                 @Language("TEXT") val code = """
-                |# Template for reading lines from stdin and printing the line count to stdout
+                |# Template for reading lines from stdin and printing the line count to stdout.
+                |# Copy this code to your IDE to get started.
                 |
                 |lines = []
                 |while line = gets
