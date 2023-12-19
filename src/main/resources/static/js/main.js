@@ -4,9 +4,29 @@ async function submitForm(event) {
     const originalButtonText = event.target.value;
     const form = event.target.closest("form");
     let resetButtonTextSeconds = 2;
-    event.target.value += "...";
     event.target.disabled = true;
 
+    // UX: Change button text to something meaningful to indicate progress
+    let buttonTextChangeInterval = undefined;
+    const submitState = form.querySelector("[name=submitState]")?.value;
+    if (submitState === "ONLY_TOKENIZE") {
+        event.target.value = "Tokenizing...";
+    } else if (submitState === "SUBMIT_NOW") {
+        event.target.value = "Tokenizing...";
+        const buttonStrings = ["Compiling...", "Executing...", "Validating stdout..."];
+        let buttonStringPosition = 0;
+        buttonTextChangeInterval = setInterval(() => {
+            event.target.value = buttonStrings[buttonStringPosition];
+            buttonStringPosition++;
+            if (buttonStringPosition === buttonStrings.length) {
+                clearInterval(buttonTextChangeInterval);
+            }
+        }, 500);
+    } else {
+        event.target.value += "...";
+    }
+
+    // Send the form data to the server
     try {
         const response = await fetch(form.action, {
             method: "POST",
@@ -23,6 +43,7 @@ async function submitForm(event) {
         } else {
             const responseData = await response.json();
             if (responseData.buttonText) {
+                clearInterval(buttonTextChangeInterval);
                 event.target.value = responseData.buttonText;
             }
             if (responseData.alertHtml) {
@@ -51,9 +72,11 @@ async function submitForm(event) {
         event.target.value = "Error";
     }
 
+    // Reset button
     event.target.disabled = false;
     if (resetButtonTextSeconds) {
         setTimeout(() => {
+            clearInterval(buttonTextChangeInterval);
             event.target.value = originalButtonText;
         }, resetButtonTextSeconds * 1000);
     }
