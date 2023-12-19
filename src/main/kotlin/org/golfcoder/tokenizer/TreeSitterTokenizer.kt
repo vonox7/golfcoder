@@ -55,6 +55,7 @@ class TreeSitterTokenizer(private val language: String, override val tokenizerVe
                         "string" in type -> Tokenizer.Token.Type.STRING // e.g. Python reports "string_content", Javascript "string_fragment".
                         "character" in type -> Tokenizer.Token.Type.STRING // Kotlin reports "character_literal" for e.g. 'a'.
                         "str_text" in type -> Tokenizer.Token.Type.STRING // Swift reports "line_str_text"
+                        treeSitterToken.text == ";" -> Tokenizer.Token.Type.STATEMENT_DELIMITER // All languages that we support use a semikolon as statement delimiter (if they have one)
                         else -> Tokenizer.Token.Type.CODE_TOKEN
                     }
                 }

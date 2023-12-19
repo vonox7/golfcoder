@@ -297,6 +297,7 @@ object LeaderboardDayView {
                         }
                     }
                     Tokenizer.Token.Type.WHITESPACE -> Unit // Don't render whitespaces, they get added via the above indent calculation
+                    Tokenizer.Token.Type.STATEMENT_DELIMITER -> code("token-comment") { +token.source }
                     Tokenizer.Token.Type.COMMENT -> code("token-comment") { +token.source }
                 }
             }

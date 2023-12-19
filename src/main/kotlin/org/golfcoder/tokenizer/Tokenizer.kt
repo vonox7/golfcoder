@@ -6,6 +6,7 @@ interface Tokenizer {
             CODE_TOKEN, // Name, operation, etc.
             STRING, // String start/end indicators (e.g. '"') must be either included listed as CODE_TOKEN or be included in STRING
             WHITESPACE, // Space, tab, newline, BOM, etc.
+            STATEMENT_DELIMITER, // e.g. ";" in C++
             COMMENT
         }
 
@@ -26,6 +27,7 @@ interface Tokenizer {
                 Token.Type.CODE_TOKEN -> 1
                 Token.Type.STRING -> token.source.length
                 Token.Type.WHITESPACE -> 0
+                Token.Type.STATEMENT_DELIMITER -> 0
                 Token.Type.COMMENT -> 0
             }
         }
