@@ -32,6 +32,8 @@ object TemplateView {
             Solution.Language.PYTHON -> {
                 @Language("Python")
                 val code = """
+                |# Template for reading all lines from stdin and printing the line count to stdout
+                |
                 |lines = []
                 |while True:
                 |    try:
@@ -43,12 +45,15 @@ object TemplateView {
             }
 
             Solution.Language.RUST -> {
-                @Language("Rust")
+                @Language("TEXT")
                 val code = """
+                |// Template for reading lines from stdin and printing the line count to stdout
+                |
                 |use std::io::BufRead;
                 |
                 |fn main() {
-                |    let lines = std::io::stdin().lock().lines();
+                |    let stdin = std::io::stdin();
+                |    let lines = stdin.lock().lines();
                 |    println!("{}", lines.count());
                 |}""".trimMargin()
                 code
@@ -57,6 +62,8 @@ object TemplateView {
             Solution.Language.GO -> {
                 @Language("Go")
                 val code = """
+                |// Template for reading lines from stdin and printing the line count to stdout
+                |
                 |package main
                 |
                 |import (
@@ -79,6 +86,8 @@ object TemplateView {
             Solution.Language.KOTLIN -> {
                 @Language("kotlin")
                 val code = """
+                |// Template for reading lines from stdin and printing the line count to stdout
+                |
                 |fun main() {
                 |    // If you want to iterate over `lines` multiple times, write `generateSequence(::readLine).toList()`
                 |    val lines = generateSequence(::readLine)
@@ -89,7 +98,9 @@ object TemplateView {
 
             Solution.Language.JAVASCRIPT -> {
                 @Language("JavaScript")
-                val code = """let lines = [];
+                val code = """
+                |// Template for reading lines from stdin and printing the line count to stdout
+                |let lines = [];
                 |
                 |require('readline')
                 |    .createInterface({input: process.stdin})
@@ -105,6 +116,8 @@ object TemplateView {
             Solution.Language.CSHARP -> {
                 @Language("TEXT")
                 val code = """
+                |// Template for reading lines from stdin and printing the line count to stdout
+                |
                 |using System;
                 |using System.Collections.Generic;
                 |using System.Linq;
@@ -128,6 +141,8 @@ object TemplateView {
             Solution.Language.TYPESCRIPT -> {
                 @Language("TypeScript")
                 val code = """
+                |// Template for reading lines from stdin and printing the line count to stdout
+                |
                 |declare var require: any
                 |declare var process: any
                 |
@@ -147,6 +162,8 @@ object TemplateView {
             Solution.Language.CPLUSPLUS -> {
                 @Language("C++")
                 val code = """
+                |// Template for reading lines from stdin and printing the line count to stdout
+                |
                 |#include <iostream>
                 |
                 |int main() {
@@ -163,6 +180,8 @@ object TemplateView {
             Solution.Language.JAVA -> {
                 @Language("Java")
                 val code = """
+                |// Template for reading lines from stdin and printing the line count to stdout
+                |
                 |import java.util.ArrayList;
                 |import java.util.Scanner;
                 |
@@ -182,6 +201,8 @@ object TemplateView {
             Solution.Language.C -> {
                 @Language("TEXT")
                 val code = """
+                |// Template for reading lines from stdin and printing the line count to stdout
+                |
                 |#include <stdio.h>
                 |
                 |int main() {
@@ -199,6 +220,8 @@ object TemplateView {
             Solution.Language.SWIFT -> {
                 @Language("Swift")
                 val code = """
+                |// Template for reading lines from stdin and printing the line count to stdout
+                |
                 |import Foundation
                 |
                 |var lines = [String]()
@@ -213,6 +236,8 @@ object TemplateView {
             Solution.Language.SCALA -> {
                 @Language("TEXT")
                 val code = """
+                |// Template for reading lines from stdin and printing the line count to stdout
+                |
                 |import scala.io.StdIn
                 |
                 |object Main extends App {
@@ -224,6 +249,8 @@ object TemplateView {
 
             Solution.Language.RUBY -> {
                 @Language("TEXT") val code = """
+                |# Template for reading lines from stdin and printing the line count to stdout
+                |
                 |lines = []
                 |while line = gets
                 |    lines << line

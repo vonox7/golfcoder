@@ -64,3 +64,9 @@ function resetSubmitForm(event) {
     form.querySelector("[name=onlyTokenize]").value = "on";
     form.querySelector("[name=submitButton]").value = "Calculate tokens";
 }
+
+function fillTemplate(event) {
+    const form = event.target.closest("form");
+    const value = event.target.value;
+    form.querySelector("[name=code]").value = event.target.querySelector(`[value="${value}"]`).dataset.template;
+}

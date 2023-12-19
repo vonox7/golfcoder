@@ -48,6 +48,8 @@ object LeaderboardDayView {
 
         val userIdsToUsers = getUserProfiles(leaderboardPositions.map { it.userId }.toSet())
 
+        val defaultLanguage = currentUser?.defaultLanguage ?: Solution.Language.PYTHON
+
         fun HtmlBlockTag.renderUpload() {
             h2 { +"Submit solution" }
             form(action = "/api/solution/upload") {
@@ -70,12 +72,12 @@ object LeaderboardDayView {
                 }
                 select {
                     name = "language"
-                    onChange = "resetSubmitForm(event)"
-                    val defaultLanguage = currentUser?.defaultLanguage ?: Solution.Language.PYTHON
+                    onChange = "fillTemplate(event); resetSubmitForm(event)"
                     Solution.Language.entries.forEach { language ->
                         option {
                             value = language.name
                             selected = language == defaultLanguage
+                            attributes["data-template"] = language.template ?: ""
                             if (language.tokenizer is NotYetAvailableTokenizer) {
                                 disabled = true
                                 +"${language.displayName} (not yet available) "
@@ -88,13 +90,14 @@ object LeaderboardDayView {
                 br()
                 textArea {
                     name = "code"
-                    rows = "10"
-                    cols = "80"
+                    rows = "12"
+                    cols = "90"
                     placeholder = "Paste your code here. Download a template for your language below."
                     onChange = "resetSubmitForm(event)"
                     onKeyDown = "resetSubmitForm(event)"
                     maxLength = UploadSolutionApi.MAX_CODE_LENGTH.toString()
                     spellCheck = false
+                    +defaultLanguage.template.orEmpty()
                 }
                 br()
                 b { +"Rules" }
