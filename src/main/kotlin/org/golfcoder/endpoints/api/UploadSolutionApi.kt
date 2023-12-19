@@ -29,6 +29,11 @@ object UploadSolutionApi {
     val PART_RANGE = 1..2
     private const val MIN_CODE_LENGTH = 10
 
+    enum class SubmitState {
+        ONLY_TOKENIZE,
+        SUBMIT_NOW,
+        LOGIN_TO_SUBMIT,
+    }
 
     @Serializable
     private class UploadSolutionRequest(
@@ -38,12 +43,18 @@ object UploadSolutionApi {
         val code: String,
         val language: Solution.Language,
         val codeIsPublic: String = "off",
-        val onlyTokenize: String,
+        val submitState: SubmitState,
     )
 
     suspend fun post(call: ApplicationCall) {
         val request = call.receive<UploadSolutionRequest>()
         val userSession = call.sessions.get<UserSession>()
+
+        // Redirect to login screen if "login to submit" was pressed
+        if (userSession == null && request.submitState == SubmitState.LOGIN_TO_SUBMIT) {
+            call.respond(ApiCallResult(redirect = "/login"))
+            return
+        }
 
         // Validate user input
         require(request.code.length <= MAX_CODE_LENGTH)
@@ -77,12 +88,12 @@ object UploadSolutionApi {
             mainDatabase.getSuspendingCollection<User>().updateOne(User::_id equal userSession.userId) {
                 User::defaultLanguage setTo request.language
                 User::tokenizedCodeCount incrementBy 1
-                if (request.onlyTokenize != "on") {
+                if (request.submitState == SubmitState.SUBMIT_NOW) {
                     User::codeRunCount incrementBy 1
                 }
             }
 
-        if (request.onlyTokenize == "on") {
+        if (request.submitState == SubmitState.ONLY_TOKENIZE) {
             val solutionsHtml = with(LeaderboardDayView) {
                 createHTML().div {
                     h2 { +"Preview: $tokenCount tokens" }
@@ -95,13 +106,14 @@ object UploadSolutionApi {
                     ApiCallResult(
                         buttonText = "$tokenCount tokens. Login to submit to the leaderboard.",
                         resetButtonTextSeconds = null,
+                        changeInput = mapOf("submitState" to SubmitState.LOGIN_TO_SUBMIT.name),
                         setInnerHtml = mapOf("solution" to solutionsHtml),
                     )
                 } else {
                     ApiCallResult(
                         buttonText = "$tokenCount tokens. Click here to submit to the leaderboard.",
                         resetButtonTextSeconds = null,
-                        changeInput = mapOf("onlyTokenize" to "off"),
+                        changeInput = mapOf("submitState" to SubmitState.SUBMIT_NOW.name),
                         setInnerHtml = mapOf("solution" to solutionsHtml),
                     )
                 }
@@ -126,7 +138,7 @@ object UploadSolutionApi {
                         br()
                         +"We need to solve it first ;)."
                     },
-                    changeInput = mapOf("onlyTokenize" to "on"),
+                    changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
                 )
             )
             return
@@ -184,7 +196,7 @@ object UploadSolutionApi {
                 ApiCallResult(
                     buttonText = "Calculate tokens",
                     resetButtonTextSeconds = null,
-                    changeInput = mapOf("onlyTokenize" to "on"),
+                    changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
                     alertHtml = createHTML().div {
                         +"Wrong stdout. Expected "
                         code { +"${expectedOutput.output}" }
@@ -203,7 +215,7 @@ object UploadSolutionApi {
                 ApiCallResult(
                     buttonText = "Calculate tokens",
                     resetButtonTextSeconds = null,
-                    changeInput = mapOf("onlyTokenize" to "on"),
+                    changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
                     alertHtml = createHTML().div {
                         +"Wrong stdout. Expected a number, but got "
                         code { +codeRunnerStdout }
@@ -217,7 +229,7 @@ object UploadSolutionApi {
                 ApiCallResult(
                     buttonText = "Calculate tokens",
                     resetButtonTextSeconds = null,
-                    changeInput = mapOf("onlyTokenize" to "on"),
+                    changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
                     alertHtml = createHTML().div {
                         +"Missing stdout. Expected a number. Ensure that your code prints the solution to stdout."
                     }
@@ -229,7 +241,7 @@ object UploadSolutionApi {
                 ApiCallResult(
                     buttonText = "Calculate tokens",
                     resetButtonTextSeconds = null,
-                    changeInput = mapOf("onlyTokenize" to "on"),
+                    changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
                     alertHtml = createHTML().div {
                         +"Code execution failed:"
                         br()

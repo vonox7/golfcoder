@@ -140,8 +140,8 @@ object LeaderboardDayView {
                     }
                 }
                 input(type = InputType.hidden) {
-                    name = "onlyTokenize"
-                    value = "on"
+                    name = "submitState"
+                    value = UploadSolutionApi.SubmitState.ONLY_TOKENIZE.name
                 }
                 input(type = InputType.submit) {
                     name = "submitButton"

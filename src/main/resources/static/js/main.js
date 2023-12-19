@@ -61,7 +61,7 @@ async function submitForm(event) {
 
 function resetSubmitForm(event) {
     const form = event.target.closest("form");
-    form.querySelector("[name=onlyTokenize]").value = "on";
+    form.querySelector("[name=submitState]").value = "ONLY_TOKENIZE";
     form.querySelector("[name=submitButton]").value = "Calculate tokens";
 }
 
