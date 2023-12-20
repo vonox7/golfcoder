@@ -52,7 +52,7 @@ dependencies {
 }
 
 kotlin {
-    compilerOptions.jvmTarget = JvmTarget.JVM_17
+    compilerOptions.jvmTarget = JvmTarget.JVM_21
 }
 
 tasks {
