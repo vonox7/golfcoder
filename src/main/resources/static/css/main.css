@@ -112,6 +112,7 @@ header a {
 
 .github-star-button {
     float: right;
+    margin-top: 16px;
     margin-bottom: 16px;
 }
 

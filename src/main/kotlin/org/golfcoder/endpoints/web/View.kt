@@ -23,7 +23,7 @@ suspend fun ApplicationCall.respondHtmlView(
             div(if (maxWidth) "max-width-800" else "") {
                 render()
             }
-            footer(this@respondHtmlView)
+            footer()
         }
     }
 }
@@ -122,7 +122,7 @@ private fun HtmlBlockTag.errorDialog() {
     }
 }
 
-private fun HtmlBlockTag.footer(call: ApplicationCall) {
+private fun HtmlBlockTag.footer() {
     footer {
         iframe(classes = "github-star-button") {
             src = "https://ghbtns.com/github-btn.html?user=vonox7&repo=golfcoder&type=star&count=true&size=large"
