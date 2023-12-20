@@ -1,9 +1,7 @@
 package org.golfcoder.endpoints.api
 
 import com.moshbit.katerbase.equal
-import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -16,6 +14,7 @@ import org.golfcoder.database.User
 import org.golfcoder.httpClient
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
+import org.golfcoder.utils.bodyOrPrintException
 import java.time.Instant
 
 object EditUserApi {
@@ -69,14 +68,7 @@ object EditUserApi {
             .get("https://api.github.com/users/${profileName}/repos") {
                 header(HttpHeaders.Authorization, "Bearer ${principal.accessToken}")
             }
-            .let {
-                try {
-                    it.body<List<GithubReposResponse>>()
-                } catch (e: Exception) {
-                    println("Failed to get github repos for user $profileName:\n${it.bodyAsText()}\n${e.message}")
-                    throw e
-                }
-            }
+            .bodyOrPrintException<List<GithubReposResponse>>()
 
         // Find all repos with "advent-of-code", but if none are found then find repos with "aoc"
         val adventOfCodeRepos = repos

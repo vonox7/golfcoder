@@ -1,11 +1,11 @@
 package org.golfcoder.tokenizer
 
-import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
 import org.golfcoder.httpClient
+import org.golfcoder.utils.bodyOrPrintException
 import java.net.ConnectException
 
 class TreeSitterTokenizer(private val language: String, override val tokenizerVersion: Int) : Tokenizer {
@@ -39,7 +39,7 @@ class TreeSitterTokenizer(private val language: String, override val tokenizerVe
             throw e
         }
 
-        val body = response.body<TreeSitterResponse>()
+        val body = response.bodyOrPrintException<TreeSitterResponse>()
 
         return body.tokens.map { treeSitterToken ->
             Tokenizer.Token(

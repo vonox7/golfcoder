@@ -2,9 +2,7 @@ package org.golfcoder.plugins
 
 import com.moshbit.katerbase.child
 import com.moshbit.katerbase.equal
-import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -25,6 +23,7 @@ import org.golfcoder.endpoints.web.LoginView
 import org.golfcoder.endpoints.web.respondHtmlView
 import org.golfcoder.httpClient
 import org.golfcoder.mainDatabase
+import org.golfcoder.utils.bodyOrPrintException
 import java.util.*
 
 const val sessionAuthenticationName = "session-aocg"
@@ -117,17 +116,9 @@ fun Application.configureSecurity() {
                     val principal: OAuthAccessTokenResponse.OAuth2 =
                         call.authentication.principal() ?: error("No principal")
 
-                    val response = httpClient.get(userInfoUrl) {
+                    val userInfo: OauthUserInfoResponse = httpClient.get(userInfoUrl) {
                         header(HttpHeaders.Authorization, "Bearer ${principal.accessToken}")
-                    }
-
-                    val userInfo: OauthUserInfoResponse = try {
-                        response.body(userInfoClassTypeInfo)
-                    } catch (e: Exception) {
-                        println("Error while parsing oauth2 user info: ${e.message}")
-                        println("Response body: ${response.bodyAsText()}")
-                        throw e
-                    }
+                    }.bodyOrPrintException(userInfoClassTypeInfo)
 
                     val currentSession = call.sessions.get<UserSession>()
                     val currentUser = currentSession?.let {
