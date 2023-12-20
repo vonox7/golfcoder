@@ -172,7 +172,7 @@ object UploadSolutionApi {
         call.respond(when {
             outputNumber == expectedOutput.output -> {
                 // Correct solution. Save solution to database
-                mainDatabase.getSuspendingCollection<Solution>().insertOne(Solution().apply {
+                val solution = Solution().apply {
                     _id = randomId()
                     userId = userSession.userId
                     year = request.year.toInt()
@@ -184,11 +184,15 @@ object UploadSolutionApi {
                     uploadDate = Date()
                     this.tokenCount = tokenCount
                     tokenizerVersion = tokenizer.tokenizerVersion
-                }, upsert = false)
+                }
+                mainDatabase.getSuspendingCollection<Solution>().insertOne(solution, upsert = false)
 
                 recalculateScore(year = request.year.toInt(), day = request.day.toInt())
 
-                ApiCallResult(buttonText = "Submitted", reloadSite = true)
+                ApiCallResult(
+                    buttonText = "Submitted",
+                    redirect = "/${request.year}/day/${request.day}?solution=${solution._id}"
+                )
             }
 
             outputNumber != null -> {
