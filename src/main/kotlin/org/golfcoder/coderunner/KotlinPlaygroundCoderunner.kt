@@ -1,11 +1,11 @@
 package org.golfcoder.coderunner
 
-import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
 import org.golfcoder.database.Solution
 import org.golfcoder.httpClient
+import org.golfcoder.utils.bodyOrPrintException
 
 class KotlinPlaygroundCoderunner : Coderunner {
 
@@ -25,10 +25,23 @@ class KotlinPlaygroundCoderunner : Coderunner {
 
     @Serializable
     private class KotlinPlaygroundRunResponse(
-        val exception: String?,
+        val exception: KotlinPlaygroundException?, // Runtime exception
         val text: String,
-        val errors: Map<String, List<Error>>, // Filename to list of errors
+        val errors: Map<String, List<Error>>, // Filename to list of compile time errors
     ) {
+        @Serializable
+        class KotlinPlaygroundException(
+            val message: String?,
+            val fullName: String,
+            val stackTrace: List<KotlinPlaygroundStacktraceElement>,
+        ) {
+            @Serializable
+            class KotlinPlaygroundStacktraceElement(
+                val methodName: String,
+                val lineNumber: Int,
+            )
+        }
+
         @Serializable
         class Error(
             val interval: Interval,
@@ -74,11 +87,17 @@ class KotlinPlaygroundCoderunner : Coderunner {
                     confType = "java",
                 )
             )
-        }.body<KotlinPlaygroundRunResponse>()
+        }.bodyOrPrintException<KotlinPlaygroundRunResponse>()
 
         mutableListOf("").removeAt(0)
 
-        val playgroundErrorString = response.exception?.takeIf { it.isNotEmpty() }
+        val playgroundErrorString = response.exception?.let { exception ->
+            exception.fullName +
+                    (exception.message?.let { ": $it" } ?: "") +
+                    "\n" +
+                    exception.stackTrace.filter { it.lineNumber > 0 }
+                        .joinToString("\n") { "    ${it.methodName} at line ${it.lineNumber}" }
+        }
             ?: response.errors.values.flatten().takeIf { it.isNotEmpty() }?.joinToString("\n") { error ->
                 "${error.message} at line ${error.interval.start.line + 1}:${error.interval.start.ch + 1}"
             }

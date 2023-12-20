@@ -162,7 +162,7 @@ object UploadSolutionApi {
             if (Sysinfo.isLocal) e.printStackTrace()
             Coderunner.RunResult(
                 stdout = "",
-                error = "Code execution failed:\n\n${e.message}",
+                error = "Code compilation or execution failed:\n\n${e.message}",
             )
         }
 
@@ -247,7 +247,7 @@ object UploadSolutionApi {
                     resetButtonTextSeconds = null,
                     changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
                     alertHtml = createHTML().div {
-                        +"Code execution failed:"
+                        +"Code compilation or execution failed:"
                         br()
                         code { +coderunnerResult.error }
                     }
