@@ -139,7 +139,7 @@ class ExpectedOutput : MongoMainEntry() {
     var day: Int = 0
     var part: Int = 0
     var input: String = ""
-    var output: Long = 0L
+    var output: String = ""
     lateinit var source: Source
 
     enum class Source {

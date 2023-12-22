@@ -29,14 +29,18 @@ object ExpectedOutputAggregatorLoader {
                 day to load(year, day)
             }
             println("Loaded expected output:" + results.joinToString("") { (day, results) ->
-                "\n$year/$day: ${results.filter { it !is YearNotInSource }.joinToString { it.toString() }}"
+                "\n$year/$day: " + results.filter { it.value !is YearNotInSource }.toList()
+                    .joinToString { (source, result) -> "$result(${source.name})" }
             })
         }
         println("Loaded expected output for all years and days")
     }
 
-    private suspend fun load(year: Int, day: Int): List<ExpectedOutputAggregator.AggregatorResult> {
-        return ExpectedOutput.Source.entries.map { source ->
+    private suspend fun load(
+        year: Int,
+        day: Int,
+    ): Map<ExpectedOutput.Source, ExpectedOutputAggregator.AggregatorResult> {
+        return ExpectedOutput.Source.entries.associateWith { source ->
             try {
                 source.aggregator.load(year, day)
             } catch (exception: Exception) {
@@ -56,7 +60,7 @@ object ExpectedOutputAggregatorLoader {
                         .intersect(UploadSolutionApi.DAYS_RANGE)
                         .map { day ->
                             val results = load(now.get(Calendar.YEAR), day)
-                            if (results.none { it is ExpectedOutputAggregator.AggregatorResult.Success }) {
+                            if (results.none { it.value is ExpectedOutputAggregator.AggregatorResult.Success }) {
                                 println("Could not load expected output for day $day from any source")
                             }
                         }

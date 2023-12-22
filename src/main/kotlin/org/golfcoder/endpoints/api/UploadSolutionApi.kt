@@ -167,11 +167,10 @@ object UploadSolutionApi {
             )
         }
 
-        val codeRunnerStdout = coderunnerResult.stdout.trim()
-        val outputNumber = codeRunnerStdout.toLongOrNull()
+        val codeRunnerStdout = coderunnerResult.stdout.trim().takeIf { it.isNotEmpty() }
 
         call.respond(when {
-            outputNumber == expectedOutput.output -> {
+            codeRunnerStdout == expectedOutput.output -> {
                 // Correct solution. Save solution to database
                 val solution = Solution().apply {
                     _id = randomId()
@@ -196,7 +195,7 @@ object UploadSolutionApi {
                 )
             }
 
-            outputNumber != null -> {
+            codeRunnerStdout != null -> {
                 // Incorrect solution, but code execution worked
                 ApiCallResult(
                     buttonText = "Calculate tokens",
@@ -204,27 +203,13 @@ object UploadSolutionApi {
                     changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
                     alertHtml = createHTML().div {
                         +"Wrong stdout. Expected "
-                        code { +"${expectedOutput.output}" }
+                        code { +expectedOutput.output }
                         +", but got "
                         code { +codeRunnerStdout }
                         +"."
                         br()
                         br()
                         +"If you think this is a bug, please report it to Golfcoder (see FAQ)."
-                    }
-                )
-            }
-
-            codeRunnerStdout.isNotEmpty() -> {
-                // Code got executed, but could not be cast to a number
-                ApiCallResult(
-                    buttonText = "Calculate tokens",
-                    resetButtonTextSeconds = null,
-                    changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
-                    alertHtml = createHTML().div {
-                        +"Wrong stdout. Expected a number, but got "
-                        code { +codeRunnerStdout }
-                        +"."
                     }
                 )
             }

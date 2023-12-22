@@ -24,7 +24,13 @@ class FornwallAggregator : ExpectedOutputAggregator {
         (1..2).forEach { part ->
             val output = httpClient.post("https://advent.fly.dev/solve/$year/$day/$part") {
                 setBody(input)
-            }.bodyAsText().toLong()
+            }
+                .takeIf { it.status == io.ktor.http.HttpStatusCode.OK }
+                ?.bodyAsText()
+                ?.takeIf { it.count() < 50 } // Just to make sure not to parse garbage
+                ?: run {
+                    return Failure.DifferentFormat
+                }
 
             mainDatabase.getSuspendingCollection<ExpectedOutput>().insertOne(
                 ExpectedOutput().apply {

@@ -52,7 +52,7 @@ class GereonsAggregator : ExpectedOutputAggregator {
                     this.part = part
                     this.source = source
                     this.input = testcaseCode
-                    this.output = output
+                    this.output = output.toString()
                 },
                 upsert = true
             )

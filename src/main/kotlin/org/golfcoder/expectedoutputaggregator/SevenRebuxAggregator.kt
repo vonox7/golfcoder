@@ -53,7 +53,7 @@ class SevenRebuxAggregator : ExpectedOutputAggregator {
                     this.part = part
                     this.source = source
                     this.input = input
-                    this.output = output
+                    this.output = output.toString()
                 },
                 upsert = true
             )
