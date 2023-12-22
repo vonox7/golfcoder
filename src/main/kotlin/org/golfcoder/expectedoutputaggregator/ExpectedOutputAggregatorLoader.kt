@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.count
 import org.golfcoder.Sysinfo
 import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.endpoints.api.UploadSolutionApi
+import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Failure.YearNotInSource
 import org.golfcoder.mainDatabase
 import java.util.*
 import kotlin.time.Duration.Companion.minutes
@@ -23,19 +24,24 @@ object ExpectedOutputAggregatorLoader {
     }
 
     private suspend fun loadAll() {
-        val year = 2023
-
-        UploadSolutionApi.DAYS_RANGE.forEach { day ->
-            load(year, day)
+        UploadSolutionApi.YEARS_RANGE.forEach { year ->
+            val results = UploadSolutionApi.DAYS_RANGE.map { day ->
+                day to load(year, day)
+            }
+            println("Loaded expected output:" + results.joinToString("") { (day, results) ->
+                "\n$year/$day: ${results.filter { it !is YearNotInSource }.joinToString { it.toString() }}"
+            })
         }
+        println("Loaded expected output for all years and days")
     }
 
-    private suspend fun load(year: Int, day: Int) {
-        ExpectedOutput.Source.entries.forEach { source ->
+    private suspend fun load(year: Int, day: Int): List<ExpectedOutputAggregator.AggregatorResult> {
+        return ExpectedOutput.Source.entries.map { source ->
             try {
                 source.aggregator.load(year, day)
             } catch (exception: Exception) {
-                println("Could not load expected output for day $day from $source: $exception")
+                println("Could not load expected output for $year/$day from $source: $exception")
+                ExpectedOutputAggregator.AggregatorResult.Failure.UnknownError(exception.toString())
             }
         }
     }
@@ -45,11 +51,16 @@ object ExpectedOutputAggregatorLoader {
         while (true) {
             try {
                 val now = Calendar.getInstance()
-                (now.get(Calendar.DAY_OF_MONTH) - 1..now.get(Calendar.DAY_OF_MONTH) + 1)
-                    .intersect(UploadSolutionApi.DAYS_RANGE)
-                    .forEach { day ->
-                        load(now.get(Calendar.YEAR), day)
-                    }
+                if (now.get(Calendar.MONTH) == Calendar.DECEMBER) {
+                    (now.get(Calendar.DAY_OF_MONTH) - 1..now.get(Calendar.DAY_OF_MONTH) + 1)
+                        .intersect(UploadSolutionApi.DAYS_RANGE)
+                        .map { day ->
+                            val results = load(now.get(Calendar.YEAR), day)
+                            if (results.none { it is ExpectedOutputAggregator.AggregatorResult.Success }) {
+                                println("Could not load expected output for day $day from any source")
+                            }
+                        }
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }

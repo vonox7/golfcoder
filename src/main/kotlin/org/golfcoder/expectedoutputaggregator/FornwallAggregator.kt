@@ -3,11 +3,13 @@ package org.golfcoder.expectedoutputaggregator
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import org.golfcoder.database.ExpectedOutput
+import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Failure
+import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Success
 import org.golfcoder.httpClient
 import org.golfcoder.mainDatabase
 
 class FornwallAggregator : ExpectedOutputAggregator {
-    override suspend fun load(year: Int, day: Int) {
+    override suspend fun load(year: Int, day: Int): ExpectedOutputAggregator.AggregatorResult {
         val source = ExpectedOutput.Source.FORNWALL
 
         val input = httpClient.get(
@@ -16,8 +18,7 @@ class FornwallAggregator : ExpectedOutputAggregator {
         ).bodyAsText()
 
         if (input.isEmpty()) {
-            println("No input (yet) for day $day (year $year) from $source")
-            return
+            return Failure.NotYetAvailable
         }
 
         (1..2).forEach { part ->
@@ -37,8 +38,7 @@ class FornwallAggregator : ExpectedOutputAggregator {
                 },
                 upsert = true
             )
-
-            println("Added expected output for day $day part $part from $source")
         }
+        return Success
     }
 }

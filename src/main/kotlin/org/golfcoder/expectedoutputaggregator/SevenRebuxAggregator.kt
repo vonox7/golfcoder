@@ -8,8 +8,10 @@ import org.golfcoder.httpClient
 import org.golfcoder.mainDatabase
 
 class SevenRebuxAggregator : ExpectedOutputAggregator {
-    override suspend fun load(year: Int, day: Int) {
-        if (year != 2023) return
+    override suspend fun load(year: Int, day: Int): ExpectedOutputAggregator.AggregatorResult {
+        if (year != 2023) {
+            return ExpectedOutputAggregator.AggregatorResult.Failure.YearNotInSource
+        }
 
         val source = ExpectedOutput.Source.SEVEN_REBUX
 
@@ -18,8 +20,7 @@ class SevenRebuxAggregator : ExpectedOutputAggregator {
         val input = httpClient.get(
             "https://raw.githubusercontent.com/7rebux/advent-of-code-2023/main/src/main/resources/$dayString.txt"
         ).takeIf { it.status == HttpStatusCode.OK }?.bodyAsText() ?: run {
-            println("Expected output for day $day from $source not yet available")
-            return
+            return ExpectedOutputAggregator.AggregatorResult.Failure.NotYetAvailable
         }
 
         val testcaseCode = httpClient.get(
@@ -40,8 +41,7 @@ class SevenRebuxAggregator : ExpectedOutputAggregator {
             .toLongOrNull()
 
         if (part1output == null || part2output == null) {
-            println("Unknown answer format for day $day (year $year) from $source")
-            return
+            return ExpectedOutputAggregator.AggregatorResult.Failure.DifferentFormat
         }
 
         mapOf(1 to part1output, 2 to part2output).forEach { (part, output) ->
@@ -57,7 +57,8 @@ class SevenRebuxAggregator : ExpectedOutputAggregator {
                 },
                 upsert = true
             )
-            println("Added expected output for day $day part $part from $source")
         }
+
+        return ExpectedOutputAggregator.AggregatorResult.Success
     }
 }

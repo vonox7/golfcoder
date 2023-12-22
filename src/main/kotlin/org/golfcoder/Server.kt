@@ -94,7 +94,7 @@ private fun Application.ktorServerModule() {
     configureHTTP()
 
     routing {
-        get("/") { call.respondRedirect("/2023") }
+        get("/") { call.respondRedirect("/${UploadSolutionApi.YEARS_RANGE.last}") }
         get("/favicon.ico") { call.respondRedirect("/static/images/favicon.ico", permanent = true) }
 
         authenticate(sessionAuthenticationName, optional = true) {

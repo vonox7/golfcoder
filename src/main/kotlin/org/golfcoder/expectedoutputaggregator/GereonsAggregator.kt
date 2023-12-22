@@ -8,16 +8,17 @@ import org.golfcoder.httpClient
 import org.golfcoder.mainDatabase
 
 class GereonsAggregator : ExpectedOutputAggregator {
-    override suspend fun load(year: Int, day: Int) {
-        if (year != 2023) return
+    override suspend fun load(year: Int, day: Int): ExpectedOutputAggregator.AggregatorResult {
+        if (year != 2023) {
+            return ExpectedOutputAggregator.AggregatorResult.Failure.YearNotInSource
+        }
 
         val source = ExpectedOutput.Source.GEREONS
 
         val testcaseCode = httpClient.get(
             "https://raw.githubusercontent.com/gereons/AoC2023/main/Tests/Day${String.format("%02d", day)}Tests.swift"
         ).takeIf { it.status == HttpStatusCode.OK }?.bodyAsText() ?: run {
-            println("Expected output for day $day from $source not yet available")
-            return
+            return ExpectedOutputAggregator.AggregatorResult.Failure.NotYetAvailable
         }
 
         val testInput = testcaseCode
@@ -27,8 +28,7 @@ class GereonsAggregator : ExpectedOutputAggregator {
             .takeIf { it.isNotEmpty() }
 
         if (testInput == null) {
-            println("No input (yet) for day $day (year $year) from $source (or different test format)")
-            return
+            return ExpectedOutputAggregator.AggregatorResult.Failure.DifferentFormat
         }
 
         (1..2).forEach { part ->
@@ -41,8 +41,7 @@ class GereonsAggregator : ExpectedOutputAggregator {
                 ?.get(1)
                 ?.toLongOrNull()
                 ?: run {
-                    println("Unknown input format for day $day (year $year) from $source")
-                    return
+                    return ExpectedOutputAggregator.AggregatorResult.Failure.DifferentFormat
                 }
 
             mainDatabase.getSuspendingCollection<ExpectedOutput>().insertOne(
@@ -57,8 +56,7 @@ class GereonsAggregator : ExpectedOutputAggregator {
                 },
                 upsert = true
             )
-
-            println("Added expected output for day $day part $part from $source")
         }
+        return ExpectedOutputAggregator.AggregatorResult.Success
     }
 }

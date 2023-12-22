@@ -5,10 +5,13 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import io.ktor.server.sessions.*
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.toSet
 import kotlinx.html.*
+import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.database.LeaderboardPosition
 import org.golfcoder.database.getUserProfiles
 import org.golfcoder.endpoints.api.UploadSolutionApi
+import org.golfcoder.endpoints.api.UploadSolutionApi.YEARS_RANGE
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.utils.relativeToNow
@@ -17,15 +20,32 @@ object LeaderboardYearView {
     suspend fun getHtml(call: ApplicationCall) {
         val session = call.sessions.get<UserSession>()
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
+
         val positionOneLeaderboardPositions = mainDatabase.getSuspendingCollection<LeaderboardPosition>()
             .find(LeaderboardPosition::year equal year, LeaderboardPosition::position equal 1)
             .toList()
             .associateBy { it.day }
+        val expectedOutputDays = mainDatabase.getSuspendingCollection<ExpectedOutput>()
+            .distinct(ExpectedOutput::day, ExpectedOutput::year equal year)
+            .toSet()
+
         val positionOneUserIdsToUsers =
             getUserProfiles(positionOneLeaderboardPositions.values.map { it.userId }.toSet())
 
         call.respondHtmlView("Advent of Code Leaderboard $year") {
             h1 { +"Advent of Code Leaderboard $year" }
+            h3("center") {
+                YEARS_RANGE.forEachIndexed { index, yearToLink ->
+                    if (index > 0) {
+                        +" • "
+                    }
+                    if (yearToLink == year) {
+                        +"$yearToLink"
+                    } else {
+                        a("/$yearToLink") { +"$yearToLink" }
+                    }
+                }
+            }
 
             div("center") {
                 p {
@@ -68,7 +88,11 @@ object LeaderboardYearView {
                                 if (positionOne == null) {
                                     td("text-secondary-info") {
                                         colSpan = "6"
-                                        +" No submissions yet"
+                                        if (day in expectedOutputDays) {
+                                            +" No submissions yet"
+                                        } else {
+                                            +"Puzzle is not yet released (or not yet supported)"
+                                        }
                                     }
                                 } else {
                                     td("left-align") {
