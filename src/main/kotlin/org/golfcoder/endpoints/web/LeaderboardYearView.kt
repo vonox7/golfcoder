@@ -111,7 +111,7 @@ object LeaderboardYearView {
                                     }
 
                                     td("right-align mobile-hidden") {
-                                        +positionOne.partInfos.values.maxOf { it.uploadDate }.relativeToNow
+                                        +positionOne.partInfos.values.maxOf { it.uploadDate }.relativeToNow()
                                     }
                                 }
                             }

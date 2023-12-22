@@ -259,7 +259,7 @@ object LeaderboardDayView {
                             }
                         }
                         td("right-align mobile-hidden") {
-                            +leaderboardPosition.partInfos.values.maxOf { it.uploadDate }.relativeToNow
+                            +leaderboardPosition.partInfos.values.maxOf { it.uploadDate }.relativeToNow()
                         }
                     }
                 }

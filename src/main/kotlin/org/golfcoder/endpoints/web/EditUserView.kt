@@ -36,7 +36,7 @@ object EditUserView {
                 +currentUser.name
             }
             p {
-                +"You joined Golfcoder ${currentUser.createdOn.relativeToNow}. "
+                +"You joined Golfcoder ${currentUser.createdOn.relativeToNow()}. "
             }
 
             val currentLoginProviders = currentUser.oAuthDetails.map { it.provider }
@@ -197,7 +197,7 @@ object EditUserView {
                                 +solution.tokenCount.toString()
                             }
                         }
-                        td("right-align") { +solution.uploadDate.relativeToNow }
+                        td("right-align") { +solution.uploadDate.relativeToNow() }
                     }
                 }
             }
