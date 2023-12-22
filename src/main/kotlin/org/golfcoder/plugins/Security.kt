@@ -68,7 +68,12 @@ fun Application.configureSecurity() {
                         .count() == 1
                 }
             }
-            challenge("/login") // Redirect to /login if validate failed
+            challenge {
+                // The user has a session cookie but we don't have this user in the db (maybe server restart during login?).
+                // Make sure that the user can create a new session
+                call.sessions.clear<UserSession>()
+                call.respondRedirect("/login")
+            }
         }
     }
 
