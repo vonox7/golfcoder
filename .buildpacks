@@ -1,4 +1,3 @@
-https://github.com/Scalingo/apt-buildpack.git
-https://github.com/Dynatrace/heroku-buildpack-dynatrace.git
+https://github.com/vonox7/heroku-buildpack-dynatrace.git
 https://github.com/Scalingo/nodejs-buildpack
 https://github.com/Scalingo/gradle-buildpack.git
