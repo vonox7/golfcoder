@@ -68,7 +68,7 @@ object UploadSolutionApi {
         val tokenizer = request.language.tokenizer
         val tokens: List<Tokenizer.Token>
         val tokenCount: Int
-        print("Tokenize for user ${userSession?.userId}: ${request.year}/${request.day}/${request.part} ${request.language}")
+        println("Tokenize for user ${userSession?.userId}: ${request.year}/${request.day}/${request.part} ${request.language}:\n${request.code}")
         try {
             tokens = tokenizer.tokenize(request.code)
             if (Sysinfo.isLocal) {
@@ -147,7 +147,7 @@ object UploadSolutionApi {
         }
 
         // Run code
-        print("Run code for user ${userSession.userId}: ${request.year}/${request.day}/${request.part} ${request.language}")
+        println("Run code for user ${userSession.userId}: ${request.year}/${request.day}/${request.part} ${request.language}")
         runCode(call, request, expectedOutput, userSession, tokenCount, tokenizer)
     }
 
