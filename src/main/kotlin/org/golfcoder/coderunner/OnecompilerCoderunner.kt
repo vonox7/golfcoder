@@ -35,6 +35,12 @@ class OnecompilerCoderunner(private val onecompilerLanguageId: String) : Coderun
     )
 
     override suspend fun run(code: String, language: Solution.Language, stdin: String): Coderunner.RunResult {
+        return Coderunner.RunResult(
+            // Temp disable OneCompiler due to instability
+            stdout = "",
+            error = null,
+        )
+
         val onecompilerResponse = httpClient.post("https://onecompiler-apis.p.rapidapi.com/api/v1/run") {
             contentType(ContentType.Application.Json)
             header("X-RapidAPI-Key", System.getenv("RAPIDAPI_KEY"))
