@@ -9,6 +9,7 @@ interface ExpectedOutputAggregator {
             data object YearNotInSource : Failure()
             data object NotYetAvailable : Failure()
             data object DifferentFormat : Failure()
+            data object TooLongInput : Failure()
             data class UnknownError(val errorMessage: String) : Failure()
         }
     }

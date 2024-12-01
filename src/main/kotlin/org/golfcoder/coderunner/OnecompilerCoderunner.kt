@@ -30,7 +30,7 @@ class OnecompilerCoderunner(private val onecompilerLanguageId: String) : Coderun
         val stdout: String?,
         val stderr: String?,
         val executionTime: Int,
-        val limitRemaining: Int? = null,
+        val limitPerMonthRemaining: Int? = null,
         val stdin: String,
     )
 
@@ -59,7 +59,7 @@ class OnecompilerCoderunner(private val onecompilerLanguageId: String) : Coderun
             ?.removePrefix("OpenJDK 64-Bit Server VM warning: Options -Xverify:none and -noverify were deprecated in JDK 13 and will likely be removed in a future release.\n")
 
         println(
-            "Onecompiler limit remaining: ${onecompilerResponse.limitRemaining}. " +
+            "Onecompiler limit remaining: ${onecompilerResponse.limitPerMonthRemaining}. " +
                     "Execution time: ${onecompilerResponse.executionTime}ms for " +
                     "${code.length} characters in $language" +
                     if (onecompilerException == null) "" else " (execution failed)"

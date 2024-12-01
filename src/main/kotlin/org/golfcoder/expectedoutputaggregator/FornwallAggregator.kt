@@ -21,6 +21,10 @@ class FornwallAggregator : ExpectedOutputAggregator {
             return Failure.NotYetAvailable
         }
 
+        if (input.length > 2000) {
+            return Failure.TooLongInput
+        }
+
         (1..2).forEach { part ->
             val output = httpClient.post("https://advent.fly.dev/solve/$year/$day/$part") {
                 setBody(input)
