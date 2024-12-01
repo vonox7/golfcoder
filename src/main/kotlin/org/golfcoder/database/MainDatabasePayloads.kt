@@ -141,6 +141,7 @@ class ExpectedOutput : MongoMainEntry() {
 
     enum class Source {
         FORNWALL,
+        FORNWALL_RUST,
         GEREONS,
         SEVEN_REBUX,
         KATE,
@@ -149,6 +150,7 @@ class ExpectedOutput : MongoMainEntry() {
         val aggregator: ExpectedOutputAggregator
             get() = when (this) {
                 FORNWALL -> FornwallAggregator()
+                FORNWALL_RUST -> FornwallRustAggregator()
                 GEREONS -> GereonsAggregator()
                 SEVEN_REBUX -> SevenRebuxAggregator()
                 KATE -> KateAggregator()
