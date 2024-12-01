@@ -28,6 +28,8 @@ import org.golfcoder.plugins.configureHTTP
 import org.golfcoder.plugins.configureSecurity
 import org.golfcoder.plugins.sessionAuthenticationName
 import org.golfcoder.tokenizer.TokenRecalculator
+import org.golfcoder.utils.SentryPlugin
+import org.golfcoder.utils.initSentry
 
 val container = System.getenv("CONTAINER") ?: "local"
 lateinit var mainDatabase: MainDatabase
@@ -49,6 +51,8 @@ val httpClient = HttpClient(CIO) {
 }
 
 fun main(): Unit = runBlocking {
+    initSentry()
+
     println("Connecting to database...")
     mainDatabase = MainDatabase(System.getenv("MONGO_URL") ?: "mongodb://localhost:27017/golfcoder")
 
@@ -92,6 +96,7 @@ fun main(): Unit = runBlocking {
 private fun Application.ktorServerModule() {
     configureSecurity()
     configureHTTP()
+    install(SentryPlugin)
 
     routing {
         get("/") { call.respondRedirect("/${UploadSolutionApi.YEARS_RANGE.last}") }
