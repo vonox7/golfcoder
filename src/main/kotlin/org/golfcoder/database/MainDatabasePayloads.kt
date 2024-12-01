@@ -5,10 +5,7 @@ import com.moshbit.katerbase.MongoSubEntry
 import org.golfcoder.coderunner.Coderunner
 import org.golfcoder.coderunner.KotlinPlaygroundCoderunner
 import org.golfcoder.coderunner.OnecompilerCoderunner
-import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator
-import org.golfcoder.expectedoutputaggregator.FornwallAggregator
-import org.golfcoder.expectedoutputaggregator.GereonsAggregator
-import org.golfcoder.expectedoutputaggregator.SevenRebuxAggregator
+import org.golfcoder.expectedoutputaggregator.*
 import org.golfcoder.tokenizer.Tokenizer
 import org.golfcoder.tokenizer.TreeSitterTokenizer
 import java.util.*
@@ -145,7 +142,8 @@ class ExpectedOutput : MongoMainEntry() {
     enum class Source {
         FORNWALL,
         GEREONS,
-        SEVEN_REBUX
+        SEVEN_REBUX,
+        KATE,
         ;
 
         val aggregator: ExpectedOutputAggregator
@@ -153,6 +151,7 @@ class ExpectedOutput : MongoMainEntry() {
                 FORNWALL -> FornwallAggregator()
                 GEREONS -> GereonsAggregator()
                 SEVEN_REBUX -> SevenRebuxAggregator()
+                KATE -> KateAggregator()
             }
     }
 }
