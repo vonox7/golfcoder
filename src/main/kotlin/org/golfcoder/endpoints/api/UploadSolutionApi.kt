@@ -170,7 +170,8 @@ object UploadSolutionApi {
         val codeRunnerStdout = coderunnerResult.stdout.trim().takeIf { it.isNotEmpty() }
 
         call.respond(when {
-            codeRunnerStdout == expectedOutput.output -> {
+            // TODO disable || true when onecompiler works again
+            codeRunnerStdout == expectedOutput.output || true -> {
                 // Correct solution. Save solution to database
                 val solution = Solution().apply {
                     _id = randomId()
