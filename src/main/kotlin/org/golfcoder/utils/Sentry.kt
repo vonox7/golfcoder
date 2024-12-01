@@ -13,11 +13,16 @@ import org.golfcoder.plugins.UserSession
 
 
 fun initSentry() {
-  Sentry.init { options ->
-    options.dsn = "https://db4206f768de71d93f1a38a408b895cd@o4508395080712192.ingest.de.sentry.io/4508395085889616"
-    options.addInAppInclude("org.golfcoder") // Mark our own packages in stacktrace
-    options.release = System.getenv("CONTAINER_VERSION") // Git commit hash
-    options.serverName = System.getenv("CONTAINER") // Container name
+  val sentryDsn = System.getenv("SENTRY_DSN")
+  if (sentryDsn == null) {
+    println("No SENTRY_DSN found, skipping Sentry initialization")
+  } else {
+    Sentry.init { options ->
+      options.dsn = sentryDsn
+      options.addInAppInclude("org.golfcoder") // Mark our own packages in stacktrace
+      options.release = System.getenv("CONTAINER_VERSION") // Git commit hash
+      options.serverName = System.getenv("CONTAINER") // Container name
+    }
   }
 }
 
