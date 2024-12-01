@@ -251,7 +251,8 @@ fun Application.configureSecurity() {
     )
 }
 
-class UserSession(val userId: String, val displayName: String) : Principal
+@Serializable
+class UserSession(val userId: String, val displayName: String)
 
 @Serializable
 private data class GoogleUserInfo(
