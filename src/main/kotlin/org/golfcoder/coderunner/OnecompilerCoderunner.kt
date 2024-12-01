@@ -30,7 +30,7 @@ class OnecompilerCoderunner(private val onecompilerLanguageId: String) : Coderun
         val stdout: String?,
         val stderr: String?,
         val executionTime: Int,
-        val limitRemaining: Int,
+        val limitRemaining: Int? = null,
         val stdin: String,
     )
 
