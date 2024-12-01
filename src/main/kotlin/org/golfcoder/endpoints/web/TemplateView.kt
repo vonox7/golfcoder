@@ -35,12 +35,9 @@ object TemplateView {
                 |# Template for reading all lines from stdin and printing the line count to stdout.
                 |# Copy this code to your IDE to get started.
                 |
-                |lines = []
-                |while True:
-                |    try:
-                |        lines.append(input())
-                |    except EOFError:
-                |        break
+                |from sys import stdin
+                |
+                |lines = stdin.readlines()
                 |print(len(lines))""".trimMargin()
                 code
             }
@@ -233,12 +230,7 @@ object TemplateView {
                 |// Template for reading lines from stdin and printing the line count to stdout.
                 |// Copy this code to your IDE to get started.
                 |
-                |import Foundation
-                |
-                |var lines = [String]()
-                |while let line = readLine() {
-                |    lines.append(line)
-                |}
+                |let lines: [String] = AnyIterator { readLine() }
                 |print(lines.count)
                 |""".trimMargin()
                 code
