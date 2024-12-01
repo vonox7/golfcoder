@@ -43,6 +43,10 @@ class KateAggregator : ExpectedOutputAggregator {
         return Failure.DifferentFormat
       }
 
+      if (input.length > 2000) {
+        return Failure.TooLongInput
+      }
+
       mainDatabase.getSuspendingCollection<ExpectedOutput>().insertOne(
         ExpectedOutput().apply {
           _id = generateId(year.toString(), day.toString(), part.toString(), source.name)
