@@ -40,7 +40,7 @@ object ExpectedOutputAggregatorLoader {
         year: Int,
         day: Int,
     ): Map<ExpectedOutput.Source, ExpectedOutputAggregator.AggregatorResult> {
-        return ExpectedOutput.Source.entries.filter { it == ExpectedOutput.Source.KATE }.associateWith { source ->
+        return ExpectedOutput.Source.entries.associateWith { source ->
             try {
                 source.aggregator.load(year, day)
             } catch (exception: Exception) {
