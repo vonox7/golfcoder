@@ -23,7 +23,7 @@ object ExpectedOutputAggregatorLoader {
         }
     }
 
-    private suspend fun loadAll() {
+    suspend fun loadAll() {
         UploadSolutionApi.YEARS_RANGE.forEach { year ->
             val results = UploadSolutionApi.DAYS_RANGE.map { day ->
                 day to load(year, day)
@@ -40,7 +40,7 @@ object ExpectedOutputAggregatorLoader {
         year: Int,
         day: Int,
     ): Map<ExpectedOutput.Source, ExpectedOutputAggregator.AggregatorResult> {
-        return ExpectedOutput.Source.entries.associateWith { source ->
+        return ExpectedOutput.Source.entries.filter { it == ExpectedOutput.Source.KATE }.associateWith { source ->
             try {
                 source.aggregator.load(year, day)
             } catch (exception: Exception) {
