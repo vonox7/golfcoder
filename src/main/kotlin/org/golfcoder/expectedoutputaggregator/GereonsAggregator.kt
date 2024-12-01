@@ -9,23 +9,24 @@ import org.golfcoder.mainDatabase
 
 class GereonsAggregator : ExpectedOutputAggregator {
     override suspend fun load(year: Int, day: Int): ExpectedOutputAggregator.AggregatorResult {
-        if (year != 2023) {
+        if (year != 2024) {
             return ExpectedOutputAggregator.AggregatorResult.Failure.YearNotInSource
         }
 
         val source = ExpectedOutput.Source.GEREONS
 
         val testcaseCode = httpClient.get(
-            "https://raw.githubusercontent.com/gereons/AoC2023/main/Tests/Day${String.format("%02d", day)}Tests.swift"
+            "https://raw.githubusercontent.com/gereons/AoC2024/main/Tests/Day${String.format("%02d", day)}Tests.swift"
         ).takeIf { it.status == HttpStatusCode.OK }?.bodyAsText() ?: run {
             return ExpectedOutputAggregator.AggregatorResult.Failure.NotYetAvailable
         }
 
         val testInput = testcaseCode
-            .substringAfter("let testInput = \"\"\"")
-            .substringBefore("\"\"\"")
+            .substringAfter("let testInput = \"\"\"", missingDelimiterValue = "")
+            .substringBefore("\"\"\"", missingDelimiterValue = "")
             .trim()
             .takeIf { it.isNotEmpty() }
+            ?.takeIf { "func " !in it } // Sanity check to make sure we don't parse the actual code
 
         if (testInput == null) {
             return ExpectedOutputAggregator.AggregatorResult.Failure.DifferentFormat
@@ -33,7 +34,7 @@ class GereonsAggregator : ExpectedOutputAggregator {
 
         (1..2).forEach { part ->
             val output = Regex(
-                """.*testInput\s*.\s*XCTAssertEqual\(day\.part$part\(\), ([0-9]+)\).*""",
+                """.*testInput\s*.\s*#expect\(day\.part$part\(\) == ([0-9]+)\).*""",
                 RegexOption.DOT_MATCHES_ALL
             )
                 .matchEntire(testcaseCode)
@@ -51,7 +52,7 @@ class GereonsAggregator : ExpectedOutputAggregator {
                     this.day = day
                     this.part = part
                     this.source = source
-                    this.input = testcaseCode
+                    this.input = testInput
                     this.output = output.toString()
                 },
                 upsert = true
