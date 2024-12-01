@@ -26,7 +26,7 @@ object UploadSolutionApi {
 
     const val MAX_CODE_LENGTH = 100_000
     val DAYS_RANGE = 1..25
-    val YEARS_RANGE = 2015..2023
+    val YEARS_RANGE = 2015..2024
     val PART_RANGE = 1..2
     private const val MIN_CODE_LENGTH = 10
 
