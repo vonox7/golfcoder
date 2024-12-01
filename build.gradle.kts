@@ -47,6 +47,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("com.github.studoverse:katerbase:fa230a827a566b42450aa07ded2d5b2e22dcdf30")
     implementation("org.mongodb:mongodb-driver-sync:4.9.0")
+    implementation("io.sentry:sentry:8.0.0-rc.1")
 }
 
 kotlin {
