@@ -1,5 +1,6 @@
 package org.golfcoder.tokenizer
 
+import io.sentry.Sentry
 import java.io.*
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
@@ -25,7 +26,7 @@ fun Array<String>.runCommand(
                 process.destroy()
             }
         } catch (e: Exception) {
-            println(e)
+            Sentry.captureException(e)
         }
     } else null
 

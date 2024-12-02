@@ -2,6 +2,7 @@ package org.golfcoder.tokenizer
 
 import com.moshbit.katerbase.equal
 import com.moshbit.katerbase.lower
+import io.sentry.Sentry
 import org.golfcoder.database.Solution
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.mainDatabase
@@ -31,6 +32,7 @@ object TokenRecalculator {
                         }
                         recalculationCount++
                     } catch (e: Exception) {
+                        Sentry.captureException(e)
                         e.printStackTrace() // Tokenizer might fail, but continue with next solution
                     }
                 }

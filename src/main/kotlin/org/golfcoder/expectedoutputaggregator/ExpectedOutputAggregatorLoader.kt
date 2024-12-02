@@ -1,5 +1,6 @@
 package org.golfcoder.expectedoutputaggregator
 
+import io.sentry.Sentry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.count
 import org.golfcoder.Sysinfo
@@ -44,6 +45,7 @@ object ExpectedOutputAggregatorLoader {
             try {
                 source.aggregator.load(year, day)
             } catch (exception: Exception) {
+                Sentry.captureException(exception)
                 println("Could not load expected output for $year/$day from $source: $exception")
                 ExpectedOutputAggregator.AggregatorResult.Failure.UnknownError(exception.toString())
             }
@@ -66,7 +68,7 @@ object ExpectedOutputAggregatorLoader {
                         }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Sentry.captureException(e)
             }
 
             delay(10.minutes)

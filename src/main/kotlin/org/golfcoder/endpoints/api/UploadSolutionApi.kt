@@ -6,6 +6,7 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
+import io.sentry.Sentry
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
@@ -76,6 +77,7 @@ object UploadSolutionApi {
             }
             tokenCount = tokenizer.getTokenCount(tokens)
         } catch (e: Exception) {
+            Sentry.captureException(e)
             // Could either be a syntax error or a tokenizer error (like network issue, bug in our code...)
             call.respond(ApiCallResult(buttonText = "Tokenizer failed", alertHtml = createHTML().div {
                 +"Tokenizer failed:"
@@ -162,7 +164,7 @@ object UploadSolutionApi {
         val coderunnerResult = try {
             request.language.coderunner.run(request.code, request.language, expectedOutput.input)
         } catch (e: Exception) {
-            if (Sysinfo.isLocal) e.printStackTrace()
+            Sentry.captureException(e)
             Coderunner.RunResult(
                 stdout = "",
                 error = "Code compilation or execution failed:\n\n${e.message}",
