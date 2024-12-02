@@ -230,9 +230,11 @@ object TemplateView {
                 |// Template for reading lines from stdin and printing the line count to stdout.
                 |// Copy this code to your IDE to get started.
                 |
-                |let lines: [String] = AnyIterator { readLine() }
-                |print(lines.count)
-                |""".trimMargin()
+                |var lines: [String] = []
+                |while let line = readLine() {
+                |    lines.append(line)
+                |}
+                |print(lines.count)""".trimMargin()
                 code
             }
 
