@@ -100,37 +100,6 @@ object LeaderboardDayView {
                     +defaultLanguage.template.orEmpty()
                 }
                 br()
-                b { +"Rules" }
-                ul {
-                    li {
-                        +"You're welcome to participate alone or in a team."
-                    }
-                    li {
-                        +"You may submit multiple solutions and explore different programming languages."
-                    }
-                    li {
-                        +"Stick to the standard library of your language, no further dependencies/libraries, except the ones which "
-                        a(href = "https://onecompiler.com/", target = "_blank") { +"OneCompiler" }
-                        +" provides (e.g. NumPy for Python)."
-                    }
-                    li {
-                        +"Ensure your code aligns to the template ("
-                        Solution.Language.entries
-                            .filter { it.template != null }
-                            .mapIndexed { index, it ->
-                                if (index != 0) {
-                                    +", "
-                                }
-                                a(href = "/template/golfcoder-${it.name.lowercase()}-template.${it.fileEnding}") {
-                                    +it.displayName
-                                }
-                            }
-                        +"), reading the puzzle input from stdin (terminated with end-of-file), and printing the solution to stdout."
-                    }
-                    li {
-                        +"Please refrain from making network requests, reading data from files, or storing data in variable/function/class names for reflection."
-                    }
-                }
                 label("checkbox-container") {
                     +"Code publicly visible"
                     input(type = InputType.checkBox) {
@@ -169,6 +138,8 @@ object LeaderboardDayView {
                     } else {
                         renderLeaderboard(leaderboardPositions, userIdsToUsers, currentUser)
                     }
+
+                    renderRules()
                 }
 
                 div("right") {
@@ -265,6 +236,45 @@ object LeaderboardDayView {
                 }
             }
         }
+    }
+
+    private fun HtmlBlockTag.renderRules() {
+        br()
+        h2 { +"Rules" }
+        ul {
+            li {
+                +"You're welcome to participate alone or in a team."
+            }
+            li {
+                +"You may submit multiple solutions and explore different programming languages."
+            }
+            li {
+                +"Stick to the standard library of your language, no further dependencies/libraries, except the ones which "
+                a(href = "https://onecompiler.com/", target = "_blank") { +"OneCompiler" }
+                +" provides (e.g. NumPy for Python)."
+            }
+            li {
+                +"Ensure your code aligns to the template ("
+                Solution.Language.entries
+                    .filter { it.template != null }
+                    .mapIndexed { index, it ->
+                        if (index != 0) {
+                            +", "
+                        }
+                        a(href = "/template/golfcoder-${it.name.lowercase()}-template.${it.fileEnding}") {
+                            +it.displayName
+                        }
+                    }
+                +"), reading the puzzle input from stdin (terminated with end-of-file), and printing the solution to stdout."
+            }
+            li {
+                +"Please refrain from making network requests, reading data from files, or storing data in variable/function/class names for reflection."
+            }
+            li {
+                +"Your code must be able to process all valid Advent of Code inputs. Golfcoder might reevaluate correctness of your solution with different inputs after your submission."
+            }
+        }
+
     }
 
     fun HtmlBlockTag.renderSolution(tokens: List<Tokenizer.Token>) {
