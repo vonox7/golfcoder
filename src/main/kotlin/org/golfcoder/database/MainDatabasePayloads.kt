@@ -23,6 +23,9 @@ class User : MongoMainEntry() {
     var codeRunCount: Int = 0 // Needed to show "highscores" in the future?
     var adventOfCodeRepositoryInfo: AdventOfCodeRepositoryInfo? = null
 
+    // Admins can see all solutions to detect cheaters and can delete solutions. Must be set manually in the database.
+    var admin: Boolean = false
+
     class OAuthDetails(
         val provider: String,
         val providerUserId: String,
@@ -55,6 +58,7 @@ class Solution : MongoMainEntry() {
     var codePubliclyVisible: Boolean = false
     var tokenCount: Int = 0
     var tokenizerVersion: Int = 0
+    var markedAsCheated: Boolean = false
 
     // Most used languages on GitHub for advent-of-code: https://github.com/search?q=advent-of-code+2023&type=repositories
 

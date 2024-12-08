@@ -182,6 +182,7 @@ object EditUserView {
                     th(classes = "right-align") { +"Part" }
                     th(classes = "right-align") { +"Tokens" }
                     th(classes = "right-align") { +"Date" }
+                    th(classes = "right-align") { }
                 }
             }
             tbody {
@@ -198,6 +199,15 @@ object EditUserView {
                             }
                         }
                         td("right-align") { +solution.uploadDate.relativeToNow() }
+                        td("right-align") {
+                            if (solution.markedAsCheated) {
+                                +"Flagged as cheated solution."
+                                br()
+                                +"Please follow the Golfcoder rules "
+                                br()
+                                +"for a fair competition."
+                            }
+                        }
                     }
                 }
             }

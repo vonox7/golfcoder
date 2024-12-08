@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.toSet
 import kotlinx.html.*
 import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.database.LeaderboardPosition
+import org.golfcoder.database.User
 import org.golfcoder.database.getUserProfiles
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.endpoints.api.UploadSolutionApi.YEARS_RANGE
@@ -19,6 +20,9 @@ import org.golfcoder.utils.relativeToNow
 object LeaderboardYearView {
     suspend fun getHtml(call: ApplicationCall) {
         val session = call.sessions.get<UserSession>()
+        val currentUser = session?.let {
+            mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)
+        }
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
 
         val positionOneLeaderboardPositions = mainDatabase.getSuspendingCollection<LeaderboardPosition>()
@@ -124,7 +128,7 @@ object LeaderboardYearView {
                                                 a(href = "/$year/day/$day?solution=${partInfo.solutionId}#solution") {
                                                     +"${partInfo.tokens}"
                                                 }
-                                            } else if (positionOne.userId == session?.userId) {
+                                            } else if (positionOne.userId == session?.userId || currentUser?.admin == true) {
                                                 a(href = "/$year/day/$day?solution=${partInfo.solutionId}#solution") {
                                                     +"${partInfo.tokens} (only accessible by you)"
                                                 }

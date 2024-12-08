@@ -29,7 +29,7 @@ object LeaderboardDayView {
         val day = call.parameters["day"]?.toIntOrNull() ?: throw NotFoundException("Invalid day")
         val highlightedSolution: Solution? = call.parameters["solution"]?.let { solutionId ->
             mainDatabase.getSuspendingCollection<Solution>().findOne(Solution::_id equal solutionId)
-                ?.takeIf { it.codePubliclyVisible || it.userId == currentUser?._id }
+                ?.takeIf { (it.codePubliclyVisible || currentUser?.admin == true) || it.userId == currentUser?._id }
                 ?: throw NotFoundException("Invalid solution parameter")
         }
 
@@ -158,6 +158,19 @@ object LeaderboardDayView {
                             a(href = "/solution/${highlightedSolution._id}.${highlightedSolution.language.fileEnding}") {
                                 +"Download solution"
                             }
+                            if (currentUser?.admin == true) {
+                                form(action = "/api/admin/markSolutionAsCheated") {
+                                    input(type = InputType.hidden) {
+                                        name = "solutionId"
+                                        value = highlightedSolution._id
+                                    }
+                                    input(type = InputType.submit) {
+                                        name = "submitButton"
+                                        onClick = "submitForm(event)"
+                                        value = "Admin: Mark solution as cheated"
+                                    }
+                                }
+                            }
                         }
                         renderSolution(highlightedSolutionTokenized!!)
                     }
@@ -220,7 +233,7 @@ object LeaderboardDayView {
                                     a(href = "/$year/day/$day?solution=${partInfo.solutionId}#solution") {
                                         +"${partInfo.tokens}"
                                     }
-                                } else if (leaderboardPosition.userId == currentUser?._id) {
+                                } else if (leaderboardPosition.userId == currentUser?._id || currentUser?.admin == true) {
                                     a(href = "/$year/day/$day?solution=${partInfo.solutionId}#solution") {
                                         +"${partInfo.tokens} (only accessible by you)"
                                     }

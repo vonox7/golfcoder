@@ -246,12 +246,17 @@ object UploadSolutionApi {
         })
     }
 
-    private suspend fun recalculateScore(year: Int, day: Int) {
+    suspend fun recalculateScore(year: Int, day: Int) {
         // The whole recalculation could be done also with 1 single aggregate query?
         val solutions = PART_RANGE.map { part ->
             @Suppress("DEPRECATION") // use excludeFields - only `code` is excluded since it is too big
             mainDatabase.getSuspendingCollection<Solution>()
-                .find(Solution::year equal year, Solution::day equal day, Solution::part equal part)
+                .find(
+                    Solution::year equal year,
+                    Solution::day equal day,
+                    Solution::part equal part,
+                    Solution::markedAsCheated equal false
+                )
                 .sortBy(Solution::tokenCount)
                 .excludeFields(Solution::code)
                 .limit(200)

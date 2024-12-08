@@ -25,6 +25,7 @@ class MainDatabase(uri: String) : MongoDatabase(
                 Solution::year.ascending(),
                 Solution::day.ascending(),
                 Solution::part.ascending(),
+                Solution::markedAsCheated.descending(),
                 Solution::tokenCount.descending()
             )
             index(
