@@ -75,6 +75,7 @@ class Solution : MongoMainEntry() {
         SWIFT("Swift", "swift"),
         SCALA("Scala", "scala"),
         RUBY("Ruby", "rb"),
+        BASH("Bash", "sh"),
         ;
 
         val coderunner: Coderunner
@@ -92,6 +93,7 @@ class Solution : MongoMainEntry() {
                 SWIFT -> OnecompilerCoderunner("swift")
                 SCALA -> OnecompilerCoderunner("scala")
                 RUBY -> OnecompilerCoderunner("ruby")
+                BASH -> OnecompilerCoderunner("bash")
             }
 
 
@@ -110,6 +112,7 @@ class Solution : MongoMainEntry() {
                 SWIFT -> TreeSitterTokenizer("swift", tokenizerVersion = 2)
                 SCALA -> TreeSitterTokenizer("scala", tokenizerVersion = 2)
                 RUBY -> TreeSitterTokenizer("ruby", tokenizerVersion = 2)
+                BASH -> TreeSitterTokenizer("bash", tokenizerVersion = 2)
             }
     }
 }

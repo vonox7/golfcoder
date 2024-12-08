@@ -266,5 +266,18 @@ object TemplateView {
                 |""".trimMargin()
                 code
             }
+
+          Solution.Language.BASH -> {
+            @Language("BASH") val code = """
+                |# Template for reading all lines from stdin and printing the line count to stdout.
+                |# Copy this code to your IDE to get started.
+                |
+                |lines=()
+                |while IFS= read -r line || [[ -n "${'$'}line" ]]; do
+                |    lines+=("${'$'}line")
+                |done
+                |echo "${'$'}{#lines[@]}"""".trimMargin()
+            code
+          }
         }
 }

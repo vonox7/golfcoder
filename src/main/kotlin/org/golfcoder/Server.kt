@@ -71,12 +71,14 @@ fun main(): Unit = runBlocking {
     }
 
     println("Starting ktor...")
+    val port = System.getenv("PORT")?.toIntOrNull() ?: 8030
     embeddedServer(
         Netty,
-        port = System.getenv("PORT")?.toIntOrNull() ?: 8030,
+        port = port,
         host = if (Sysinfo.isLocal) "localhost" else "0.0.0.0",
         module = Application::ktorServerModule
     ).start(wait = false)
+    println("Server started at http://localhost:$port")
 
     launch {
         TokenRecalculator.recalculateSolutions()
