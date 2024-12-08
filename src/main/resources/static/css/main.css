@@ -402,6 +402,10 @@ a {
     color: #888;
 }
 
+.text-small {
+    font-size: 90%;
+}
+
 .text-big {
     font-size: 120%;
 }

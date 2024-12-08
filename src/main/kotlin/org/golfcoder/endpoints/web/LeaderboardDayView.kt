@@ -235,7 +235,11 @@ object LeaderboardDayView {
                                     }
                                 } else if (leaderboardPosition.userId == currentUser?._id || currentUser?.admin == true) {
                                     a(href = "/$year/day/$day?solution=${partInfo.solutionId}#solution") {
-                                        +"${partInfo.tokens} (only accessible by you)"
+                                        +"${partInfo.tokens}"
+                                    }
+                                    br()
+                                    span("text-small") {
+                                        +"only accessible by you"
                                     }
                                 } else {
                                     +"${partInfo.tokens}"
