@@ -53,10 +53,19 @@ class OnecompilerCoderunner(private val onecompilerLanguageId: String) : Coderun
             )
         }.bodyOrPrintException<OnecompilerResponse>()
 
-        val onecompilerException = (onecompilerResponse.stderr?.takeIf { it.isNotEmpty() }
+        var onecompilerException = (onecompilerResponse.stderr?.takeIf { it.isNotEmpty() }
             ?: onecompilerResponse.exception?.takeIf { it.isNotEmpty() })
             // Sanitize output from OneCompiler (Kotlin)
             ?.removePrefix("OpenJDK 64-Bit Server VM warning: Options -Xverify:none and -noverify were deprecated in JDK 13 and will likely be removed in a future release.\n")
+
+        var stdout = onecompilerResponse.stdout
+        if (onecompilerException == null && language == Solution.Language.BASH && onecompilerResponse.stdout?.trim() == "0") {
+            onecompilerException = "Wrong stdout: 0\n\n" +
+                "Note that you can only use bash commands, but no unix utilities / BusyBox.\n" +
+                "So no awk, grep, sed, cat or similar.\n" +
+                "Call `man bash` for further help."
+            stdout = null
+        }
 
         println(
             "Onecompiler limit remaining: ${onecompilerResponse.limitPerMonthRemaining}. " +
@@ -65,9 +74,6 @@ class OnecompilerCoderunner(private val onecompilerLanguageId: String) : Coderun
                     if (onecompilerException == null) "" else " (execution failed)"
         )
 
-        return Coderunner.RunResult(
-            stdout = onecompilerResponse.stdout ?: "",
-            error = onecompilerException,
-        )
+        return Coderunner.RunResult(stdout = stdout ?: "", error = onecompilerException)
     }
 }
