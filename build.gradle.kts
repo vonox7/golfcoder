@@ -45,7 +45,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty-jvm")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-    implementation("com.github.studoverse:katerbase:3a04a4956ad131cc997ba9e623070da60527ca2f")
+    implementation("com.github.studoverse:katerbase:4e944a1d19b7b96a80080d42ecfebd9b732f5270")
     implementation("org.mongodb:mongodb-driver-sync:4.9.0")
     implementation("io.sentry:sentry:8.13.2")
 }
