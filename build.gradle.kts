@@ -5,9 +5,9 @@ val kotlin_version: String by project
 val logback_version: String by project
 
 plugins {
-    kotlin("jvm") version "2.0.20"
-    id("io.ktor.plugin") version "3.0.1"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.20"
+    kotlin("jvm") version "2.1.21"
+    id("io.ktor.plugin") version "3.1.3"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.21"
 }
 
 group = "org.golfcoder"
@@ -45,9 +45,9 @@ dependencies {
     implementation("io.ktor:ktor-server-netty-jvm")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-    implementation("com.github.studoverse:katerbase:fa230a827a566b42450aa07ded2d5b2e22dcdf30")
+    implementation("com.github.studoverse:katerbase:3a04a4956ad131cc997ba9e623070da60527ca2f")
     implementation("org.mongodb:mongodb-driver-sync:4.9.0")
-    implementation("io.sentry:sentry:8.0.0-rc.1")
+    implementation("io.sentry:sentry:8.13.2")
 }
 
 kotlin {
