@@ -37,3 +37,6 @@ out/
 
 ### Project related ###
 Server.jar
+
+# Node.js
+node_modules/
