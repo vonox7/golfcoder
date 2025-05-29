@@ -313,12 +313,9 @@ object UploadSolutionApi {
 
     suspend fun recalculateAllScores() {
         var leaderboards = 0
-        val years = mainDatabase.getSuspendingCollection<Solution>().distinct(Solution::year).toList()
 
-        years.forEach { year ->
-            val days = mainDatabase.getSuspendingCollection<Solution>().distinct(Solution::day).toList()
-
-            days.forEach { day ->
+        YEARS_RANGE.forEach { year ->
+            DAYS_RANGE.forEach { day ->
                 leaderboards++
                 recalculateScore(year, day)
             }
