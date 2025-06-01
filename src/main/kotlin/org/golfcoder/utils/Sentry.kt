@@ -45,7 +45,9 @@ val SentryPlugin = createApplicationPlugin("SentryPlugin") {
         this.ipAddress = call.request.origin.remoteHost
       }
 
-      this.throwable = cause
+      if (cause !is NotFoundException) { // Don't report 404 errors, they are gracefully handled with StatusPages plugin
+        this.throwable = cause
+      }
     })
   }
 }
