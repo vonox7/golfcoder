@@ -28,26 +28,26 @@ fun initSentry() {
 
 val SentryPlugin = createApplicationPlugin("SentryPlugin") {
   on(CallFailed) { call, cause ->
-    Sentry.captureEvent(SentryEvent().apply {
-      this.request = Request().apply {
-        this.method = call.request.httpMethod.value
-        this.url = call.request.uri
-        this.headers = call.request.headers.entries().associate { it.key to it.value.joinToString() }
-      }
+    if (cause !is NotFoundException) { // Don't report 404 errors, they are gracefully handled with StatusPages plugin
+      Sentry.captureEvent(SentryEvent().apply {
+        this.request = Request().apply {
+          this.method = call.request.httpMethod.value
+          this.url = call.request.uri
+          this.headers = call.request.headers.entries().associate { it.key to it.value.joinToString() }
+        }
 
-      this.user = call.sessions.get<UserSession>()?.let { userSession ->
-        User().apply {
-          this.id = userSession.userId
-          this.name = userSession.displayName
+        this.user = call.sessions.get<UserSession>()?.let { userSession ->
+          User().apply {
+            this.id = userSession.userId
+            this.name = userSession.displayName
+            this.ipAddress = call.request.origin.remoteHost
+          }
+        } ?: User().apply {
           this.ipAddress = call.request.origin.remoteHost
         }
-      } ?: User().apply {
-        this.ipAddress = call.request.origin.remoteHost
-      }
 
-      if (cause !is NotFoundException) { // Don't report 404 errors, they are gracefully handled with StatusPages plugin
         this.throwable = cause
-      }
-    })
+      })
+    }
   }
 }
