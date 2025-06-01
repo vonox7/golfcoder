@@ -4,6 +4,7 @@ import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.plugins.cachingheaders.*
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -12,7 +13,10 @@ import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.forwardedheaders.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
+import kotlinx.html.h1
+import kotlinx.html.p
 import org.golfcoder.Sysinfo
+import org.golfcoder.endpoints.web.respondHtmlView
 import java.time.Duration
 
 fun Application.configureHTTP() {
@@ -31,10 +35,17 @@ fun Application.configureHTTP() {
     }
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            if (Sysinfo.isLocal) {
-                cause.printStackTrace()
+            if (cause is NotFoundException) {
+                // Custom status page
+                call.respondHtmlView("Golfcoder - 404 Not Found", status = HttpStatusCode.NotFound) {
+                    h1 { +"The requested page was not found" }
+                }
+            } else {
+                if (Sysinfo.isLocal) {
+                    cause.printStackTrace()
+                }
+                call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
             }
-            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
         }
     }
     install(Compression) {
