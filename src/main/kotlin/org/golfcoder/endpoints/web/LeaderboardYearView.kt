@@ -104,13 +104,7 @@ object LeaderboardYearView {
                                         val user = positionOneUserIdsToUsers[positionOne.userId]
                                         renderUserProfileImage(user, big = false)
                                         val userName = (user?.name?.takeIf { user.nameIsPublic } ?: "anonymous")
-                                        val adventOfCodeRepositoryUrl =
-                                            user?.getAdventOfCodeRepositoryUrl(year)?.takeIf { user.nameIsPublic }
-                                        if (adventOfCodeRepositoryUrl == null) {
-                                            +userName
-                                        } else {
-                                            a(href = adventOfCodeRepositoryUrl, target = "_blank") { +userName }
-                                        }
+                                        +userName
                                     }
                                     td("left-align") {
                                         +positionOne.language.displayName
