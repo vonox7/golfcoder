@@ -123,7 +123,9 @@ object LeaderboardYearView {
                                         val partInfo = positionOne.partInfos[part]
                                         td("right-align") {
                                             if (partInfo == null) {
-                                                +"-"
+                                                span("text-small") {
+                                                    +"-"
+                                                }
                                             } else if (partInfo.codePubliclyVisible) {
                                                 a(href = "/$year/day/$day?solution=${partInfo.solutionId}#solution") {
                                                     +"${partInfo.tokens}"

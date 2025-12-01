@@ -229,7 +229,9 @@ object LeaderboardDayView {
                             val partInfo = leaderboardPosition.partInfos[part]
                             td("right-align") {
                                 if (partInfo == null) {
-                                    +"-"
+                                    span("text-small") {
+                                        +"-"
+                                    }
                                     onePartNotSolved = true
                                 } else if (partInfo.codePubliclyVisible) {
                                     a(href = "/$year/day/$day?solution=${partInfo.solutionId}#solution") {
@@ -257,8 +259,9 @@ object LeaderboardDayView {
         }
         if (onePartNotSolved) {
             br()
-            br()
-            +"A solution with only 1 part solved gets a penalty of 10000 tokens (indicated by -)."
+            span("text-small") {
+                +"Solutions with 1 unsolved part get a penalty of 10000 tokens (indicated with \"-\")."
+            }
         }
     }
 
