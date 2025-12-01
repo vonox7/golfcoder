@@ -21,13 +21,16 @@ import org.golfcoder.endpoints.web.LeaderboardDayView
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.tokenizer.Tokenizer
+import java.time.LocalDate
+import java.time.Month
 import java.util.*
 
 object UploadSolutionApi {
 
     const val MAX_CODE_LENGTH = 100_000
     val DAYS_RANGE = 1..25
-    val YEARS_RANGE = 2015..2024
+    val YEARS_RANGE: IntRange
+        get() = 2015..LocalDate.now().let { if (it.month == Month.DECEMBER) it.year else it.year - 1 }
     val PART_RANGE = 1..2
     private const val MIN_CODE_LENGTH = 10
 
