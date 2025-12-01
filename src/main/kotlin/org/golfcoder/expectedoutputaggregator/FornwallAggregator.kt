@@ -21,8 +21,10 @@ class FornwallAggregator : ExpectedOutputAggregator {
             return Failure.NotYetAvailable
         }
 
-        if (input.length > 2000) {
+        if (input.length > 20000) {
             return Failure.TooLongInput
+        } else if (input.length < 10) {
+            return Failure.NotYetAvailable
         }
 
         (1..2).forEach { part ->
