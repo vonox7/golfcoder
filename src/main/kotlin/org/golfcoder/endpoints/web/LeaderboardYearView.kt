@@ -81,7 +81,7 @@ object LeaderboardYearView {
                         }
                     }
                     tbody {
-                        UploadSolutionApi.DAYS_RANGE.forEach { day ->
+                        UploadSolutionApi.getDaysRange(year).forEach { day ->
                             val positionOne = positionOneLeaderboardPositions[day]
 
                             tr {

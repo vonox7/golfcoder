@@ -28,11 +28,18 @@ import java.util.*
 object UploadSolutionApi {
 
     const val MAX_CODE_LENGTH = 100_000
-    val DAYS_RANGE = 1..25
     val YEARS_RANGE: IntRange
         get() = 2015..LocalDate.now().let { if (it.month == Month.DECEMBER) it.year else it.year - 1 }
     val PART_RANGE = 1..2
     private const val MIN_CODE_LENGTH = 10
+
+    fun getDaysRange(year: Int): IntRange {
+        return if (year <= 2024) {
+            1..25
+        } else {
+            1..12
+        }
+    }
 
     enum class SubmitState {
         ONLY_TOKENIZE,
@@ -318,7 +325,7 @@ object UploadSolutionApi {
         var leaderboards = 0
 
         YEARS_RANGE.forEach { year ->
-            DAYS_RANGE.forEach { day ->
+            getDaysRange(year).forEach { day ->
                 leaderboards++
                 recalculateScore(year, day)
             }

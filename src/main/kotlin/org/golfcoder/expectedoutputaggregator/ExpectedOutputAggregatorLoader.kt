@@ -26,7 +26,7 @@ object ExpectedOutputAggregatorLoader {
 
     suspend fun loadAll() {
         UploadSolutionApi.YEARS_RANGE.forEach { year ->
-            val results = UploadSolutionApi.DAYS_RANGE.map { day ->
+            val results = UploadSolutionApi.getDaysRange(year).map { day ->
                 day to load(year, day)
             }
             println("Loaded expected output:" + results.joinToString("") { (day, results) ->
@@ -59,7 +59,7 @@ object ExpectedOutputAggregatorLoader {
                 val now = Calendar.getInstance()
                 if (now.get(Calendar.MONTH) == Calendar.DECEMBER) {
                     (now.get(Calendar.DAY_OF_MONTH) - 1..now.get(Calendar.DAY_OF_MONTH) + 1)
-                        .intersect(UploadSolutionApi.DAYS_RANGE)
+                        .intersect(UploadSolutionApi.getDaysRange(now.get(Calendar.YEAR)))
                         .map { day ->
                             val results = load(now.get(Calendar.YEAR), day)
                             if (results.none { it.value is ExpectedOutputAggregator.AggregatorResult.Success }) {
