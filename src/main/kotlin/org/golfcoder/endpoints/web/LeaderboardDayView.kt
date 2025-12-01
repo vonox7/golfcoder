@@ -184,6 +184,7 @@ object LeaderboardDayView {
         userIdsToUsers: Map<String, User>,
         currentUser: User?,
     ) {
+        var onePartNotSolved = false
         table("leaderboard") {
             thead {
                 tr {
@@ -229,6 +230,7 @@ object LeaderboardDayView {
                             td("right-align") {
                                 if (partInfo == null) {
                                     +"-"
+                                    onePartNotSolved = true
                                 } else if (partInfo.codePubliclyVisible) {
                                     a(href = "/$year/day/$day?solution=${partInfo.solutionId}#solution") {
                                         +"${partInfo.tokens}"
@@ -252,6 +254,11 @@ object LeaderboardDayView {
                     }
                 }
             }
+        }
+        if (onePartNotSolved) {
+            br()
+            br()
+            +"A solution with only 1 part solved gets a penalty of 10000 tokens (indicated by -)."
         }
     }
 
