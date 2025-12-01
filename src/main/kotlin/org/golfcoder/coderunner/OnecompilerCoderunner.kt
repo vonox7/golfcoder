@@ -8,7 +8,8 @@ import org.golfcoder.httpClient
 import org.golfcoder.utils.bodyOrPrintException
 
 // Find out onecompilerLanguageId by checking the URL after selecting a language at the dropdown at https://onecompiler.com/
-class OnecompilerCoderunner(private val onecompilerLanguageId: String) : Coderunner {
+// Char limit see https://onecompiler.com/apis/code-execution
+class OnecompilerCoderunner(private val onecompilerLanguageId: String) : Coderunner(stdinCharLimit = 10_000) {
 
     @Serializable
     private class OnecompilerRequest(

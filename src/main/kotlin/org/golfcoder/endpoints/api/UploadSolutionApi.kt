@@ -137,12 +137,16 @@ object UploadSolutionApi {
             requireNotNull(userSession)
         }
 
-        val expectedOutput = mainDatabase.getSuspendingCollection<ExpectedOutput>()
-            .findOne(
+        val expectedOutputs = mainDatabase.getSuspendingCollection<ExpectedOutput>()
+            .find(
                 ExpectedOutput::year equal request.year.toInt(),
                 ExpectedOutput::day equal request.day.toInt(),
                 ExpectedOutput::part equal request.part.toInt(),
-            ) ?: run {
+            )
+            .toList()
+            .sortedByDescending { it.output.length }
+
+        if (expectedOutputs.isEmpty()) {
             call.respond(
                 ApiCallResult(
                     buttonText = "Please wait",
@@ -155,12 +159,30 @@ object UploadSolutionApi {
                     changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
                 )
             )
-            return
-        }
+        } else {
+            val expectedOutput = expectedOutputs
+                .firstOrNull { it.input.length <= request.language.coderunner.stdinCharLimit }
 
-        // Run code
-        println("Run code for user ${userSession.userId}: ${request.year}/${request.day}/${request.part} ${request.language}")
-        runCode(call, request, expectedOutput, userSession, tokenCount, tokenizer)
+            if (expectedOutput == null) {
+                call.respond(
+                    ApiCallResult(
+                        buttonText = "Language for this puzzle not yet supported.",
+                        resetButtonTextSeconds = null,
+                        alertHtml = createHTML().div {
+                            +"Due to OneCompiler limitations submitting your solution for this day is not yet supported."
+                            br()
+                            +"Please wait or choose Kotlin to submit your solution for this day."
+                        },
+                        changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
+                    )
+                )
+                throw Exception("Stdin too long, think about OneCompiler alternatives for ${request.language}")
+            } else {
+                // Run code
+                println("Run code for user ${userSession.userId}: ${request.year}/${request.day}/${request.part} ${request.language}")
+                runCode(call, request, expectedOutput, userSession, tokenCount, tokenizer)
+            }
+        }
     }
 
     private suspend fun runCode(
@@ -174,7 +196,7 @@ object UploadSolutionApi {
         val coderunnerResult = try {
             request.language.coderunner.run(request.code, request.language, expectedOutput.input)
         } catch (e: Exception) {
-            Sentry.captureException(e)
+            Sentry.captureException(Exception("runCode failed for ${request.language}", e))
             Coderunner.RunResult(
                 stdout = "",
                 error = "Code compilation or execution failed:\n\n${e.message}",

@@ -7,7 +7,7 @@ import org.golfcoder.database.Solution
 import org.golfcoder.httpClient
 import org.golfcoder.utils.bodyOrPrintException
 
-class KotlinPlaygroundCoderunner : Coderunner {
+class KotlinPlaygroundCoderunner : Coderunner(stdinCharLimit = 1_000_000) {
 
     @Serializable
     private class KotlinPlaygroundRunRequest(

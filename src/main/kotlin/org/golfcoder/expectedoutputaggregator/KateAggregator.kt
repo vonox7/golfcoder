@@ -41,7 +41,7 @@ class KateAggregator : ExpectedOutputAggregator {
 
             if (input == null || output == null) {
                 return Failure.DifferentFormat
-            } else if (input.length > 20000) {
+            } else if (input.length > 100000) {
                 return Failure.TooLongInput
             } else if (input.length < 10) {
                 return Failure.NotYetAvailable

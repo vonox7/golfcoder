@@ -35,7 +35,7 @@ class GereonsAggregator : ExpectedOutputAggregator {
 
         if (testInput == null) {
             return Failure.DifferentFormat
-        } else if (testInput.length > 20000) {
+        } else if (testInput.length > 100000) {
             return Failure.TooLongInput
         } else if (testInput.length < 10) {
             return Failure.NotYetAvailable
