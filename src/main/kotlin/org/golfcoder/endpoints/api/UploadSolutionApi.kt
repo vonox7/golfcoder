@@ -58,6 +58,13 @@ object UploadSolutionApi {
         val submitState: SubmitState,
     )
 
+    // Returns e.g. "1*****7890" for "1234567890" to prevent cheating but still provide a good UX
+    private fun maskOutput(output: String): String {
+        return output
+            .mapIndexed { index, char -> if (index == 0 || index > output.length / 2) char else '*' }
+            .joinToString("")
+    }
+
     suspend fun post(call: ApplicationCall) {
         val request = call.receive<UploadSolutionRequest>()
         val userSession = call.sessions.get<UserSession>()
@@ -239,13 +246,14 @@ object UploadSolutionApi {
                     changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
                     alertHtml = createHTML().div {
                         +"Wrong stdout. Expected "
-                        code { +expectedOutput.output }
+                        code { +maskOutput(expectedOutput.output) }
                         +", but got "
                         code { +codeRunnerStdout }
                         +"."
                         br()
+                        +"Some characters are masked with *. Please run & validate your code first locally."
                         br()
-                        +"If you think this is a bug, please report it to Golfcoder (see FAQ)."
+                        +"If you think this is a bug, please report it to Golfcoder on GitHub (see FAQ)."
                     }
                 )
             }
