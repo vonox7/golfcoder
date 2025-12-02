@@ -68,7 +68,7 @@ class KotlinPlaygroundCoderunner : Coderunner(stdinCharLimit = 1_000_000) {
         require(language == Solution.Language.KOTLIN)
         val stdInAsListString = stdin.split("\n").joinToString(",") { "\"\"\"$it\"\"\"" }
 
-        val response = httpClient.post("https://api.kotlinlang.org/api/2.1.0/compiler/run") {
+        val response = httpClient.post("https://api.kotlinlang.org/api/2.2.21/compiler/run") {
             contentType(ContentType.Application.Json)
             setBody(
                 KotlinPlaygroundRunRequest(
@@ -102,11 +102,19 @@ class KotlinPlaygroundCoderunner : Coderunner(stdinCharLimit = 1_000_000) {
                 "${error.message} at line ${error.interval.start.line + 1}:${error.interval.start.ch + 1}"
             }
 
+        // Kotlin playground only supports "rather short" execution time (<1s or so)
+        if (response.text.contains("Evaluation stopped while it's taking too long")) {
+            return RunResult(
+                stdout = "",
+                error = "Evaluation stopped while it's taking too long",
+            )
+        }
+
         val resultString = response.text
             .substringAfter("<outStream>", missingDelimiterValue = "")
             .substringBeforeLast("</outStream>", missingDelimiterValue = "")
 
-        return Coderunner.RunResult(
+        return RunResult(
             stdout = resultString,
             error = playgroundErrorString,
         )
