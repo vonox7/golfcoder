@@ -153,6 +153,7 @@ class ExpectedOutput : MongoMainEntry() {
         SEVEN_REBUX,
         KATE,
         SHAHATA,
+        SIM
         ;
 
         val aggregator: ExpectedOutputAggregator
@@ -163,6 +164,7 @@ class ExpectedOutput : MongoMainEntry() {
                 SEVEN_REBUX -> SevenRebuxAggregator()
                 KATE -> KateAggregator()
                 SHAHATA -> ShahataAggregator()
+                SIM -> SimAggregator()
             }
     }
 }
