@@ -60,6 +60,9 @@ object UploadSolutionApi {
 
     // Returns e.g. "1*****7890" for "1234567890" to prevent cheating but still provide a good UX
     private fun maskOutput(output: String): String {
+        if (output.length < 5) {
+            return "*".repeat(output.length)
+        }
         return output
             .mapIndexed { index, char -> if (index == 0 || index > output.length / 2) char else '*' }
             .joinToString("")
@@ -251,7 +254,9 @@ object UploadSolutionApi {
                         code { +codeRunnerStdout }
                         +"."
                         br()
+                        br()
                         +"Some characters are masked with *. Please run & validate your code first locally."
+                        br()
                         br()
                         +"If you think this is a bug, please report it to Golfcoder on GitHub (see FAQ)."
                     }
