@@ -25,7 +25,7 @@ object ExpectedOutputAggregatorLoader {
     }
 
     suspend fun loadAll() {
-        UploadSolutionApi.YEARS_RANGE.forEach { year ->
+        UploadSolutionApi.YEARS_RANGE.reversed().forEach { year ->
             val results = UploadSolutionApi.getDaysRange(year).map { day ->
                 day to load(year, day)
             }
