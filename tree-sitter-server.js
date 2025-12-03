@@ -72,6 +72,18 @@ app.post('/tokenize', (request, response) => {
             // tree-sitter-rust has as string_literal text ""hello"", but has only 2 children (the 2 brackets).
             // So manually add the literal text
             addNode(node)
+        } else if (String(node.type) === "string_content") {
+            // tree-sitter-python puts "\\" as escape_sequence child (but not the individual children).
+            // So make sure that the whole string gets handled, not just the escape_sequence.
+            addNode(node)
+        } else if (String(node.type) === "string") {
+            // tree-sitter-scala puts "\\" as escape_sequence child (but not the individual children).
+            // So make sure that the whole string gets handled, not just the escape_sequence.
+            addNode(node)
+        } else if (String(node.type) === "line_string_literal") {
+            // tree-sitter-swift puts "\\" as escape_sequence child (but not the individual children).
+            // So make sure that the whole string gets handled, not just the escape_sequence.
+            addNode(node)
         } else if (String(node.type) === "interpreted_string_literal") {
             // tree-sitter-go has as interpreted_string_literal text ""hello"", but has only 2 children (the 2 brackets).
             // So manually add the literal text
