@@ -103,20 +103,20 @@ class Solution : MongoMainEntry() {
 
         val tokenizer: Tokenizer
             get() = when (this) {
-                PYTHON -> TreeSitterTokenizer("python", tokenizerVersion = 5)
-                RUST -> TreeSitterTokenizer("rust", tokenizerVersion = 5)
-                GO -> TreeSitterTokenizer("go", tokenizerVersion = 5)
-                KOTLIN -> TreeSitterTokenizer("kotlin", tokenizerVersion = 5)
-                JAVASCRIPT -> TreeSitterTokenizer("javascript", tokenizerVersion = 5)
-                CSHARP -> TreeSitterTokenizer("csharp", tokenizerVersion = 5)
-                TYPESCRIPT -> TreeSitterTokenizer("typescript", tokenizerVersion = 5)
-                CPLUSPLUS -> TreeSitterTokenizer("cpp", tokenizerVersion = 5)
-                JAVA -> TreeSitterTokenizer("java", tokenizerVersion = 5)
-                C -> TreeSitterTokenizer("c", tokenizerVersion = 5)
-                SWIFT -> TreeSitterTokenizer("swift", tokenizerVersion = 5)
-                SCALA -> TreeSitterTokenizer("scala", tokenizerVersion = 5)
-                RUBY -> TreeSitterTokenizer("ruby", tokenizerVersion = 5)
-                BASH -> TreeSitterTokenizer("bash", tokenizerVersion = 5)
+                PYTHON -> TreeSitterTokenizer("python", tokenizerVersion = 6)
+                RUST -> TreeSitterTokenizer("rust", tokenizerVersion = 6)
+                GO -> TreeSitterTokenizer("go", tokenizerVersion = 6)
+                KOTLIN -> TreeSitterTokenizer("kotlin", tokenizerVersion = 6)
+                JAVASCRIPT -> TreeSitterTokenizer("javascript", tokenizerVersion = 6)
+                CSHARP -> TreeSitterTokenizer("csharp", tokenizerVersion = 6)
+                TYPESCRIPT -> TreeSitterTokenizer("typescript", tokenizerVersion = 6)
+                CPLUSPLUS -> TreeSitterTokenizer("cpp", tokenizerVersion = 6)
+                JAVA -> TreeSitterTokenizer("java", tokenizerVersion = 6)
+                C -> TreeSitterTokenizer("c", tokenizerVersion = 6)
+                SWIFT -> TreeSitterTokenizer("swift", tokenizerVersion = 6)
+                SCALA -> TreeSitterTokenizer("scala", tokenizerVersion = 6)
+                RUBY -> TreeSitterTokenizer("ruby", tokenizerVersion = 6)
+                BASH -> TreeSitterTokenizer("bash", tokenizerVersion = 6)
             }
     }
 }
