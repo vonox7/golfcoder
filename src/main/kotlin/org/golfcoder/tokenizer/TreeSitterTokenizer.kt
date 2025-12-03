@@ -50,12 +50,12 @@ class TreeSitterTokenizer(private val language: String, override val tokenizerVe
                     when {
                         "error" in type -> throw Exception("Syntax error on line ${treeSitterToken.startRow}:${treeSitterToken.startColumn}:\n${treeSitterToken.text}")
                         "comment" in type -> Tokenizer.Token.Type.COMMENT
-                        "\n" in treeSitterToken.text -> Tokenizer.Token.Type.WHITESPACE // Go reports "\n" for newlines
                         "system_lib_string" in type -> Tokenizer.Token.Type.CODE_TOKEN // c++ reports "system_lib_string" for #include <iostream>
                         "string" in type -> Tokenizer.Token.Type.STRING // e.g. Python reports "string_content", Javascript "string_fragment".
                         "character" in type -> Tokenizer.Token.Type.STRING // Kotlin reports "character_literal" for e.g. 'a'.
                         "str_text" in type -> Tokenizer.Token.Type.STRING // Swift reports "line_str_text"
                         treeSitterToken.text == ";" -> Tokenizer.Token.Type.STATEMENT_DELIMITER // All languages that we support use a semikolon as statement delimiter (if they have one)
+                        "\n" in treeSitterToken.text -> Tokenizer.Token.Type.WHITESPACE // Go reports "\n" for newlines. Check that last to correctly count multiline strings
                         else -> Tokenizer.Token.Type.CODE_TOKEN
                     }
                 }
