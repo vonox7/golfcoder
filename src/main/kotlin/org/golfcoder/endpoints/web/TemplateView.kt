@@ -102,6 +102,7 @@ object TemplateView {
                 val code = """
                 |// Template for reading lines from stdin and printing the line count to stdout.
                 |// Copy this code to your IDE to get started.
+                |
                 |let lines = require('fs').readFileSync(0,'utf8').split('\n');
                 |console.log(lines.length);
                 |""".trimMargin()

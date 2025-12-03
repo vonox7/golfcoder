@@ -84,6 +84,10 @@ app.post('/tokenize', (request, response) => {
             // tree-sitter-typescript returns for e.g. `let line: string` the `string` as predefined type with 1 child (type=string, text=string).
             // So manually add the predefined type, as `string` is a token, not a literal string.
             addNode(node)
+        } else if (String(node.type).indexOf("comment") !== -1) {
+            // tree-sitter-rust & tree-sitter-scala contain on comments as children just "//".
+            // So manually add the outer node.
+            addNode(node)
         } else if (children.length === 0) {
             addNode(node)
         } else {
