@@ -5,9 +5,9 @@ val kotlin_version: String by project
 val logback_version: String by project
 
 plugins {
-    kotlin("jvm") version "2.2.0"
-    id("io.ktor.plugin") version "3.2.0"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0"
+    kotlin("jvm") version "2.2.21"
+    id("io.ktor.plugin") version "3.3.3"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21"
 }
 
 group = "org.golfcoder"
@@ -47,11 +47,11 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("com.github.studoverse:katerbase:4e944a1d19b7b96a80080d42ecfebd9b732f5270")
     implementation("org.mongodb:mongodb-driver-sync:4.9.0")
-    implementation("io.sentry:sentry:8.13.2")
+    implementation("io.sentry:sentry:8.27.1")
 }
 
 kotlin {
-    compilerOptions.jvmTarget = JvmTarget.JVM_21
+    compilerOptions.jvmTarget = JvmTarget.JVM_21 // FIXME change to 25 once kotlin gradle plugin supports it
     jvmToolchain(21)
 }
 
