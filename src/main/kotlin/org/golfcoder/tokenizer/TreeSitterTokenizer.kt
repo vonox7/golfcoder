@@ -56,6 +56,7 @@ class TreeSitterTokenizer(private val language: String, override val tokenizerVe
                         "str_text" in type -> Tokenizer.Token.Type.STRING // Swift reports "line_str_text"
                         treeSitterToken.text == ";" -> Tokenizer.Token.Type.STATEMENT_DELIMITER // All languages that we support use a semikolon as statement delimiter (if they have one)
                         "\n" in treeSitterToken.text -> Tokenizer.Token.Type.WHITESPACE // Go reports "\n" for newlines. Check that last to correctly count multiline strings
+                        "integer" in type && input.length > Long.MAX_VALUE.toString().length -> Tokenizer.Token.Type.STRING // Treat Python "BigInts" as strings, as they would be in any other language
                         else -> Tokenizer.Token.Type.CODE_TOKEN
                     }
                 }
