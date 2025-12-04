@@ -71,6 +71,8 @@ object UploadSolutionApi {
     suspend fun post(call: ApplicationCall) {
         val request = call.receive<UploadSolutionRequest>()
         val userSession = call.sessions.get<UserSession>()
+        val currentUser =
+            userSession?.let { mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal it.userId) }
 
         // Redirect to login screen if "login to submit" was pressed
         if (userSession == null && request.submitState == SubmitState.LOGIN_TO_SUBMIT) {
@@ -190,7 +192,7 @@ object UploadSolutionApi {
             } else {
                 // Run code
                 println("Run code for user ${userSession.userId}: ${request.year}/${request.day}/${request.part} ${request.language}")
-                runCode(call, request, expectedOutput, userSession, tokenCount, tokenizer)
+                runCode(call, request, expectedOutput, userSession, currentUser, tokenCount, tokenizer)
             }
         }
     }
@@ -200,6 +202,7 @@ object UploadSolutionApi {
         request: UploadSolutionRequest,
         expectedOutput: ExpectedOutput,
         userSession: UserSession,
+        currentUser: User?,
         tokenCount: Int,
         tokenizer: Tokenizer,
     ) {
@@ -249,7 +252,7 @@ object UploadSolutionApi {
                     changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
                     alertHtml = createHTML().div {
                         +"Wrong stdout. Expected "
-                        code { +maskOutput(expectedOutput.output) }
+                        code { if (currentUser?.admin == true) +expectedOutput.output else +maskOutput(expectedOutput.output) }
                         +", but got "
                         code { +codeRunnerStdout }
                         +"."
