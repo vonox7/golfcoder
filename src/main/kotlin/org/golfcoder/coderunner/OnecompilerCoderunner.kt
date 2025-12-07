@@ -46,7 +46,7 @@ class OnecompilerCoderunner(private val onecompilerLanguageId: String) : Coderun
                     stdin = stdin,
                     files = listOf(
                         OnecompilerRequest.File(
-                            name = "index.${language.fileEnding}",
+                            name = "main.${language.fileEnding}",
                             content = code
                         )
                     )
