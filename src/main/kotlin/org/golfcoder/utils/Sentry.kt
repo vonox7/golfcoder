@@ -5,6 +5,7 @@ import io.ktor.server.application.hooks.*
 import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.sessions.*
+import io.ktor.utils.io.*
 import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.protocol.Request
@@ -26,9 +27,14 @@ fun initSentry() {
   }
 }
 
+private val ignoredExceptions = listOf(
+  NotFoundException::class, // Don't report 404 errors, they are gracefully handled with StatusPages plugin
+  ClosedByteChannelException::class, // Client disconnected, no need to report
+)
+
 val SentryPlugin = createApplicationPlugin("SentryPlugin") {
   on(CallFailed) { call, cause ->
-    if (cause !is NotFoundException) { // Don't report 404 errors, they are gracefully handled with StatusPages plugin
+    if (ignoredExceptions.none { it.isInstance(cause) }) {
       Sentry.captureEvent(SentryEvent().apply {
         this.request = Request().apply {
           this.method = call.request.httpMethod.value
