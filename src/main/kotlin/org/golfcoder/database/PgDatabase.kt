@@ -14,8 +14,8 @@ fun connectToPostgres(): R2dbcDatabase {
     return R2dbcDatabase.connect(
         url = "r2dbc:postgresql://${url.host}:${url.port}/${url.encodedPath}",
         driver = "postgresql",
-        user = url.user!!.substringBefore(":"),
-        password = url.user?.substringAfter(":", "") ?: "",
+        user = url.user!!,
+        password = url.password ?: "",
         databaseConfig = R2dbcDatabaseConfig.Builder()
             .apply {
                 connectionFactoryOptions {
