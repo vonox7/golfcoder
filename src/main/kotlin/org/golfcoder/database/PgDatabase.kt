@@ -24,9 +24,9 @@ suspend fun connectToPostgres(): R2dbcDatabase {
                     }
                 }
             }
-    ).also {
-        it.transactionManager.newTransaction().exec("SELECT 1").also {
-            println("PostgreSQL connection successful")
-        }
+    ).apply {
+        // Test the connection
+        transactionManager.newTransaction().exec("SELECT 1")
+        println("PostgreSQL connection successful")
     }
 }
