@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
+val exposed_version: String by project
 
 plugins {
     kotlin("jvm") version "2.2.21"
@@ -46,6 +47,11 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("com.github.studoverse:katerbase:4e944a1d19b7b96a80080d42ecfebd9b732f5270")
+    implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-r2dbc:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-migration-r2dbc:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
+    implementation("org.postgresql:r2dbc-postgresql:1.1.1.RELEASE")
     implementation("org.mongodb:mongodb-driver-sync:4.9.0")
     implementation("io.sentry:sentry:8.27.1")
 }

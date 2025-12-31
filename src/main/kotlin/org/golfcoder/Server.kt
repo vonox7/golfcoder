@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.golfcoder.database.MainDatabase
+import org.golfcoder.database.connectToPostgres
 import org.golfcoder.endpoints.api.*
 import org.golfcoder.endpoints.web.*
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregatorLoader
@@ -27,9 +28,12 @@ import org.golfcoder.plugins.sessionAuthenticationName
 import org.golfcoder.tokenizer.TokenRecalculator
 import org.golfcoder.utils.SentryPlugin
 import org.golfcoder.utils.initSentry
+import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
+import org.jetbrains.exposed.v1.r2dbc.transactions.transactionManager
 
 val container = System.getenv("CONTAINER") ?: "local"
 lateinit var mainDatabase: MainDatabase
+lateinit var pgDatabase: R2dbcDatabase
 val httpClient = HttpClient(CIO) {
     install(ContentNegotiation) {
         json(Json {
@@ -52,6 +56,11 @@ fun main(): Unit = runBlocking {
 
     println("Connecting to database...")
     mainDatabase = MainDatabase(System.getenv("MONGO_URL") ?: "mongodb://localhost:27017/golfcoder")
+    pgDatabase = connectToPostgres()
+
+    pgDatabase.transactionManager.newTransaction().exec("SELECT 1").also {
+        println("PostgreSQL connection successful")
+    }
 
     // Wait for tree-sitter server to start
     if (!Sysinfo.isLocal) {
