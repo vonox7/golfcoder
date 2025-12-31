@@ -45,7 +45,7 @@ val SentryPlugin = createApplicationPlugin("SentryPlugin") {
         this.user = call.sessions.get<UserSession>()?.let { userSession ->
           User().apply {
             this.id = userSession.userId
-            this.name = userSession.displayName
+            this.username = userSession.displayName
             this.ipAddress = call.request.origin.remoteHost
           }
         } ?: User().apply {
