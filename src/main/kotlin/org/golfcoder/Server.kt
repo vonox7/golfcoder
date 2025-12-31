@@ -29,7 +29,6 @@ import org.golfcoder.tokenizer.TokenRecalculator
 import org.golfcoder.utils.SentryPlugin
 import org.golfcoder.utils.initSentry
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
-import org.jetbrains.exposed.v1.r2dbc.transactions.transactionManager
 
 val container = System.getenv("CONTAINER") ?: "local"
 lateinit var mainDatabase: MainDatabase
@@ -57,10 +56,6 @@ fun main(): Unit = runBlocking {
     println("Connecting to database...")
     mainDatabase = MainDatabase(System.getenv("MONGO_URL") ?: "mongodb://localhost:27017/golfcoder")
     pgDatabase = connectToPostgres()
-
-    pgDatabase.transactionManager.newTransaction().exec("SELECT 1").also {
-        println("PostgreSQL connection successful")
-    }
 
     // Wait for tree-sitter server to start
     if (!Sysinfo.isLocal) {
