@@ -30,10 +30,10 @@ object EditUserView {
             .sortedBy { it.year * 10000 + it.day }
             .groupBy { it.year * 10000 + it.day }
 
-        call.respondHtmlView("Golfcoder ${currentUser.name}") {
+        call.respondHtmlView("Golfcoder ${session.displayName}") {
             h1 {
                 renderUserProfileImage(currentUser, big = true)
-                +currentUser.name
+                +session.displayName
             }
             p {
                 +"You joined Golfcoder ${currentUser.createdOn.relativeToNow()}. "
@@ -51,13 +51,13 @@ object EditUserView {
                     +"Name: "
                     input(type = InputType.text) {
                         name = "name"
-                        value = currentUser.name
+                        value = session.displayName
                         maxLength = EditUserApi.MAX_USER_NAME_LENGTH.toString()
                     }
                 }
 
                 label("checkbox-container") {
-                    +"Show my name on the leaderboard (${currentUser.name} vs \"anonymous\")"
+                    +"Show my name on the leaderboard (${session.displayName} vs \"anonymous\")"
                     input(type = InputType.checkBox) {
                         name = "nameIsPublic"
                         checked = currentUser.nameIsPublic
