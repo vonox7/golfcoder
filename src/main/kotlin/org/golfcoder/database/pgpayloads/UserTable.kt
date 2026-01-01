@@ -24,6 +24,8 @@ object UserTable : Table("user") {
     // Admins can see all solutions to detect cheaters and can delete solutions. Must be set manually in the database.
     val admin = bool("admin").default(false)
 
+    override val primaryKey = PrimaryKey(id)
+
     @Serializable
     data class OAuthDetails(
         val provider: String,
