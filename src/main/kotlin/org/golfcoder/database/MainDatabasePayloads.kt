@@ -149,7 +149,6 @@ class ExpectedOutput : MongoMainEntry() {
     enum class Source {
         FORNWALL,
         FORNWALL_RUST,
-        GEREONS,
         SEVEN_REBUX,
         KATE,
         SHAHATA,
@@ -160,7 +159,6 @@ class ExpectedOutput : MongoMainEntry() {
             get() = when (this) {
                 FORNWALL -> FornwallAggregator()
                 FORNWALL_RUST -> FornwallRustAggregator()
-                GEREONS -> GereonsAggregator()
                 SEVEN_REBUX -> SevenRebuxAggregator()
                 KATE -> KateAggregator()
                 SHAHATA -> ShahataAggregator()

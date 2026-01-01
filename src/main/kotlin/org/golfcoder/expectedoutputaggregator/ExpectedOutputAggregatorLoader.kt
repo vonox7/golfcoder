@@ -2,6 +2,8 @@ package org.golfcoder.expectedoutputaggregator
 
 import io.sentry.Sentry
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import org.golfcoder.Sysinfo
 import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.database.pgpayloads.ExpectedOutputTable
@@ -16,12 +18,17 @@ object ExpectedOutputAggregatorLoader {
     // Locally we want to load the expected output only once to have a less noisy local development experience.
     // On production each time the server starts.
     suspend fun loadOnStartup() {
-        val dbSourceEnumCount = suspendTransaction {
-            ExpectedOutputTable.select(ExpectedOutputTable.sourceEnum).withDistinct(true).count().toInt()
+        val dbSourceEnums = suspendTransaction {
+            ExpectedOutputTable.select(ExpectedOutputTable.sourceEnum).withDistinct(true)
+                .map { it[ExpectedOutputTable.sourceEnum] }
+                .toList()
         }
 
-        if (!Sysinfo.isLocal || dbSourceEnumCount != ExpectedOutput.Source.entries.size) {
-            println("Loading expected output from all sources, as database has only $dbSourceEnumCount distinct sources")
+        if (!Sysinfo.isLocal || dbSourceEnums.count() != ExpectedOutput.Source.entries.size) {
+            println(
+                "Loading expected output from all sources, as database has only ${dbSourceEnums.sorted()}, " +
+                        "expected ${ExpectedOutput.Source.entries.sorted()}"
+            )
             loadAll()
             loadContinuously()
         }
