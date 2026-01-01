@@ -9,7 +9,7 @@ object ExpectedOutputTable : Table("expectedOutput") {
     val part = integer("part")
     val input = text("input")
     val output = text("output")
-    val sourceName = enumeration("sourceName", ExpectedOutput.Source::class)
+    val sourceEnum = enumerationByName("sourceEnum", length = 20, ExpectedOutput.Source::class)
 
-    override val primaryKey = PrimaryKey(year, day, part, sourceName)
+    override val primaryKey = PrimaryKey(year, day, part, sourceEnum)
 }

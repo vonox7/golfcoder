@@ -6,15 +6,12 @@ import io.ktor.http.*
 import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Failure
 import org.golfcoder.httpClient
-import org.golfcoder.mainDatabase
 
 class GereonsAggregator : ExpectedOutputAggregator {
     override suspend fun load(year: Int, day: Int): ExpectedOutputAggregator.AggregatorResult {
         if (year != 2024) {
             return Failure.YearNotInSource
         }
-
-        val source = ExpectedOutput.Source.GEREONS
 
         val testcaseCode = httpClient.get(
             "https://raw.githubusercontent.com/gereons/AoC2024/main/Tests/Day${String.format("%02d", day)}Tests.swift"
@@ -54,18 +51,7 @@ class GereonsAggregator : ExpectedOutputAggregator {
                     return Failure.DifferentFormat
                 }
 
-            mainDatabase.getSuspendingCollection<ExpectedOutput>().insertOne(
-                ExpectedOutput().apply {
-                    _id = generateId(year.toString(), day.toString(), part.toString(), source.name)
-                    this.year = year
-                    this.day = day
-                    this.part = part
-                    this.source = source
-                    this.input = testInput
-                    this.output = output.toString()
-                },
-                upsert = true
-            )
+            save(year, day, part, ExpectedOutput.Source.GEREONS, testInput, output.toString())
         }
         return ExpectedOutputAggregator.AggregatorResult.Success
     }

@@ -6,12 +6,9 @@ import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Failure
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Success
 import org.golfcoder.httpClient
-import org.golfcoder.mainDatabase
 
 class FornwallAggregator : ExpectedOutputAggregator {
     override suspend fun load(year: Int, day: Int): ExpectedOutputAggregator.AggregatorResult {
-        val source = ExpectedOutput.Source.FORNWALL
-
         val input = httpClient.get(
             "https://raw.githubusercontent.com/fornwall/advent-of-code/main/crates/core/src/" +
                     "year$year/day${String.format("%02d", day)}_input.txt"
@@ -38,18 +35,7 @@ class FornwallAggregator : ExpectedOutputAggregator {
                     return Failure.DifferentFormat
                 }
 
-            mainDatabase.getSuspendingCollection<ExpectedOutput>().insertOne(
-                ExpectedOutput().apply {
-                    _id = generateId(year.toString(), day.toString(), part.toString(), source.name)
-                    this.year = year
-                    this.day = day
-                    this.part = part
-                    this.source = source
-                    this.input = input
-                    this.output = output
-                },
-                upsert = true
-            )
+            save(year, day, part, ExpectedOutput.Source.FORNWALL, input, output)
         }
         return Success
     }

@@ -7,12 +7,9 @@ import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Failure
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Success
 import org.golfcoder.httpClient
-import org.golfcoder.mainDatabase
 
 class FornwallRustAggregator : ExpectedOutputAggregator {
     override suspend fun load(year: Int, day: Int): ExpectedOutputAggregator.AggregatorResult {
-        val source = ExpectedOutput.Source.FORNWALL_RUST
-
         if (year < 2022) {
             return Failure.YearNotInSource // TODO support inlined testInput
         }
@@ -69,18 +66,7 @@ class FornwallRustAggregator : ExpectedOutputAggregator {
                 return Failure.NotYetAvailable
             }
 
-            mainDatabase.getSuspendingCollection<ExpectedOutput>().insertOne(
-                ExpectedOutput().apply {
-                    _id = generateId(year.toString(), day.toString(), part.toString(), source.name)
-                    this.year = year
-                    this.day = day
-                    this.part = part
-                    this.source = source
-                    this.input = input
-                    this.output = output.toString()
-                },
-                upsert = true
-            )
+            save(year, day, part, ExpectedOutput.Source.FORNWALL_RUST, input, output.toString())
         }
         return Success
     }

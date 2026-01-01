@@ -7,11 +7,9 @@ import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Failure
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Success
 import org.golfcoder.httpClient
-import org.golfcoder.mainDatabase
 
 class ShahataAggregator : ExpectedOutputAggregator {
     override suspend fun load(year: Int, day: Int): ExpectedOutputAggregator.AggregatorResult {
-        val source = ExpectedOutput.Source.SHAHATA
 
         val file = httpClient.get(
             "https://raw.githubusercontent.com/shahata/adventofcode-solver/refs/heads/main/src/$year/" +
@@ -43,18 +41,7 @@ class ShahataAggregator : ExpectedOutputAggregator {
                 return Failure.NotYetAvailable
             }
 
-            mainDatabase.getSuspendingCollection<ExpectedOutput>().insertOne(
-                ExpectedOutput().apply {
-                    _id = generateId(year.toString(), day.toString(), part.toString(), source.name)
-                    this.year = year
-                    this.day = day
-                    this.part = part
-                    this.source = source
-                    this.input = inputFile.trim()
-                    this.output = output
-                },
-                upsert = true
-            )
+            save(year, day, part, ExpectedOutput.Source.SHAHATA, inputFile.trim(), output)
         }
         return Success
     }

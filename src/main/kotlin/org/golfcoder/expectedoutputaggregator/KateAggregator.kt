@@ -7,12 +7,9 @@ import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Failure
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Success
 import org.golfcoder.httpClient
-import org.golfcoder.mainDatabase
 
 class KateAggregator : ExpectedOutputAggregator {
     override suspend fun load(year: Int, day: Int): ExpectedOutputAggregator.AggregatorResult {
-        val source = ExpectedOutput.Source.KATE
-
         val fileSuffix = if (year >= 2024) "ts" else "js"
         val file = httpClient.get(
             "https://raw.githubusercontent.com/katemihalikova/advent-of-code/refs/heads/latest/$year/" +
@@ -48,18 +45,7 @@ class KateAggregator : ExpectedOutputAggregator {
                 return Failure.NotYetAvailable
             }
 
-            mainDatabase.getSuspendingCollection<ExpectedOutput>().insertOne(
-                ExpectedOutput().apply {
-                    _id = generateId(year.toString(), day.toString(), part.toString(), source.name)
-                    this.year = year
-                    this.day = day
-                    this.part = part
-                    this.source = source
-                    this.input = input
-                    this.output = output.toString()
-                },
-                upsert = true
-            )
+            save(year, day, part, ExpectedOutput.Source.KATE, input, output.toString())
         }
         return Success
     }
