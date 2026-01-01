@@ -3,6 +3,7 @@ package org.golfcoder.database.pgpayloads
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.golfcoder.database.Solution
+import org.golfcoder.endpoints.api.EditUserApi.MAX_USER_NAME_LENGTH
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.datetime.CurrentDateTime
 import org.jetbrains.exposed.v1.datetime.datetime
@@ -12,7 +13,7 @@ object UserTable : Table("user") {
     val id = varchar("id", 32)
     val oauthDetails = jsonb<Array<OAuthDetails>>("oauthDetails", Json)
     val createdOn = datetime("createdOn").defaultExpression(CurrentDateTime)
-    val name = varchar("name", 255)
+    val name = varchar("name", MAX_USER_NAME_LENGTH)
     val publicProfilePictureUrl = varchar("publicProfilePictureUrl", 2048).nullable()
     val nameIsPublic = bool("nameIsPublic").default(true)
     val profilePictureIsPublic = bool("profilePictureIsPublic").default(true)
