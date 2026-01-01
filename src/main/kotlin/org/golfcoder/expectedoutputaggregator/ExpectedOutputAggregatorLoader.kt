@@ -2,12 +2,13 @@ package org.golfcoder.expectedoutputaggregator
 
 import io.sentry.Sentry
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.count
 import org.golfcoder.Sysinfo
 import org.golfcoder.database.ExpectedOutput
+import org.golfcoder.database.pgpayloads.ExpectedOutputTable
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Failure.YearNotInSource
-import org.golfcoder.mainDatabase
+import org.jetbrains.exposed.v1.r2dbc.select
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import java.util.*
 import kotlin.time.Duration.Companion.minutes
 
@@ -15,10 +16,12 @@ object ExpectedOutputAggregatorLoader {
     // Locally we want to load the expected output only once to have a less noisy local development experience.
     // On production each time the server starts.
     suspend fun loadOnStartup() {
-        if (!Sysinfo.isLocal ||
-            mainDatabase.getSuspendingCollection<ExpectedOutput>().distinct(ExpectedOutput::source).count() !=
-            ExpectedOutput.Source.entries.size
-        ) {
+        val dbSourceEnumCount = suspendTransaction {
+            ExpectedOutputTable.select(ExpectedOutputTable.sourceEnum).withDistinct(true).count().toInt()
+        }
+
+        if (!Sysinfo.isLocal || dbSourceEnumCount != ExpectedOutput.Source.entries.size) {
+            println("Loading expected output from all sources, as database has only $dbSourceEnumCount distinct sources")
             loadAll()
             loadContinuously()
         }
