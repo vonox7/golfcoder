@@ -7,20 +7,25 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 import io.sentry.Sentry
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
 import org.golfcoder.coderunner.Coderunner
-import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.database.LeaderboardPosition
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
+import org.golfcoder.database.pgpayloads.ExpectedOutputTable
 import org.golfcoder.endpoints.web.LeaderboardDayView
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.tokenizer.Tokenizer
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.r2dbc.select
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import java.time.LocalDate
 import java.time.Month
 import java.util.*
@@ -58,6 +63,8 @@ object UploadSolutionApi {
         val submitState: SubmitState,
     )
 
+    private class ExpectedOutputRow(val input: String, val output: String)
+
     // Returns e.g. "1*****7890" for "1234567890" to prevent cheating but still provide a good UX
     private fun maskOutput(output: String): String {
         if (output.length < 5) {
@@ -68,7 +75,7 @@ object UploadSolutionApi {
             .joinToString("")
     }
 
-    suspend fun post(call: ApplicationCall) {
+    suspend fun post(call: ApplicationCall) = suspendTransaction {
         val request = call.receive<UploadSolutionRequest>()
         val userSession = call.sessions.get<UserSession>()
         val currentUser =
@@ -77,14 +84,14 @@ object UploadSolutionApi {
         // Redirect to login screen if "login to submit" was pressed
         if (userSession == null && request.submitState == SubmitState.LOGIN_TO_SUBMIT) {
             call.respond(ApiCallResult(redirect = "/login"))
-            return
+            return@suspendTransaction
         }
 
         // Validate user input
         require(request.code.length <= MAX_CODE_LENGTH)
         if (request.code.length <= MIN_CODE_LENGTH) {
             call.respond(ApiCallResult(buttonText = "Forgot to paste your code?"))
-            return
+            return@suspendTransaction
         }
 
         // Tokenize
@@ -106,7 +113,7 @@ object UploadSolutionApi {
                 br()
                 code { +"${e.message}" }
             }))
-            return
+            return@suspendTransaction
         }
 
         // Log to user object
@@ -144,17 +151,18 @@ object UploadSolutionApi {
                     )
                 }
             )
-            return
+            return@suspendTransaction
         } else {
             requireNotNull(userSession)
         }
-
-        val expectedOutputs = mainDatabase.getSuspendingCollection<ExpectedOutput>()
-            .find(
-                ExpectedOutput::year equal request.year.toInt(),
-                ExpectedOutput::day equal request.day.toInt(),
-                ExpectedOutput::part equal request.part.toInt(),
+        val expectedOutputs = ExpectedOutputTable
+            .select(ExpectedOutputTable.input, ExpectedOutputTable.output)
+            .where(
+                (ExpectedOutputTable.year eq request.year.toInt()) and
+                        (ExpectedOutputTable.day eq request.day.toInt()) and
+                        (ExpectedOutputTable.part eq request.part.toInt())
             )
+            .map { ExpectedOutputRow(it[ExpectedOutputTable.input], it[ExpectedOutputTable.output]) }
             .toList()
             .sortedByDescending { it.output.length }
 
@@ -200,7 +208,7 @@ object UploadSolutionApi {
     private suspend fun runCode(
         call: ApplicationCall,
         request: UploadSolutionRequest,
-        expectedOutput: ExpectedOutput,
+        expectedOutput: ExpectedOutputRow,
         userSession: UserSession,
         currentUser: User?,
         tokenCount: Int,
@@ -218,7 +226,8 @@ object UploadSolutionApi {
 
         val codeRunnerStdout = coderunnerResult.stdout.trim().takeIf { it.isNotEmpty() }
 
-        call.respond(when {
+        call.respond(
+            when {
             codeRunnerStdout == expectedOutput.output -> {
                 // Correct solution. Save solution to database
                 val solution = Solution().apply {
@@ -252,7 +261,11 @@ object UploadSolutionApi {
                     changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
                     alertHtml = createHTML().div {
                         +"Wrong stdout. Expected "
-                        code { if (currentUser?.admin == true) +expectedOutput.output else +maskOutput(expectedOutput.output) }
+                        code {
+                            if (currentUser?.admin == true) +expectedOutput.output else +maskOutput(
+                                expectedOutput.output
+                            )
+                        }
                         +", but got "
                         code { +codeRunnerStdout }
                         +"."

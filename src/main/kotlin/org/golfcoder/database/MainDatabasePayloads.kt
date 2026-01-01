@@ -5,7 +5,6 @@ import com.moshbit.katerbase.MongoSubEntry
 import org.golfcoder.coderunner.Coderunner
 import org.golfcoder.coderunner.KotlinPlaygroundCoderunner
 import org.golfcoder.coderunner.OnecompilerCoderunner
-import org.golfcoder.expectedoutputaggregator.*
 import org.golfcoder.tokenizer.Tokenizer
 import org.golfcoder.tokenizer.TreeSitterTokenizer
 import java.util.*
@@ -136,33 +135,4 @@ class LeaderboardPosition : MongoMainEntry() {
         val codePubliclyVisible: Boolean,
         val uploadDate: Date,
     ) : MongoSubEntry()
-}
-
-class ExpectedOutput : MongoMainEntry() {
-    var year: Int = 0
-    var day: Int = 0
-    var part: Int = 0
-    var input: String = ""
-    var output: String = ""
-    lateinit var source: Source
-
-    enum class Source {
-        FORNWALL,
-        FORNWALL_RUST,
-        SEVEN_REBUX,
-        KATE,
-        SHAHATA,
-        SIM
-        ;
-
-        val aggregator: ExpectedOutputAggregator
-            get() = when (this) {
-                FORNWALL -> FornwallAggregator()
-                FORNWALL_RUST -> FornwallRustAggregator()
-                SEVEN_REBUX -> SevenRebuxAggregator()
-                KATE -> KateAggregator()
-                SHAHATA -> ShahataAggregator()
-                SIM -> SimAggregator()
-            }
-    }
 }

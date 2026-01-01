@@ -3,7 +3,7 @@ package org.golfcoder.expectedoutputaggregator
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import org.golfcoder.database.ExpectedOutput
+import org.golfcoder.database.pgpayloads.Source
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Failure
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Success
 import org.golfcoder.httpClient
@@ -45,7 +45,7 @@ class KateAggregator : ExpectedOutputAggregator {
                 return Failure.NotYetAvailable
             }
 
-            save(year, day, part, ExpectedOutput.Source.KATE, input, output.toString())
+            save(year, day, part, Source.KATE, input, output.toString())
         }
         return Success
     }

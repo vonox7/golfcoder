@@ -4,21 +4,25 @@ import com.moshbit.katerbase.equal
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import io.ktor.server.sessions.*
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
 import kotlinx.html.*
-import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.database.LeaderboardPosition
 import org.golfcoder.database.User
 import org.golfcoder.database.getUserProfiles
+import org.golfcoder.database.pgpayloads.ExpectedOutputTable
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.endpoints.api.UploadSolutionApi.YEARS_RANGE
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.utils.relativeToNow
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.r2dbc.select
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 object LeaderboardYearView {
-    suspend fun getHtml(call: ApplicationCall) {
+    suspend fun getHtml(call: ApplicationCall) = suspendTransaction {
         val session = call.sessions.get<UserSession>()
         val currentUser = session?.let {
             mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)
@@ -29,8 +33,12 @@ object LeaderboardYearView {
             .find(LeaderboardPosition::year equal year, LeaderboardPosition::position equal 1)
             .toList()
             .associateBy { it.day }
-        val expectedOutputDays = mainDatabase.getSuspendingCollection<ExpectedOutput>()
-            .distinct(ExpectedOutput::day, ExpectedOutput::year equal year)
+
+        val expectedOutputDays = ExpectedOutputTable
+            .select(ExpectedOutputTable.day)
+            .withDistinct(true)
+            .where(ExpectedOutputTable.year eq year)
+            .map { it[ExpectedOutputTable.day] }
             .toSet()
 
         val positionOneUserIdsToUsers =

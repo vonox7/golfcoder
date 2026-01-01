@@ -3,7 +3,7 @@ package org.golfcoder.expectedoutputaggregator
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import org.golfcoder.database.ExpectedOutput
+import org.golfcoder.database.pgpayloads.Source
 import org.golfcoder.httpClient
 
 class SevenRebuxAggregator : ExpectedOutputAggregator {
@@ -42,7 +42,7 @@ class SevenRebuxAggregator : ExpectedOutputAggregator {
         }
 
         mapOf(1 to part1output, 2 to part2output).forEach { (part, output) ->
-            save(year, day, part, ExpectedOutput.Source.SEVEN_REBUX, input, output.toString())
+            save(year, day, part, Source.SEVEN_REBUX, input, output.toString())
         }
 
         return ExpectedOutputAggregator.AggregatorResult.Success

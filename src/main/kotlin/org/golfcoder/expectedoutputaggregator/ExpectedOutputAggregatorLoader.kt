@@ -5,8 +5,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.golfcoder.Sysinfo
-import org.golfcoder.database.ExpectedOutput
 import org.golfcoder.database.pgpayloads.ExpectedOutputTable
+import org.golfcoder.database.pgpayloads.Source
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregator.AggregatorResult.Failure.YearNotInSource
 import org.jetbrains.exposed.v1.r2dbc.select
@@ -24,10 +24,10 @@ object ExpectedOutputAggregatorLoader {
                 .toList()
         }
 
-        if (!Sysinfo.isLocal || dbSourceEnums.count() != ExpectedOutput.Source.entries.size) {
+        if (!Sysinfo.isLocal || dbSourceEnums.count() != Source.entries.size) {
             println(
                 "Loading expected output from all sources, as database has only ${dbSourceEnums.sorted()}, " +
-                        "expected ${ExpectedOutput.Source.entries.sorted()}"
+                        "expected ${Source.entries.sorted()}"
             )
             loadAll()
             loadContinuously()
@@ -50,8 +50,8 @@ object ExpectedOutputAggregatorLoader {
     private suspend fun load(
         year: Int,
         day: Int,
-    ): Map<ExpectedOutput.Source, ExpectedOutputAggregator.AggregatorResult> {
-        return ExpectedOutput.Source.entries.associateWith { source ->
+    ): Map<Source, ExpectedOutputAggregator.AggregatorResult> {
+        return Source.entries.associateWith { source ->
             try {
                 source.aggregator.load(year, day)
             } catch (exception: Exception) {

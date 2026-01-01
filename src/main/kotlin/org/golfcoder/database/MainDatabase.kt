@@ -52,13 +52,5 @@ class MainDatabase(uri: String) : MongoDatabase(
                 partialIndex = arrayOf(LeaderboardPosition::position equal 1)
             )
         }
-        collection<ExpectedOutput>("expectedOutputs") {
-            index(
-                ExpectedOutput::year.ascending(),
-                ExpectedOutput::day.ascending(),
-                ExpectedOutput::part.ascending(),
-                ExpectedOutput::source.ascending(),
-            )
-        }
     }
 )
