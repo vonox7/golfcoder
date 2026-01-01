@@ -3,6 +3,7 @@ package org.golfcoder.database
 import io.ktor.http.*
 import io.r2dbc.spi.ConnectionFactoryOptions
 import org.golfcoder.database.pgpayloads.ExpectedOutputTable
+import org.golfcoder.database.pgpayloads.UserTable
 import org.jetbrains.exposed.v1.migration.r2dbc.MigrationUtils
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabaseConfig
@@ -44,7 +45,8 @@ suspend fun connectToPostgres(): R2dbcDatabase {
 // This means that in case of errors during migration a manual intervention is required.
 suspend fun R2dbcTransaction.migrateDb() {
     val tables = arrayOf(
-        ExpectedOutputTable
+        UserTable,
+        ExpectedOutputTable,
     )
 
     val statements = MigrationUtils.statementsRequiredForDatabaseMigration(*tables)

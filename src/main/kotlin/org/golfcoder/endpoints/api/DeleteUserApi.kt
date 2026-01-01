@@ -8,8 +8,12 @@ import io.ktor.server.sessions.*
 import kotlinx.serialization.Serializable
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
+import org.golfcoder.database.pgpayloads.UserTable
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.r2dbc.deleteWhere
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 object DeleteUserApi {
 
@@ -19,14 +23,13 @@ object DeleteUserApi {
         val name: String,
     )
 
-    suspend fun post(call: ApplicationCall) {
+    suspend fun post(call: ApplicationCall) = suspendTransaction {
         val request = call.receive<DeleteUserRequest>()
         val session = call.sessions.get<UserSession>()!!
-        val currentUser = mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)!!
 
-        if (request.name != currentUser.name) {
+        if (request.name != session.displayName) {
             call.respond(ApiCallResult(buttonText = "Wrong user name"))
-            return
+            return@suspendTransaction
         }
 
         if (request.keepSubmissions != "on") {
@@ -38,6 +41,7 @@ object DeleteUserApi {
         }
 
         mainDatabase.getSuspendingCollection<User>().deleteOne(User::_id equal session.userId)
+        UserTable.deleteWhere { UserTable.id eq session.userId }
 
         call.sessions.clear<UserSession>()
 

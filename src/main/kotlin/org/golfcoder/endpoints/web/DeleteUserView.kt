@@ -1,21 +1,17 @@
 package org.golfcoder.endpoints.web
 
-import com.moshbit.katerbase.equal
 import io.ktor.server.application.*
 import io.ktor.server.sessions.*
 import kotlinx.html.*
-import org.golfcoder.database.User
-import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 
 object DeleteUserView {
     suspend fun getHtml(call: ApplicationCall) {
         val session = call.sessions.get<UserSession>()!!
-        val currentUser = mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)!!
 
         call.respondHtmlView("Delete Golfcoder account") {
             h1 {
-                +"Delete Golfcoder account ${currentUser.name}"
+                +"Delete Golfcoder account ${session.displayName}"
             }
             form(action = "/api/user/delete") {
                 p {
@@ -41,7 +37,7 @@ object DeleteUserView {
                 label {
                     attributes["for"] = "name"
                     +"Type your user name"
-                    b { +" (${currentUser.name})" }
+                    b { +" (${session.displayName})" }
                     +" to confirm account deletion: "
                     input(type = InputType.text) {
                         name = "name"
