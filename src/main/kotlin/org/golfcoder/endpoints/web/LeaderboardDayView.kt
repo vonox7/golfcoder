@@ -4,12 +4,15 @@ import com.moshbit.katerbase.equal
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import io.ktor.server.sessions.*
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
 import org.golfcoder.database.LeaderboardPosition
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
 import org.golfcoder.database.getUserProfiles
+import org.golfcoder.database.pgpayloads.SolutionTable
+import org.golfcoder.database.pgpayloads.toSolution
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.endpoints.api.UploadSolutionApi.PART_RANGE
 import org.golfcoder.endpoints.web.TemplateView.template
@@ -18,9 +21,12 @@ import org.golfcoder.plugins.UserSession
 import org.golfcoder.tokenizer.NotYetAvailableTokenizer
 import org.golfcoder.tokenizer.Tokenizer
 import org.golfcoder.utils.relativeToNow
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 object LeaderboardDayView {
-    suspend fun getHtml(call: ApplicationCall) {
+    suspend fun getHtml(call: ApplicationCall) = suspendTransaction {
         val session = call.sessions.get<UserSession>()
         val currentUser = session?.let {
             mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)
@@ -28,7 +34,8 @@ object LeaderboardDayView {
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
         val day = call.parameters["day"]?.toIntOrNull() ?: throw NotFoundException("Invalid day")
         val highlightedSolution: Solution? = call.parameters["solution"]?.let { solutionId ->
-            mainDatabase.getSuspendingCollection<Solution>().findOne(Solution::_id equal solutionId)
+            (mainDatabase.getSuspendingCollection<Solution>().findOne(Solution::_id equal solutionId)
+                ?: SolutionTable.selectAll().where(SolutionTable.id eq solutionId).firstOrNull()?.toSolution())
                 ?.takeIf { (it.codePubliclyVisible || currentUser?.admin == true) || it.userId == currentUser?._id }
                 ?: throw NotFoundException("Invalid solution parameter")
         }

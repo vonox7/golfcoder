@@ -8,13 +8,19 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.golfcoder.database.User
+import org.golfcoder.database.pgpayloads.UserTable
 import org.golfcoder.httpClient
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.utils.bodyOrPrintException
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.r2dbc.select
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import java.time.Instant
 
 object EditUserApi {
@@ -37,10 +43,16 @@ object EditUserApi {
         val pushedAt: Instant get() = Instant.parse(pushedAtString)
     }
 
-    suspend fun post(call: ApplicationCall) {
+    suspend fun post(call: ApplicationCall) = suspendTransaction {
         val request = call.receive<EditUserRequest>()
         val session = call.sessions.get<UserSession>()!!
-        val currentUser = mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)!!
+        val currentUserAdventOfCodeRepositoryInfo =
+            UserTable.select(UserTable.adventOfCodeRepositoryInfo)
+                .where(UserTable.id eq session.userId)
+                .map { it[UserTable.adventOfCodeRepositoryInfo] }
+                .firstOrNull()
+                ?: mainDatabase.getSuspendingCollection<User>()
+                    .findOne(User::_id equal session.userId)?.adventOfCodeRepositoryInfo
 
         val newName = request.name.take(MAX_USER_NAME_LENGTH).trim().takeIf { it.isNotEmpty() } ?: "XXX"
 
@@ -49,7 +61,7 @@ object EditUserApi {
                 User::name setTo newName
                 User::nameIsPublic setTo (request.nameIsPublic == "on")
                 User::profilePictureIsPublic setTo (request.profilePictureIsPublic == "on")
-                if (currentUser.adventOfCodeRepositoryInfo != null) {
+                if (currentUserAdventOfCodeRepositoryInfo != null) {
                     User::adventOfCodeRepositoryInfo.child(User.AdventOfCodeRepositoryInfo::publiclyVisible) setTo (request.showAdventOfCodeRepositoryLink == "on")
                 }
             }

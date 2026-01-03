@@ -29,6 +29,7 @@ import org.golfcoder.tokenizer.TokenRecalculator
 import org.golfcoder.utils.SentryPlugin
 import org.golfcoder.utils.initSentry
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
+import java.util.*
 
 val container = System.getenv("CONTAINER") ?: "local"
 lateinit var mainDatabase: MainDatabase
@@ -51,6 +52,8 @@ val httpClient = HttpClient(CIO) {
 }
 
 fun main(): Unit = runBlocking {
+    TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+
     initSentry()
 
     println("Connecting to database...")

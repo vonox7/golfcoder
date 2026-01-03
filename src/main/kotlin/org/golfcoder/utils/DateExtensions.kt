@@ -1,6 +1,10 @@
 package org.golfcoder.utils
 
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.UtcOffset
+import kotlinx.datetime.toInstant
 import java.util.*
+import kotlin.time.ExperimentalTime
 
 fun Date.relativeToNow(now: Date = Date()): String {
     var difference = (now.time - time) / 1000
@@ -13,3 +17,7 @@ fun Date.relativeToNow(now: Date = Date()): String {
     }
     throw IllegalStateException("Should not happen, difference: $difference")
 }
+
+@OptIn(ExperimentalTime::class)
+fun LocalDateTime.toJavaDate(): Date =
+    Date(this.toInstant(UtcOffset.ZERO).toEpochMilliseconds())

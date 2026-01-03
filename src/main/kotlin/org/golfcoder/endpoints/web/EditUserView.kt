@@ -3,26 +3,39 @@ package org.golfcoder.endpoints.web
 import com.moshbit.katerbase.equal
 import io.ktor.server.application.*
 import io.ktor.server.sessions.*
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
 import org.golfcoder.database.LeaderboardPosition
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
+import org.golfcoder.database.pgpayloads.SolutionTable
+import org.golfcoder.database.pgpayloads.toSolution
 import org.golfcoder.endpoints.api.EditUserApi
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.utils.relativeToNow
+import org.jetbrains.exposed.v1.core.SortOrder.DESC
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 
 object EditUserView {
-    suspend fun getHtml(call: ApplicationCall) {
+    suspend fun getHtml(call: ApplicationCall) = suspendTransaction {
         val session = call.sessions.get<UserSession>()!!
         val currentUser = mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)!!
 
         val mySolutions = mainDatabase.getSuspendingCollection<Solution>()
             .find(Solution::userId equal session.userId)
             .sortByDescending(Solution::uploadDate)
-            .toList()
+            .toList() +
+                SolutionTable
+                    .selectAll()
+                    .where(SolutionTable.userId eq session.userId)
+                    .orderBy(SolutionTable.id, DESC)
+                    .map { it.toSolution() }
+                    .toList()
 
         val myLeaderboardPositions = mainDatabase.getSuspendingCollection<LeaderboardPosition>()
             .find(LeaderboardPosition::userId equal session.userId)

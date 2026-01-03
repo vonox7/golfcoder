@@ -8,6 +8,7 @@ import io.ktor.server.sessions.*
 import kotlinx.serialization.Serializable
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
+import org.golfcoder.database.pgpayloads.SolutionTable
 import org.golfcoder.database.pgpayloads.UserTable
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
@@ -33,9 +34,10 @@ object DeleteUserApi {
         }
 
         if (request.keepSubmissions != "on") {
-            val deleteSubmissionsResult = mainDatabase.getSuspendingCollection<Solution>()
-                .deleteMany(Solution::userId equal session.userId)
-            if (deleteSubmissionsResult.deletedCount > 0L) {
+            val deleteSubmissionsDeleteCount = mainDatabase.getSuspendingCollection<Solution>()
+                .deleteMany(Solution::userId equal session.userId).deletedCount +
+                    SolutionTable.deleteWhere { SolutionTable.userId eq session.userId }
+            if (deleteSubmissionsDeleteCount > 0L) {
                 UploadSolutionApi.recalculateAllScores()
             }
         }

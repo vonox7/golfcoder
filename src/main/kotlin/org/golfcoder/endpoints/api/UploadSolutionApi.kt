@@ -18,12 +18,16 @@ import org.golfcoder.database.LeaderboardPosition
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
 import org.golfcoder.database.pgpayloads.ExpectedOutputTable
+import org.golfcoder.database.pgpayloads.SolutionTable
 import org.golfcoder.endpoints.web.LeaderboardDayView
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.tokenizer.Tokenizer
+import org.golfcoder.utils.randomId
+import org.golfcoder.utils.toJavaDate
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.select
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import java.time.LocalDate
@@ -230,26 +234,25 @@ object UploadSolutionApi {
             when {
             codeRunnerStdout == expectedOutput.output -> {
                 // Correct solution. Save solution to database
-                val solution = Solution().apply {
-                    _id = randomId()
-                    userId = userSession.userId
-                    year = request.year.toInt()
-                    day = request.day.toInt()
-                    part = request.part.toInt()
-                    code = request.code
-                    language = request.language
-                    codePubliclyVisible = request.codeIsPublic == "on"
-                    uploadDate = Date()
-                    this.tokenCount = tokenCount
-                    tokenizerVersion = tokenizer.tokenizerVersion
+                val solutionId = randomId()
+                SolutionTable.insert {
+                    it[id] = solutionId
+                    it[userId] = userSession.userId
+                    it[year] = request.year.toInt()
+                    it[day] = request.day.toInt()
+                    it[part] = request.part.toInt()
+                    it[code] = request.code
+                    it[language] = request.language
+                    it[codePublicVisible] = request.codeIsPublic == "on"
+                    it[this.tokenCount] = tokenCount
+                    it[tokenizerVersion] = tokenizer.tokenizerVersion
                 }
-                mainDatabase.getSuspendingCollection<Solution>().insertOne(solution, upsert = false)
 
                 recalculateScore(year = request.year.toInt(), day = request.day.toInt())
 
                 ApiCallResult(
                     buttonText = "Submitted",
-                    redirect = "/${request.year}/day/${request.day}?solution=${solution._id}"
+                    redirect = "/${request.year}/day/${request.day}?solution=${solutionId}"
                 )
             }
 
@@ -307,11 +310,16 @@ object UploadSolutionApi {
         })
     }
 
-    suspend fun recalculateScore(year: Int, day: Int) {
+    private class SolutionPart(
+        val id: String, val userId: String, val language: Solution.Language, val tokenCount: Int,
+        val part: Int, val codePubliclyVisible: Boolean = false, val uploadDate: Date
+    )
+
+    suspend fun recalculateScore(year: Int, day: Int) = suspendTransaction {
         // The whole recalculation could be done also with 1 single aggregate query?
-        val solutions = PART_RANGE.map { part ->
+        val solutions: List<List<SolutionPart>> = PART_RANGE.map { part ->
             @Suppress("DEPRECATION") // use excludeFields - only `code` is excluded since it is too big
-            mainDatabase.getSuspendingCollection<Solution>()
+            (mainDatabase.getSuspendingCollection<Solution>()
                 .find(
                     Solution::year equal year,
                     Solution::day equal day,
@@ -321,12 +329,47 @@ object UploadSolutionApi {
                 .sortBy(Solution::tokenCount)
                 .excludeFields(Solution::code)
                 .limit(200)
-                .toList()
+                .map {
+                    SolutionPart(
+                        id = it._id,
+                        userId = it.userId,
+                        language = it.language,
+                        tokenCount = it.tokenCount,
+                        part = it.part,
+                        codePubliclyVisible = it.codePubliclyVisible,
+                        uploadDate = it.uploadDate,
+                    )
+                }
+                .toList() +
+                    SolutionTable.select(
+                        SolutionTable.id, SolutionTable.userId, SolutionTable.language,
+                        SolutionTable.tokenCount, SolutionTable.codePublicVisible, SolutionTable.uploadDate
+                    ).where {
+                        (SolutionTable.year eq year) and
+                                (SolutionTable.day eq day) and
+                                (SolutionTable.part eq part) and
+                                (SolutionTable.markedAsCheated eq false)
+                    }
+                        .orderBy(SolutionTable.tokenCount)
+                        .limit(200)
+                        .map {
+                            SolutionPart(
+                                id = it[SolutionTable.id],
+                                userId = it[SolutionTable.userId],
+                                language = it[SolutionTable.language],
+                                tokenCount = it[SolutionTable.tokenCount],
+                                part = part,
+                                codePubliclyVisible = it[SolutionTable.codePublicVisible],
+                                uploadDate = it[SolutionTable.uploadDate].toJavaDate()
+                            )
+                        }
+                        .toList())
+                .sortedByDescending { it.tokenCount } // TODO remove after migrating everything to PG
         }
 
         // We need to do some transformations here, so we get per user the best solution per part (also per language).
         // And to calculate the total score (for all parts) (per user+language).
-        val scoresByUserId = mutableMapOf<String, List<Solution>>()
+        val scoresByUserId = mutableMapOf<String, List<SolutionPart>>()
         solutions.forEach { solutionsPerPart ->
             solutionsPerPart
                 .groupBy { it.userId + it.language }
@@ -336,7 +379,7 @@ object UploadSolutionApi {
                 }
         }
 
-        val sortedScores: List<Pair<List<Solution>, Int>> = scoresByUserId.values.associateWith { userSolutions ->
+        val sortedScores: List<Pair<List<SolutionPart>, Int>> = scoresByUserId.values.associateWith { userSolutions ->
             PART_RANGE.sumOf { part ->
                 userSolutions.find { it.part == part }?.tokenCount
                     ?: 10_000 // No solution for part yet submitted
@@ -362,7 +405,7 @@ object UploadSolutionApi {
                     leaderboardPosition.partInfos = solutions.associate { solution ->
                         solution.part to LeaderboardPosition.PartInfo(
                             tokens = solution.tokenCount,
-                            solutionId = solution._id,
+                            solutionId = solution.id,
                             codePubliclyVisible = solution.codePubliclyVisible,
                             uploadDate = solution.uploadDate,
                         )
