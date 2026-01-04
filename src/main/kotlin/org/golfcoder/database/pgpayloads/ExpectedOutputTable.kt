@@ -3,7 +3,7 @@ package org.golfcoder.database.pgpayloads
 import org.golfcoder.expectedoutputaggregator.*
 import org.jetbrains.exposed.v1.core.Table
 
-object ExpectedOutputTable : Table("expectedOutput") {
+object ExpectedOutputTable : Table("expected_output") {
     val year = integer("year")
     val day = integer("day")
     val part = integer("part")

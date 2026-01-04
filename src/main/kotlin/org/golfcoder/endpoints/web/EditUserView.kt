@@ -6,10 +6,11 @@ import io.ktor.server.sessions.*
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
-import org.golfcoder.database.LeaderboardPosition
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
+import org.golfcoder.database.pgpayloads.LeaderboardPositionTable
 import org.golfcoder.database.pgpayloads.SolutionTable
+import org.golfcoder.database.pgpayloads.toLeaderboardPosition
 import org.golfcoder.database.pgpayloads.toSolution
 import org.golfcoder.endpoints.api.EditUserApi
 import org.golfcoder.mainDatabase
@@ -37,8 +38,10 @@ object EditUserView {
                     .map { it.toSolution() }
                     .toList()
 
-        val myLeaderboardPositions = mainDatabase.getSuspendingCollection<LeaderboardPosition>()
-            .find(LeaderboardPosition::userId equal session.userId)
+        val myLeaderboardPositions = LeaderboardPositionTable
+            .selectAll()
+            .where(LeaderboardPositionTable.userId eq session.userId)
+            .map { it.toLeaderboardPosition() }
             .toList()
             .sortedBy { it.year * 10000 + it.day }
             .groupBy { it.year * 10000 + it.day }

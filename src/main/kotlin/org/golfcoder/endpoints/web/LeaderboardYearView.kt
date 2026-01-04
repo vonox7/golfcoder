@@ -8,17 +8,20 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
 import kotlinx.html.*
-import org.golfcoder.database.LeaderboardPosition
 import org.golfcoder.database.User
 import org.golfcoder.database.getUserProfiles
 import org.golfcoder.database.pgpayloads.ExpectedOutputTable
+import org.golfcoder.database.pgpayloads.LeaderboardPositionTable
+import org.golfcoder.database.pgpayloads.toLeaderboardPosition
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.endpoints.api.UploadSolutionApi.YEARS_RANGE
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.utils.relativeToNow
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.select
+import org.jetbrains.exposed.v1.r2dbc.selectAll
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 object LeaderboardYearView {
@@ -29,8 +32,10 @@ object LeaderboardYearView {
         }
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
 
-        val positionOneLeaderboardPositions = mainDatabase.getSuspendingCollection<LeaderboardPosition>()
-            .find(LeaderboardPosition::year equal year, LeaderboardPosition::position equal 1)
+        val positionOneLeaderboardPositions = LeaderboardPositionTable
+            .selectAll()
+            .where { (LeaderboardPositionTable.year eq year) and (LeaderboardPositionTable.position eq 1) }
+            .map { it.toLeaderboardPosition() }
             .toList()
             .associateBy { it.day }
 
@@ -41,6 +46,7 @@ object LeaderboardYearView {
             .map { it[ExpectedOutputTable.day] }
             .toSet()
 
+        // TODO join?
         val positionOneUserIdsToUsers =
             getUserProfiles(positionOneLeaderboardPositions.values.map { it.userId }.toSet())
 

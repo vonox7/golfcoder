@@ -3,6 +3,7 @@ package org.golfcoder.database
 import io.ktor.http.*
 import io.r2dbc.spi.ConnectionFactoryOptions
 import org.golfcoder.database.pgpayloads.ExpectedOutputTable
+import org.golfcoder.database.pgpayloads.LeaderboardPositionTable
 import org.golfcoder.database.pgpayloads.SolutionTable
 import org.golfcoder.database.pgpayloads.UserTable
 import org.jetbrains.exposed.v1.migration.r2dbc.MigrationUtils
@@ -49,6 +50,7 @@ suspend fun R2dbcTransaction.migrateDb() {
         UserTable,
         ExpectedOutputTable,
         SolutionTable,
+        LeaderboardPositionTable,
     )
 
     val statements = MigrationUtils.statementsRequiredForDatabaseMigration(*tables)

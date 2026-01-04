@@ -1,6 +1,5 @@
 package org.golfcoder.endpoints.api
 
-import com.moshbit.katerbase.MongoMainEntry.Companion.generateId
 import com.moshbit.katerbase.equal
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -14,10 +13,10 @@ import kotlinx.html.stream.createHTML
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
 import org.golfcoder.coderunner.Coderunner
-import org.golfcoder.database.LeaderboardPosition
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
 import org.golfcoder.database.pgpayloads.ExpectedOutputTable
+import org.golfcoder.database.pgpayloads.LeaderboardPositionTable
 import org.golfcoder.database.pgpayloads.SolutionTable
 import org.golfcoder.endpoints.web.LeaderboardDayView
 import org.golfcoder.mainDatabase
@@ -25,8 +24,11 @@ import org.golfcoder.plugins.UserSession
 import org.golfcoder.tokenizer.Tokenizer
 import org.golfcoder.utils.randomId
 import org.golfcoder.utils.toJavaDate
+import org.golfcoder.utils.toKotlinLocalDateTime
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.r2dbc.batchInsert
+import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.select
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
@@ -386,31 +388,22 @@ object UploadSolutionApi {
             }
         }.toList().sortedBy { it.second }
 
-        mainDatabase.getSuspendingCollection<LeaderboardPosition>().bulkWrite {
-            deleteMany(LeaderboardPosition::year equal year, LeaderboardPosition::day equal day)
-            sortedScores.forEachIndexed { scoreIndex, (solutions, score) ->
-                insertOne(LeaderboardPosition().also { leaderboardPosition ->
-                    leaderboardPosition._id = generateId(
-                        solutions.first().userId,
-                        solutions.first().language.name,
-                        year.toString(),
-                        day.toString()
-                    )
-                    leaderboardPosition.year = year
-                    leaderboardPosition.day = day
-                    leaderboardPosition.position = scoreIndex + 1
-                    leaderboardPosition.userId = solutions.first().userId
-                    leaderboardPosition.language = solutions.first().language
-                    leaderboardPosition.tokenSum = score
-                    leaderboardPosition.partInfos = solutions.associate { solution ->
-                        solution.part to LeaderboardPosition.PartInfo(
-                            tokens = solution.tokenCount,
-                            solutionId = solution.id,
-                            codePubliclyVisible = solution.codePubliclyVisible,
-                            uploadDate = solution.uploadDate,
-                        )
-                    }
-                }, upsert = true)
+        LeaderboardPositionTable.deleteWhere { (LeaderboardPositionTable.year eq year) and (LeaderboardPositionTable.day eq day) }
+        var position = 1
+        LeaderboardPositionTable.batchInsert(sortedScores) { (solutions, score) ->
+            this[LeaderboardPositionTable.year] = year
+            this[LeaderboardPositionTable.day] = day
+            this[LeaderboardPositionTable.position] = position++
+            this[LeaderboardPositionTable.userId] = solutions.first().userId
+            this[LeaderboardPositionTable.language] = solutions.first().language
+            this[LeaderboardPositionTable.tokenSum] = score
+            this[LeaderboardPositionTable.partInfos] = solutions.associate { solution ->
+                solution.part to LeaderboardPositionTable.PartInfo(
+                    tokens = solution.tokenCount,
+                    solutionId = solution.id,
+                    codePubliclyVisible = solution.codePubliclyVisible,
+                    uploadDate = solution.uploadDate.toKotlinLocalDateTime(),
+                )
             }
         }
     }

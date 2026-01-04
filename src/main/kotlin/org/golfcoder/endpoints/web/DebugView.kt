@@ -4,6 +4,7 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 import org.golfcoder.Sysinfo
+import org.golfcoder.database.Solution
 import org.golfcoder.database.User
 import org.golfcoder.database.pgpayloads.UserTable
 import org.golfcoder.database.pgpayloads.UserTable.OAuthDetails
@@ -30,6 +31,8 @@ object DebugView {
                     " " +
                     listOf("Doe", "Smith", "Taylor", "Jackson", "White", "Harris", "Martin", "Black").random()
             publicProfilePictureUrl = null
+            admin = true
+            defaultLanguage = Solution.Language.KOTLIN
         }
         mainDatabase.getSuspendingCollection<User>().insertOne(newUser, upsert = false)
 
@@ -38,6 +41,8 @@ object DebugView {
             it[oauthDetails] = emptyArray<OAuthDetails>()
             it[name] = newUser.name // TODO inline
             it[publicProfilePictureUrl] = null
+            it[admin] = true
+            it[defaultLanguage] = Solution.Language.KOTLIN
         }
 
         call.sessions.set(UserSession(newUser._id, newUser.name))

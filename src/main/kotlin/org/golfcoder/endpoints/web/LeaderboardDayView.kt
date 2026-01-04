@@ -5,14 +5,13 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import io.ktor.server.sessions.*
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
-import org.golfcoder.database.LeaderboardPosition
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
 import org.golfcoder.database.getUserProfiles
-import org.golfcoder.database.pgpayloads.SolutionTable
-import org.golfcoder.database.pgpayloads.toSolution
+import org.golfcoder.database.pgpayloads.*
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.endpoints.api.UploadSolutionApi.PART_RANGE
 import org.golfcoder.endpoints.web.TemplateView.template
@@ -21,6 +20,7 @@ import org.golfcoder.plugins.UserSession
 import org.golfcoder.tokenizer.NotYetAvailableTokenizer
 import org.golfcoder.tokenizer.Tokenizer
 import org.golfcoder.utils.relativeToNow
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.selectAll
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
@@ -48,9 +48,11 @@ object LeaderboardDayView {
             solution.language.tokenizer.tokenize(solution.code)
         }
 
-        val leaderboardPositions = mainDatabase.getSuspendingCollection<LeaderboardPosition>()
-            .find(LeaderboardPosition::year equal year, LeaderboardPosition::day equal day)
-            .sortBy(LeaderboardPosition::tokenSum)
+        val leaderboardPositions = LeaderboardPositionTable
+            .selectAll()
+            .where { (LeaderboardPositionTable.year eq year) and (LeaderboardPositionTable.day eq day) }
+            .orderBy(LeaderboardPositionTable.tokenSum)
+            .map { it.toLeaderboardPosition() }
             .toList()
 
         val userIdsToUsers = getUserProfiles(leaderboardPositions.map { it.userId }.toSet())

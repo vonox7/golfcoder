@@ -1,10 +1,10 @@
 package org.golfcoder.utils
 
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.UtcOffset
-import kotlinx.datetime.toInstant
+import kotlinx.datetime.*
+import kotlinx.datetime.TimeZone
 import java.util.*
 import kotlin.time.ExperimentalTime
+import kotlin.time.toKotlinInstant
 
 fun Date.relativeToNow(now: Date = Date()): String {
     var difference = (now.time - time) / 1000
@@ -21,3 +21,10 @@ fun Date.relativeToNow(now: Date = Date()): String {
 @OptIn(ExperimentalTime::class)
 fun LocalDateTime.toJavaDate(): Date =
     Date(this.toInstant(UtcOffset.ZERO).toEpochMilliseconds())
+
+@OptIn(ExperimentalTime::class)
+fun Date.toKotlinLocalDateTime(): LocalDateTime =
+    this.toInstant().toKotlinInstant().toLocalDateTime(TimeZone.UTC)
+
+fun LocalDateTime.relativeToNow(): String =
+    this.toJavaDate().relativeToNow(Date())
