@@ -1,5 +1,6 @@
 package org.golfcoder.database.pgpayloads
 
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.golfcoder.database.Solution
@@ -31,7 +32,7 @@ object UserTable : Table("user") {
     data class OAuthDetails(
         val provider: String,
         val providerUserId: String,
-        val createdOn: String, // ISO date string
+        val createdOn: LocalDateTime,
     )
 
     @Serializable
