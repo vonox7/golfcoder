@@ -14,16 +14,10 @@ import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import org.golfcoder.database.MainDatabase
-import org.golfcoder.database.Solution
-import org.golfcoder.database.User
 import org.golfcoder.database.connectToPostgres
-import org.golfcoder.database.pgpayloads.SolutionTable
-import org.golfcoder.database.pgpayloads.UserTable
 import org.golfcoder.endpoints.api.*
 import org.golfcoder.endpoints.web.*
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregatorLoader
@@ -33,14 +27,9 @@ import org.golfcoder.plugins.sessionAuthenticationName
 import org.golfcoder.tokenizer.TokenRecalculator
 import org.golfcoder.utils.SentryPlugin
 import org.golfcoder.utils.initSentry
-import org.golfcoder.utils.toKotlinLocalDateTime
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
-import org.jetbrains.exposed.v1.r2dbc.insertIgnore
-import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import java.util.*
 
-val container = System.getenv("CONTAINER") ?: "local"
-lateinit var mainDatabase: MainDatabase
 lateinit var pgDatabase: R2dbcDatabase
 val httpClient = HttpClient(CIO) {
     install(ContentNegotiation) {
@@ -65,7 +54,6 @@ fun main(): Unit = runBlocking {
     initSentry()
 
     println("Connecting to database...")
-    mainDatabase = MainDatabase(System.getenv("MONGO_URL") ?: "mongodb://localhost:27017/golfcoder")
     pgDatabase = connectToPostgres()
 
     // Wait for tree-sitter server to start
@@ -91,10 +79,6 @@ fun main(): Unit = runBlocking {
         module = Application::ktorServerModule
     ).start(wait = false)
     println("Server started at http://localhost:$port")
-
-    if (System.getenv("MIGRATE_TO_PG") == "true") {
-        migrateToPg()
-    }
 
     launch {
         TokenRecalculator.recalculateSolutions()
@@ -152,66 +136,4 @@ private fun Application.ktorServerModule() {
         staticResources("/static/js-{release}", "static/js")
         staticResources("/static/images", "static/images")
     }
-}
-
-// TODO remove after migration
-private suspend fun migrateToPg() = suspendTransaction {
-    println("Starting database migration...")
-
-    println(
-        "Migrated " + mainDatabase.getSuspendingCollection<Solution>()
-        .find()
-        .toList()
-        .sumOf { solution ->
-            SolutionTable.insertIgnore {
-                it[id] = solution._id
-                it[userId] = solution.userId
-                it[uploadDate] = solution.uploadDate.toKotlinLocalDateTime()
-                it[year] = solution.year
-                it[day] = solution.day
-                it[part] = solution.part
-                it[language] = solution.language
-                it[code] = solution.code
-                it[codePublicVisible] = solution.codePubliclyVisible
-                it[tokenCount] = solution.tokenCount
-                it[tokenizerVersion] = solution.tokenizerVersion
-                it[markedAsCheated] = solution.markedAsCheated
-            }.insertedCount
-        } + " solutions.")
-
-    println(
-        "Migrated " + mainDatabase.getSuspendingCollection<User>()
-        .find()
-        .toList()
-        .sumOf { user ->
-            UserTable.insertIgnore {
-                it[id] = user._id
-                it[oauthDetails] = user.oAuthDetails.map {
-                    UserTable.OAuthDetails(
-                        provider = it.provider,
-                        providerUserId = it.providerUserId,
-                        createdOn = it.createdOn.toKotlinLocalDateTime()
-                    )
-                }.toTypedArray()
-                it[createdOn] = user.createdOn.toKotlinLocalDateTime()
-                it[name] = user.name
-                it[publicProfilePictureUrl] = user.publicProfilePictureUrl
-                it[nameIsPublic] = user.nameIsPublic
-                it[profilePictureIsPublic] = user.profilePictureIsPublic
-                it[defaultLanguage] = user.defaultLanguage
-                it[tokenizedCodeCount] = user.tokenizedCodeCount
-                it[codeRunCount] = user.codeRunCount
-                it[adventOfCodeRepositoryInfo] = user.adventOfCodeRepositoryInfo?.let {
-                    UserTable.AdventOfCodeRepositoryInfo(
-                        githubProfileName = it.githubProfileName,
-                        singleAocRepositoryUrl = it.singleAocRepositoryUrl,
-                        yearAocRepositoryUrl = it.yearAocRepositoryUrl,
-                        publiclyVisible = it.publiclyVisible
-                    )
-                }
-                it[admin] = user.admin
-            }.insertedCount
-        } + " users.")
-
-    println("Database migration completed.")
 }

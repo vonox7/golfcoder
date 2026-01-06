@@ -1,6 +1,5 @@
 package org.golfcoder.database.pgpayloads
 
-import com.moshbit.katerbase.equal
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDateTime
@@ -10,7 +9,6 @@ import kotlinx.serialization.json.Json
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
 import org.golfcoder.endpoints.api.EditUserApi.MAX_USER_NAME_LENGTH
-import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.utils.toJavaDate
 import org.jetbrains.exposed.v1.core.ResultRow
@@ -92,7 +90,6 @@ fun ResultRow.toUser() = User().apply {
 
 suspend fun getUser(userId: String): User? {
     return UserTable.selectAll().where(UserTable.id eq userId).map { it.toUser() }.firstOrNull()
-        ?: mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal userId)
 }
 
 suspend fun UserSession.getUser(): User {

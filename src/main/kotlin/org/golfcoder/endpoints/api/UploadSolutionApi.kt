@@ -1,6 +1,5 @@
 package org.golfcoder.endpoints.api
 
-import com.moshbit.katerbase.equal
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -17,12 +16,12 @@ import org.golfcoder.database.Solution
 import org.golfcoder.database.User
 import org.golfcoder.database.pgpayloads.*
 import org.golfcoder.endpoints.web.LeaderboardDayView
-import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.tokenizer.Tokenizer
 import org.golfcoder.utils.randomId
 import org.golfcoder.utils.toJavaDate
 import org.golfcoder.utils.toKotlinLocalDateTime
+import org.jetbrains.exposed.v1.core.SortOrder.DESC
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.plus
@@ -119,14 +118,6 @@ object UploadSolutionApi {
 
         // Log to user object
         if (userSession != null) {
-            mainDatabase.getSuspendingCollection<User>().updateOne(User::_id equal userSession.userId) {
-                User::defaultLanguage setTo request.language
-                User::tokenizedCodeCount incrementBy 1
-                if (request.submitState == SubmitState.SUBMIT_NOW) {
-                    User::codeRunCount incrementBy 1
-                }
-            }
-
             UserTable.update({ UserTable.id.eq(userSession.userId) }) {
                 it[defaultLanguage] = request.language
                 it.update(tokenizedCodeCount, tokenizedCodeCount + 1)
@@ -238,82 +229,82 @@ object UploadSolutionApi {
 
         call.respond(
             when {
-            codeRunnerStdout == expectedOutput.output -> {
-                // Correct solution. Save solution to database
-                val solutionId = randomId()
-                SolutionTable.insert {
-                    it[id] = solutionId
-                    it[userId] = userSession.userId
-                    it[year] = request.year.toInt()
-                    it[day] = request.day.toInt()
-                    it[part] = request.part.toInt()
-                    it[code] = request.code
-                    it[language] = request.language
-                    it[codePublicVisible] = request.codeIsPublic == "on"
-                    it[this.tokenCount] = tokenCount
-                    it[tokenizerVersion] = tokenizer.tokenizerVersion
+                codeRunnerStdout == expectedOutput.output -> {
+                    // Correct solution. Save solution to database
+                    val solutionId = randomId()
+                    SolutionTable.insert {
+                        it[id] = solutionId
+                        it[userId] = userSession.userId
+                        it[year] = request.year.toInt()
+                        it[day] = request.day.toInt()
+                        it[part] = request.part.toInt()
+                        it[code] = request.code
+                        it[language] = request.language
+                        it[codePublicVisible] = request.codeIsPublic == "on"
+                        it[this.tokenCount] = tokenCount
+                        it[tokenizerVersion] = tokenizer.tokenizerVersion
+                    }
+
+                    recalculateScore(year = request.year.toInt(), day = request.day.toInt())
+
+                    ApiCallResult(
+                        buttonText = "Submitted",
+                        redirect = "/${request.year}/day/${request.day}?solution=${solutionId}"
+                    )
                 }
 
-                recalculateScore(year = request.year.toInt(), day = request.day.toInt())
-
-                ApiCallResult(
-                    buttonText = "Submitted",
-                    redirect = "/${request.year}/day/${request.day}?solution=${solutionId}"
-                )
-            }
-
-            codeRunnerStdout != null -> {
-                // Incorrect solution, but code execution worked
-                ApiCallResult(
-                    buttonText = "Calculate tokens",
-                    resetButtonTextSeconds = null,
-                    changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
-                    alertHtml = createHTML().div {
-                        +"Wrong stdout. Expected "
-                        code {
-                            if (currentUser?.admin == true) +expectedOutput.output else +maskOutput(
-                                expectedOutput.output
-                            )
+                codeRunnerStdout != null -> {
+                    // Incorrect solution, but code execution worked
+                    ApiCallResult(
+                        buttonText = "Calculate tokens",
+                        resetButtonTextSeconds = null,
+                        changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
+                        alertHtml = createHTML().div {
+                            +"Wrong stdout. Expected "
+                            code {
+                                if (currentUser?.admin == true) +expectedOutput.output else +maskOutput(
+                                    expectedOutput.output
+                                )
+                            }
+                            +", but got "
+                            code { +codeRunnerStdout }
+                            +"."
+                            br()
+                            br()
+                            +"Some characters are masked with *. Please run & validate your code first locally."
+                            br()
+                            br()
+                            +"If you think this is a bug, please report it to Golfcoder on GitHub (see FAQ)."
                         }
-                        +", but got "
-                        code { +codeRunnerStdout }
-                        +"."
-                        br()
-                        br()
-                        +"Some characters are masked with *. Please run & validate your code first locally."
-                        br()
-                        br()
-                        +"If you think this is a bug, please report it to Golfcoder on GitHub (see FAQ)."
-                    }
-                )
-            }
+                    )
+                }
 
-            coderunnerResult.error.isNullOrEmpty() -> {
-                // Code got executed, but no stdout and no error (e.g. missing print statement)
-                ApiCallResult(
-                    buttonText = "Calculate tokens",
-                    resetButtonTextSeconds = null,
-                    changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
-                    alertHtml = createHTML().div {
-                        +"Missing stdout. Expected a number. Ensure that your code prints the solution to stdout."
-                    }
-                )
-            }
+                coderunnerResult.error.isNullOrEmpty() -> {
+                    // Code got executed, but no stdout and no error (e.g. missing print statement)
+                    ApiCallResult(
+                        buttonText = "Calculate tokens",
+                        resetButtonTextSeconds = null,
+                        changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
+                        alertHtml = createHTML().div {
+                            +"Missing stdout. Expected a number. Ensure that your code prints the solution to stdout."
+                        }
+                    )
+                }
 
-            else -> {
-                // Code execution failed
-                ApiCallResult(
-                    buttonText = "Calculate tokens",
-                    resetButtonTextSeconds = null,
-                    changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
-                    alertHtml = createHTML().div {
-                        +"Code compilation or execution failed:"
-                        br()
-                        code { +coderunnerResult.error }
-                    }
-                )
-            }
-        })
+                else -> {
+                    // Code execution failed
+                    ApiCallResult(
+                        buttonText = "Calculate tokens",
+                        resetButtonTextSeconds = null,
+                        changeInput = mapOf("submitState" to SubmitState.ONLY_TOKENIZE.name),
+                        alertHtml = createHTML().div {
+                            +"Code compilation or execution failed:"
+                            br()
+                            code { +coderunnerResult.error }
+                        }
+                    )
+                }
+            })
     }
 
     private class SolutionPart(
@@ -324,53 +315,29 @@ object UploadSolutionApi {
     suspend fun recalculateScore(year: Int, day: Int) = suspendTransaction {
         // The whole recalculation could be done also with 1 single aggregate query?
         val solutions: List<List<SolutionPart>> = PART_RANGE.map { part ->
-            @Suppress("DEPRECATION") // use excludeFields - only `code` is excluded since it is too big
-            (mainDatabase.getSuspendingCollection<Solution>()
-                .find(
-                    Solution::year equal year,
-                    Solution::day equal day,
-                    Solution::part equal part,
-                    Solution::markedAsCheated equal false
-                )
-                .sortBy(Solution::tokenCount)
-                .excludeFields(Solution::code)
+            SolutionTable.select(
+                SolutionTable.id, SolutionTable.userId, SolutionTable.language,
+                SolutionTable.tokenCount, SolutionTable.codePublicVisible, SolutionTable.uploadDate
+            ).where {
+                (SolutionTable.year eq year) and
+                        (SolutionTable.day eq day) and
+                        (SolutionTable.part eq part) and
+                        (SolutionTable.markedAsCheated eq false)
+            }
+                .orderBy(SolutionTable.tokenCount, DESC)
                 .limit(200)
                 .map {
                     SolutionPart(
-                        id = it._id,
-                        userId = it.userId,
-                        language = it.language,
-                        tokenCount = it.tokenCount,
-                        part = it.part,
-                        codePubliclyVisible = it.codePubliclyVisible,
-                        uploadDate = it.uploadDate,
+                        id = it[SolutionTable.id],
+                        userId = it[SolutionTable.userId],
+                        language = it[SolutionTable.language],
+                        tokenCount = it[SolutionTable.tokenCount],
+                        part = part,
+                        codePubliclyVisible = it[SolutionTable.codePublicVisible],
+                        uploadDate = it[SolutionTable.uploadDate].toJavaDate()
                     )
                 }
-                .toList() +
-                    SolutionTable.select(
-                        SolutionTable.id, SolutionTable.userId, SolutionTable.language,
-                        SolutionTable.tokenCount, SolutionTable.codePublicVisible, SolutionTable.uploadDate
-                    ).where {
-                        (SolutionTable.year eq year) and
-                                (SolutionTable.day eq day) and
-                                (SolutionTable.part eq part) and
-                                (SolutionTable.markedAsCheated eq false)
-                    }
-                        .orderBy(SolutionTable.tokenCount)
-                        .limit(200)
-                        .map {
-                            SolutionPart(
-                                id = it[SolutionTable.id],
-                                userId = it[SolutionTable.userId],
-                                language = it[SolutionTable.language],
-                                tokenCount = it[SolutionTable.tokenCount],
-                                part = part,
-                                codePubliclyVisible = it[SolutionTable.codePublicVisible],
-                                uploadDate = it[SolutionTable.uploadDate].toJavaDate()
-                            )
-                        }
-                        .toList())
-                .sortedByDescending { it.tokenCount } // TODO remove after migrating everything to PG
+                .toList()
         }
 
         // We need to do some transformations here, so we get per user the best solution per part (also per language).

@@ -1,6 +1,5 @@
 package org.golfcoder.database
 
-import com.moshbit.katerbase.MongoMainEntry
 import com.moshbit.katerbase.MongoSubEntry
 import org.golfcoder.coderunner.Coderunner
 import org.golfcoder.coderunner.KotlinPlaygroundCoderunner
@@ -9,8 +8,8 @@ import org.golfcoder.tokenizer.Tokenizer
 import org.golfcoder.tokenizer.TreeSitterTokenizer
 import java.util.*
 
-class User : MongoMainEntry() {
-    // _id is the userId
+class User {
+    lateinit var _id: String
     var oAuthDetails: List<OAuthDetails> = emptyList()
     var createdOn: Date = Date()
     var name: String = ""
@@ -46,7 +45,8 @@ class User : MongoMainEntry() {
     }
 }
 
-class Solution : MongoMainEntry() {
+class Solution {
+    lateinit var _id: String
     lateinit var userId: String
     lateinit var uploadDate: Date
     lateinit var code: String

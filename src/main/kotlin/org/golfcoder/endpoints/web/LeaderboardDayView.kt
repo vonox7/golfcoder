@@ -1,6 +1,5 @@
 package org.golfcoder.endpoints.web
 
-import com.moshbit.katerbase.equal
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import io.ktor.server.sessions.*
@@ -15,7 +14,6 @@ import org.golfcoder.database.pgpayloads.*
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.endpoints.api.UploadSolutionApi.PART_RANGE
 import org.golfcoder.endpoints.web.TemplateView.template
-import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.tokenizer.NotYetAvailableTokenizer
 import org.golfcoder.tokenizer.Tokenizer
@@ -32,8 +30,7 @@ object LeaderboardDayView {
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
         val day = call.parameters["day"]?.toIntOrNull() ?: throw NotFoundException("Invalid day")
         val highlightedSolution: Solution? = call.parameters["solution"]?.let { solutionId ->
-            (mainDatabase.getSuspendingCollection<Solution>().findOne(Solution::_id equal solutionId)
-                ?: SolutionTable.selectAll().where(SolutionTable.id eq solutionId).firstOrNull()?.toSolution())
+            SolutionTable.selectAll().where(SolutionTable.id eq solutionId).firstOrNull()?.toSolution()
                 ?.takeIf { (it.codePubliclyVisible || currentUser?.admin == true) || it.userId == currentUser?._id }
                 ?: throw NotFoundException("Invalid solution parameter")
         }

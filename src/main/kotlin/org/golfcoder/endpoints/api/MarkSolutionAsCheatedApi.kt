@@ -1,17 +1,14 @@
 package org.golfcoder.endpoints.api
 
-import com.moshbit.katerbase.equal
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.Serializable
-import org.golfcoder.database.Solution
 import org.golfcoder.database.pgpayloads.SolutionTable
 import org.golfcoder.database.pgpayloads.getUser
 import org.golfcoder.database.pgpayloads.toSolution
-import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.selectAll
@@ -35,15 +32,11 @@ object MarkSolutionAsCheatedApi {
     }
 
     val solution =
-      mainDatabase.getSuspendingCollection<Solution>().findOne(Solution::_id equal request.solutionId)
-        ?: SolutionTable.selectAll().where(SolutionTable.id eq request.solutionId).firstOrNull()?.toSolution() ?: run {
+      SolutionTable.selectAll().where(SolutionTable.id eq request.solutionId).firstOrNull()?.toSolution() ?: run {
         call.respond(ApiCallResult(buttonText = "Solution not found"))
-          return@suspendTransaction
+        return@suspendTransaction
       }
 
-    mainDatabase.getCollection<Solution>().updateOne(Solution::_id equal solution._id) {
-      Solution::markedAsCheated setTo true
-    }
     SolutionTable.update({ SolutionTable.id eq solution._id }) {
       it[markedAsCheated] = true
     }

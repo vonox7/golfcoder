@@ -1,7 +1,5 @@
 package org.golfcoder.plugins
 
-import com.moshbit.katerbase.child
-import com.moshbit.katerbase.equal
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -11,7 +9,6 @@ import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.util.*
 import io.ktor.util.reflect.*
-import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.single
@@ -28,7 +25,6 @@ import org.golfcoder.endpoints.api.EditUserApi
 import org.golfcoder.endpoints.web.LoginView
 import org.golfcoder.endpoints.web.respondHtmlView
 import org.golfcoder.httpClient
-import org.golfcoder.mainDatabase
 import org.golfcoder.utils.bodyOrPrintException
 import org.golfcoder.utils.randomId
 import org.golfcoder.utils.toKotlinLocalDateTime
@@ -73,13 +69,9 @@ fun Application.configureSecurity() {
             validate { session: UserSession ->
                 // Check if user exists in db. Otherwise, we might have crashed during the oauth handshake
                 session.takeIf {
-                    mainDatabase.getSuspendingCollection<User>()
-                        .find(User::_id equal session.userId)
-                        .selectedFields(User::_id)
-                        .count() == 1 ||
-                            suspendTransaction {
-                                UserTable.select(UserTable.id).where(UserTable.id eq session.userId).count() == 1L
-                            }
+                    suspendTransaction {
+                        UserTable.select(UserTable.id).where(UserTable.id eq session.userId).count() == 1L
+                    }
                 }
             }
             challenge {
@@ -163,9 +155,6 @@ fun Application.configureSecurity() {
         userInfoClassTypeInfo = typeInfo<GithubUserInfo>(),
         postprocessLogin = { user, userInfo, principal ->
             val repoInfo = EditUserApi.getAdventOfCodeRepositoryInfo((userInfo as GithubUserInfo).login, principal)
-            mainDatabase.getSuspendingCollection<User>().updateOne(User::_id equal user._id) {
-                User::adventOfCodeRepositoryInfo setTo repoInfo
-            }
             UserTable.update({ UserTable.id eq user._id }) {
                 it[adventOfCodeRepositoryInfo] = UserTable.AdventOfCodeRepositoryInfo(
                     githubProfileName = userInfo.login,
@@ -212,12 +201,8 @@ private suspend fun findUserByOAuthProviderId(
     providerName: String,
     providerUserId: String
 ): User? {
-    return mainDatabase.getSuspendingCollection<User>().findOne(
-        User::oAuthDetails.child(User.OAuthDetails::provider) equal providerName,
-        User::oAuthDetails.child(User.OAuthDetails::providerUserId) equal providerUserId
-    ) ?:
     // TODO Do that in the query
-    UserTable.selectAll().map { it.toUser() }.firstOrNull { user ->
+    return UserTable.selectAll().map { it.toUser() }.firstOrNull { user ->
         user.oAuthDetails.any { it.provider == providerName && it.providerUserId == providerUserId }
     }
 }
@@ -254,35 +239,24 @@ private suspend fun handleLogin(
         val existingUserWithThisProviderId = findUserByOAuthProviderId(providerName, userInfo.id)
         if (existingUserWithThisProviderId == null) {
             // Link oauth2 account to existing user
-            authenticatedUser = mainDatabase.getSuspendingCollection<User>()
-                .updateOneAndFind(User::_id equal currentUser._id) {
-                    User::oAuthDetails push User.OAuthDetails(
+            authenticatedUser = UserTable.updateReturning(where = { UserTable.id eq currentUser._id }) {
+                it[oauthDetails] = currentUser.oAuthDetails.map {
+                    UserTable.OAuthDetails(
+                        provider = it.provider,
+                        providerUserId = it.providerUserId,
+                        createdOn = it.createdOn.toKotlinLocalDateTime()
+                    )
+                }.plus(
+                    UserTable.OAuthDetails(
                         provider = providerName,
                         providerUserId = userInfo.id,
-                        createdOn = Date(),
+                        createdOn = Date().toKotlinLocalDateTime()
                     )
-                    if (currentUser.publicProfilePictureUrl.isNullOrEmpty()) {
-                        User::publicProfilePictureUrl setTo userInfo.pictureUrl
-                    }
+                ).toTypedArray()
+                if (currentUser.publicProfilePictureUrl.isNullOrEmpty()) {
+                    it[publicProfilePictureUrl] = userInfo.pictureUrl
                 }
-                ?: UserTable.updateReturning(where = { UserTable.id eq currentUser._id }) {
-                    it[oauthDetails] = currentUser.oAuthDetails.map {
-                        UserTable.OAuthDetails(
-                            provider = it.provider,
-                            providerUserId = it.providerUserId,
-                            createdOn = it.createdOn.toKotlinLocalDateTime()
-                        )
-                    }.plus(
-                        UserTable.OAuthDetails(
-                            provider = providerName,
-                            providerUserId = userInfo.id,
-                            createdOn = Date().toKotlinLocalDateTime()
-                        )
-                    ).toTypedArray()
-                    if (currentUser.publicProfilePictureUrl.isNullOrEmpty()) {
-                        it[publicProfilePictureUrl] = userInfo.pictureUrl
-                    }
-                }.single().toUser()
+            }.single().toUser()
         } else if (existingUserWithThisProviderId._id == currentUser._id) {
             // User already exists and is already linked to this oauth2 account - nothing to do
             authenticatedUser = existingUserWithThisProviderId

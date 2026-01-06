@@ -5,14 +5,12 @@ import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 import org.golfcoder.Sysinfo
 import org.golfcoder.database.Solution
-import org.golfcoder.database.User
 import org.golfcoder.database.pgpayloads.UserTable
 import org.golfcoder.database.pgpayloads.UserTable.OAuthDetails
-import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
+import org.golfcoder.utils.randomId
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
-import java.util.*
 
 object DebugView {
     // Helpful for debugging locally, without having any secrets from an oauth provider
@@ -22,30 +20,22 @@ object DebugView {
         call.sessions.clear<UserSession>()
 
         // Create new random user
-        val date = Date()
-        val newUser = User().apply {
-            _id = randomId()
-            oAuthDetails = emptyList()
-            createdOn = date
-            name = listOf("John", "Jane", "Max", "Anna", "Peter", "Maria", "Paul", "Sarah", "Tim", "Lisa").random() +
+        val userId = randomId()
+        val userName =
+            listOf("John", "Jane", "Max", "Anna", "Peter", "Maria", "Paul", "Sarah", "Tim", "Lisa").random() +
                     " " +
                     listOf("Doe", "Smith", "Taylor", "Jackson", "White", "Harris", "Martin", "Black").random()
-            publicProfilePictureUrl = null
-            admin = true
-            defaultLanguage = Solution.Language.KOTLIN
-        }
-        mainDatabase.getSuspendingCollection<User>().insertOne(newUser, upsert = false)
 
         UserTable.insert {
-            it[id] = newUser._id // TODO randomId()
+            it[id] = userId
             it[oauthDetails] = emptyArray<OAuthDetails>()
-            it[name] = newUser.name // TODO inline
+            it[name] = userName
             it[publicProfilePictureUrl] = null
             it[admin] = true
             it[defaultLanguage] = Solution.Language.KOTLIN
         }
 
-        call.sessions.set(UserSession(newUser._id, newUser.name))
+        call.sessions.set(UserSession(userId, userName))
         call.respondRedirect("/")
     }
 }

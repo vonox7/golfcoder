@@ -1,6 +1,5 @@
 package org.golfcoder.endpoints.api
 
-import com.moshbit.katerbase.equal
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -15,12 +14,12 @@ import kotlinx.serialization.Serializable
 import org.golfcoder.database.User
 import org.golfcoder.database.pgpayloads.UserTable
 import org.golfcoder.httpClient
-import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.utils.bodyOrPrintException
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.select
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
+import org.jetbrains.exposed.v1.r2dbc.update
 import java.time.Instant
 
 object EditUserApi {
@@ -51,20 +50,20 @@ object EditUserApi {
                 .where(UserTable.id eq session.userId)
                 .map { it[UserTable.adventOfCodeRepositoryInfo] }
                 .firstOrNull()
-                ?: mainDatabase.getSuspendingCollection<User>()
-                    .findOne(User::_id equal session.userId)?.adventOfCodeRepositoryInfo
 
         val newName = request.name.take(MAX_USER_NAME_LENGTH).trim().takeIf { it.isNotEmpty() } ?: "XXX"
 
-        mainDatabase.getSuspendingCollection<User>()
-            .updateOne(User::_id equal session.userId) {
-                User::name setTo newName
-                User::nameIsPublic setTo (request.nameIsPublic == "on")
-                User::profilePictureIsPublic setTo (request.profilePictureIsPublic == "on")
-                if (currentUserAdventOfCodeRepositoryInfo != null) {
-                    User::adventOfCodeRepositoryInfo.child(User.AdventOfCodeRepositoryInfo::publiclyVisible) setTo (request.showAdventOfCodeRepositoryLink == "on")
-                }
+        UserTable.update({ UserTable.id eq session.userId }) {
+            it[name] = newName
+            it[nameIsPublic] = (request.nameIsPublic == "on")
+            it[profilePictureIsPublic] = (request.profilePictureIsPublic == "on")
+            if (currentUserAdventOfCodeRepositoryInfo != null) {
+                it[adventOfCodeRepositoryInfo] =
+                    currentUserAdventOfCodeRepositoryInfo.copy(
+                        publiclyVisible = (request.showAdventOfCodeRepositoryLink == "on")
+                    )
             }
+        }
 
         call.sessions.set(UserSession(session.userId, newName))
 

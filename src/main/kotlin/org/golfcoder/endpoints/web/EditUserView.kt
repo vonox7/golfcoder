@@ -1,6 +1,5 @@
 package org.golfcoder.endpoints.web
 
-import com.moshbit.katerbase.equal
 import io.ktor.server.application.*
 import io.ktor.server.sessions.*
 import kotlinx.coroutines.flow.map
@@ -9,7 +8,6 @@ import kotlinx.html.*
 import org.golfcoder.database.Solution
 import org.golfcoder.database.pgpayloads.*
 import org.golfcoder.endpoints.api.EditUserApi
-import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.utils.relativeToNow
 import org.jetbrains.exposed.v1.core.SortOrder.DESC
@@ -23,16 +21,12 @@ object EditUserView {
         val session = call.sessions.get<UserSession>()!!
         val currentUser = session.getUser()
 
-        val mySolutions = mainDatabase.getSuspendingCollection<Solution>()
-            .find(Solution::userId equal session.userId)
-            .sortByDescending(Solution::uploadDate)
-            .toList() +
-                SolutionTable
-                    .selectAll()
-                    .where(SolutionTable.userId eq session.userId)
-                    .orderBy(SolutionTable.id, DESC)
-                    .map { it.toSolution() }
-                    .toList()
+        val mySolutions = SolutionTable
+            .selectAll()
+            .where(SolutionTable.userId eq session.userId)
+            .orderBy(SolutionTable.id, DESC)
+            .map { it.toSolution() }
+            .toList()
 
         val myLeaderboardPositions = LeaderboardPositionTable
             .selectAll()

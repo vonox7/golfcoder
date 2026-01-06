@@ -1,16 +1,12 @@
 package org.golfcoder.endpoints.api
 
-import com.moshbit.katerbase.equal
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.Serializable
-import org.golfcoder.database.Solution
-import org.golfcoder.database.User
 import org.golfcoder.database.pgpayloads.SolutionTable
 import org.golfcoder.database.pgpayloads.UserTable
-import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.deleteWhere
@@ -34,15 +30,12 @@ object DeleteUserApi {
         }
 
         if (request.keepSubmissions != "on") {
-            val deleteSubmissionsDeleteCount = mainDatabase.getSuspendingCollection<Solution>()
-                .deleteMany(Solution::userId equal session.userId).deletedCount +
-                    SolutionTable.deleteWhere { SolutionTable.userId eq session.userId }
+            val deleteSubmissionsDeleteCount = SolutionTable.deleteWhere { SolutionTable.userId eq session.userId }
             if (deleteSubmissionsDeleteCount > 0L) {
                 UploadSolutionApi.recalculateAllScores()
             }
         }
 
-        mainDatabase.getSuspendingCollection<User>().deleteOne(User::_id equal session.userId)
         UserTable.deleteWhere { UserTable.id eq session.userId }
 
         call.sessions.clear<UserSession>()
