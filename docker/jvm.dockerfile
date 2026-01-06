@@ -4,7 +4,7 @@ WORKDIR /app
 COPY . .
 RUN gradle shadowJar --no-daemon
 
-FROM gcr.io/distroless/java25-debian13
+FROM eclipse-temurin:25-jdk
 COPY --from=build /app/build/libs/Server.jar /Server.jar
 EXPOSE 8030
 CMD ["Server.jar"]
