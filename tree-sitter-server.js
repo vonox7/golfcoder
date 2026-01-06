@@ -21,6 +21,9 @@ app.use(express.json());
 app.get('/', (request, response) => {
     response.send("tree-sitter server is running");
 });
+app.get('/health', (request, response) => {
+    response.send("OK");
+});
 app.post('/tokenize', (request, response) => {
     const parser = new Parser();
 

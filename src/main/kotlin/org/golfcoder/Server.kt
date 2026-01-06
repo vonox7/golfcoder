@@ -129,10 +129,7 @@ private fun Application.ktorServerModule() {
 private suspend fun healthCheck(call: ApplicationCall) {
     try {
         testPostgresConnection()
-
-        val treeSitterResponse = httpClient.get("http://localhost:8031").body<String>()
-        require(treeSitterResponse.contains("tree-sitter"))
-
+        require(httpClient.get("http://localhost:8031/health").body<String>() == "OK")
         call.respondText("OK")
     } catch (e: Exception) {
         call.respondText("NOT OK: ${e.message}", status = HttpStatusCode.ServiceUnavailable)
