@@ -4,7 +4,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import io.ktor.server.response.*
-import org.golfcoder.database.Solution
+import org.golfcoder.database.pgpayloads.Solution
 import org.intellij.lang.annotations.Language
 
 object TemplateView {

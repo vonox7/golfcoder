@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.golfcoder.database.Solution
 import org.golfcoder.endpoints.api.EditUserApi.MAX_USER_NAME_LENGTH
 import org.golfcoder.plugins.UserSession
 import org.jetbrains.exposed.v1.core.ResultRow

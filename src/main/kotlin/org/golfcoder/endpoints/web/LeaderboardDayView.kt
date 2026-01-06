@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
-import org.golfcoder.database.Solution
 import org.golfcoder.database.getUserProfiles
 import org.golfcoder.database.pgpayloads.*
 import org.golfcoder.endpoints.api.UploadSolutionApi

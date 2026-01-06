@@ -4,7 +4,7 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 import org.golfcoder.Sysinfo
-import org.golfcoder.database.Solution
+import org.golfcoder.database.pgpayloads.Solution
 import org.golfcoder.database.pgpayloads.UserTable
 import org.golfcoder.database.pgpayloads.UserTable.OAuthDetails
 import org.golfcoder.plugins.UserSession

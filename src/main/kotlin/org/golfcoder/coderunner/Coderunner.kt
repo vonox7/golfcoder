@@ -1,6 +1,7 @@
 package org.golfcoder.coderunner
 
-import org.golfcoder.database.Solution
+import org.golfcoder.database.pgpayloads.Solution
+
 
 abstract class Coderunner(val stdinCharLimit: Int) {
     // Returns stdout, or an exception with a user-friendly message

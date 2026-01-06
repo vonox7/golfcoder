@@ -1,7 +1,7 @@
 package org.golfcoder.tokenizer
 
 import io.sentry.Sentry
-import org.golfcoder.database.Solution
+import org.golfcoder.database.pgpayloads.Solution
 import org.golfcoder.database.pgpayloads.SolutionTable
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.jetbrains.exposed.v1.core.eq

@@ -12,7 +12,6 @@ import kotlinx.html.stream.createHTML
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
 import org.golfcoder.coderunner.Coderunner
-import org.golfcoder.database.Solution
 import org.golfcoder.database.pgpayloads.*
 import org.golfcoder.endpoints.web.LeaderboardDayView
 import org.golfcoder.plugins.UserSession

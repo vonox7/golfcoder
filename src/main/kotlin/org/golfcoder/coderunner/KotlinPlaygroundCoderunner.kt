@@ -3,7 +3,7 @@ package org.golfcoder.coderunner
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
-import org.golfcoder.database.Solution
+import org.golfcoder.database.pgpayloads.Solution
 import org.golfcoder.httpClient
 import org.golfcoder.utils.bodyOrPrintException
 
