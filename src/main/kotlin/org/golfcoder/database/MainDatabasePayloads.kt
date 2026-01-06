@@ -1,6 +1,5 @@
 package org.golfcoder.database
 
-import com.moshbit.katerbase.MongoSubEntry
 import org.golfcoder.coderunner.Coderunner
 import org.golfcoder.coderunner.KotlinPlaygroundCoderunner
 import org.golfcoder.coderunner.OnecompilerCoderunner
@@ -28,7 +27,7 @@ class User {
         val provider: String,
         val providerUserId: String,
         val createdOn: Date,
-    ) : MongoSubEntry()
+    )
 
     // Either singleAocRepositoryUrl, yearAocRepositoryUrl or none will be set
     class AdventOfCodeRepositoryInfo(
@@ -36,7 +35,7 @@ class User {
         var singleAocRepositoryUrl: String? = null,
         var yearAocRepositoryUrl: Map<String, String> = emptyMap(), // year-string to repository-Url
         var publiclyVisible: Boolean = true,
-    ) : MongoSubEntry()
+    )
 
     fun getAdventOfCodeRepositoryUrl(year: Int): String? {
         return (adventOfCodeRepositoryInfo?.singleAocRepositoryUrl
