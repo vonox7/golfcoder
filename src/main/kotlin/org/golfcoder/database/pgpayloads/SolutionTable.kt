@@ -1,7 +1,6 @@
 package org.golfcoder.database.pgpayloads
 
 import org.golfcoder.database.Solution
-import org.golfcoder.utils.toJavaDate
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.datetime.CurrentDateTime
@@ -32,9 +31,9 @@ object SolutionTable : Table("solution") {
 
 fun ResultRow.toSolution(): Solution {
     return Solution().apply {
-        _id = this@toSolution[SolutionTable.id]
+        id = this@toSolution[SolutionTable.id]
         userId = this@toSolution[SolutionTable.userId]
-        uploadDate = this@toSolution[SolutionTable.uploadDate].toJavaDate()
+        uploadDate = this@toSolution[SolutionTable.uploadDate]
         code = this@toSolution[SolutionTable.code]
         language = this@toSolution[SolutionTable.language]
         year = this@toSolution[SolutionTable.year]

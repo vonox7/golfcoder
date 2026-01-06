@@ -31,7 +31,7 @@ object LeaderboardDayView {
         val day = call.parameters["day"]?.toIntOrNull() ?: throw NotFoundException("Invalid day")
         val highlightedSolution: Solution? = call.parameters["solution"]?.let { solutionId ->
             SolutionTable.selectAll().where(SolutionTable.id eq solutionId).firstOrNull()?.toSolution()
-                ?.takeIf { (it.codePubliclyVisible || currentUser?.admin == true) || it.userId == currentUser?._id }
+                ?.takeIf { (it.codePubliclyVisible || currentUser?.admin == true) || it.userId == currentUser?.id }
                 ?: throw NotFoundException("Invalid solution parameter")
         }
 
@@ -152,20 +152,20 @@ object LeaderboardDayView {
                             +"${highlightedSolution.tokenCount} tokens in ${highlightedSolution.language.displayName} "
                             +"for part ${highlightedSolution.part} by "
                             when {
-                                highlightedSolutionUser != null && highlightedSolutionUser._id == currentUser?._id -> +"you"
+                                highlightedSolutionUser != null && highlightedSolutionUser.id == currentUser?.id -> +"you"
                                 highlightedSolutionUser?.nameIsPublic == true -> +highlightedSolutionUser.name
                                 else -> +"anonymous"
                             }
                         }
                         p {
-                            a(href = "/solution/${highlightedSolution._id}.${highlightedSolution.language.fileEnding}") {
+                            a(href = "/solution/${highlightedSolution.id}.${highlightedSolution.language.fileEnding}") {
                                 +"Download solution"
                             }
                             if (currentUser?.admin == true) {
                                 form(action = "/api/admin/markSolutionAsCheated") {
                                     input(type = InputType.hidden) {
                                         name = "solutionId"
-                                        value = highlightedSolution._id
+                                        value = highlightedSolution.id
                                     }
                                     input(type = InputType.submit) {
                                         name = "submitButton"
@@ -240,7 +240,7 @@ object LeaderboardDayView {
                                     a(href = "/$year/day/$day?solution=${partInfo.solutionId}#solution") {
                                         +"${partInfo.tokens}"
                                     }
-                                } else if (leaderboardPosition.userId == currentUser?._id || currentUser?.admin == true) {
+                                } else if (leaderboardPosition.userId == currentUser?.id || currentUser?.admin == true) {
                                     a(href = "/$year/day/$day?solution=${partInfo.solutionId}#solution") {
                                         +"${partInfo.tokens}"
                                     }

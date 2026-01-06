@@ -10,7 +10,6 @@ import org.golfcoder.database.Solution
 import org.golfcoder.database.User
 import org.golfcoder.endpoints.api.EditUserApi.MAX_USER_NAME_LENGTH
 import org.golfcoder.plugins.UserSession
-import org.golfcoder.utils.toJavaDate
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.eq
@@ -58,7 +57,7 @@ object UserTable : Table("user") {
 }
 
 fun ResultRow.toUser() = User().apply {
-    _id = this@toUser[UserTable.id]
+    id = this@toUser[UserTable.id]
     oAuthDetails = this@toUser[UserTable.oauthDetails].map {
         User.OAuthDetails(
             provider = it.provider,
@@ -68,14 +67,12 @@ fun ResultRow.toUser() = User().apply {
             )
         )
     }
-    createdOn = this@toUser[UserTable.createdOn].toJavaDate()
+    createdOn = this@toUser[UserTable.createdOn]
     name = this@toUser[UserTable.name]
     publicProfilePictureUrl = this@toUser[UserTable.publicProfilePictureUrl]
     nameIsPublic = this@toUser[UserTable.nameIsPublic]
     profilePictureIsPublic = this@toUser[UserTable.profilePictureIsPublic]
     defaultLanguage = this@toUser[UserTable.defaultLanguage]
-    tokenizedCodeCount = this@toUser[UserTable.tokenizedCodeCount]
-    codeRunCount = this@toUser[UserTable.codeRunCount]
     adventOfCodeRepositoryInfo = this@toUser[UserTable.adventOfCodeRepositoryInfo]?.let {
         User.AdventOfCodeRepositoryInfo(
             githubProfileName = it.githubProfileName,

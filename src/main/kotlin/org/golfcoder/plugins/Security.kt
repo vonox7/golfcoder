@@ -155,7 +155,7 @@ fun Application.configureSecurity() {
         userInfoClassTypeInfo = typeInfo<GithubUserInfo>(),
         postprocessLogin = { user, userInfo, principal ->
             val repoInfo = EditUserApi.getAdventOfCodeRepositoryInfo((userInfo as GithubUserInfo).login, principal)
-            UserTable.update({ UserTable.id eq user._id }) {
+            UserTable.update({ UserTable.id eq user.id }) {
                 it[adventOfCodeRepositoryInfo] = UserTable.AdventOfCodeRepositoryInfo(
                     githubProfileName = userInfo.login,
                     singleAocRepositoryUrl = repoInfo.singleAocRepositoryUrl,
@@ -239,7 +239,7 @@ private suspend fun handleLogin(
         val existingUserWithThisProviderId = findUserByOAuthProviderId(providerName, userInfo.id)
         if (existingUserWithThisProviderId == null) {
             // Link oauth2 account to existing user
-            authenticatedUser = UserTable.updateReturning(where = { UserTable.id eq currentUser._id }) {
+            authenticatedUser = UserTable.updateReturning(where = { UserTable.id eq currentUser.id }) {
                 it[oauthDetails] = currentUser.oAuthDetails.map {
                     UserTable.OAuthDetails(
                         provider = it.provider,
@@ -257,7 +257,7 @@ private suspend fun handleLogin(
                     it[publicProfilePictureUrl] = userInfo.pictureUrl
                 }
             }.single().toUser()
-        } else if (existingUserWithThisProviderId._id == currentUser._id) {
+        } else if (existingUserWithThisProviderId.id == currentUser.id) {
             // User already exists and is already linked to this oauth2 account - nothing to do
             authenticatedUser = existingUserWithThisProviderId
         } else {
@@ -272,7 +272,7 @@ private suspend fun handleLogin(
 
     postprocessLogin?.invoke(authenticatedUser, userInfo, principal)
 
-    call.sessions.set(UserSession(authenticatedUser._id, authenticatedUser.name))
+    call.sessions.set(UserSession(authenticatedUser.id, authenticatedUser.name))
     call.respondRedirect("/")
 }
 

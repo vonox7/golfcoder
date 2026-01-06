@@ -200,7 +200,7 @@ object EditUserView {
                         td("right-align") { +solution.day.toString() }
                         td("right-align") { +solution.part.toString() }
                         td("right-align") {
-                            a(href = "/${solution.year}/day/${solution.day}?solution=${solution._id}#solution") {
+                            a(href = "/${solution.year}/day/${solution.day}?solution=${solution.id}#solution") {
                                 +solution.tokenCount.toString()
                             }
                         }

@@ -14,6 +14,6 @@ suspend fun getUserProfiles(userIds: Set<String>): Map<String, User> {
         .where(UserTable.id inList userIds)
         .map { it.toUser() }
         .toList()
-        .associateBy { it._id }
+        .associateBy { it.id }
     return userIdsToUsers
 }

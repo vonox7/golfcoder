@@ -37,7 +37,7 @@ object MarkSolutionAsCheatedApi {
         return@suspendTransaction
       }
 
-    SolutionTable.update({ SolutionTable.id eq solution._id }) {
+    SolutionTable.update({ SolutionTable.id eq solution.id }) {
       it[markedAsCheated] = true
     }
 

@@ -1,5 +1,6 @@
 package org.golfcoder.database
 
+import kotlinx.datetime.LocalDateTime
 import org.golfcoder.coderunner.Coderunner
 import org.golfcoder.coderunner.KotlinPlaygroundCoderunner
 import org.golfcoder.coderunner.OnecompilerCoderunner
@@ -8,16 +9,14 @@ import org.golfcoder.tokenizer.TreeSitterTokenizer
 import java.util.*
 
 class User {
-    lateinit var _id: String
+    lateinit var id: String
     var oAuthDetails: List<OAuthDetails> = emptyList()
-    var createdOn: Date = Date()
+    lateinit var createdOn: LocalDateTime
     var name: String = ""
     var publicProfilePictureUrl: String? = null
     var nameIsPublic: Boolean = true
     var profilePictureIsPublic: Boolean = true
     var defaultLanguage: Solution.Language? = null
-    var tokenizedCodeCount: Int = 0 // Needed to show "highscores" in the future?
-    var codeRunCount: Int = 0 // Needed to show "highscores" in the future?
     var adventOfCodeRepositoryInfo: AdventOfCodeRepositoryInfo? = null
 
     // Admins can see all solutions to detect cheaters and can delete solutions. Must be set manually in the database.
@@ -45,9 +44,9 @@ class User {
 }
 
 class Solution {
-    lateinit var _id: String
+    lateinit var id: String
     lateinit var userId: String
-    lateinit var uploadDate: Date
+    lateinit var uploadDate: LocalDateTime
     lateinit var code: String
     lateinit var language: Language
     var year: Int = 0
