@@ -1,0 +1,23 @@
+services:
+  java-server:
+    build:
+      context: .
+      dockerfile: docker/jvm.dockerfile
+    ports:
+      - "8030:8030"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8030/" ]
+      interval: 10s
+      timeout: 1s
+      retries: 3
+  node-server:
+    build:
+      context: .
+      dockerfile: docker/node.dockerfile
+    ports:
+      - "8031:8031"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8031/" ]
+      interval: 10s
+      timeout: 1s
+      retries: 3
