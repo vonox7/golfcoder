@@ -1,22 +1,20 @@
 package org.golfcoder.endpoints.web
 
-import com.moshbit.katerbase.equal
 import io.ktor.server.application.*
 import io.ktor.server.sessions.*
 import kotlinx.html.*
-import org.golfcoder.database.User
-import org.golfcoder.mainDatabase
+import org.golfcoder.database.pgpayloads.getUser
 import org.golfcoder.plugins.UserSession
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 object LoginView {
     // providerName to providerDisplayName
     val oauth2Providers =
         mapOf("github" to "GitHub", "google" to "Google", "reddit" to "Reddit", "twitter" to "Twitter")
 
-    suspend fun getHtml(call: ApplicationCall) {
+    suspend fun getHtml(call: ApplicationCall) = suspendTransaction {
         val session = call.sessions.get<UserSession>()
-        val currentUser =
-            session?.let { mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId) }
+        val currentUser = session?.getUser()
 
         call.respondHtmlView(if (currentUser == null) "Login" else "Link Account") {
             if (currentUser == null) {

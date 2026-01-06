@@ -8,8 +8,8 @@ import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 import kotlinx.coroutines.flow.firstOrNull
 import org.golfcoder.database.Solution
-import org.golfcoder.database.User
 import org.golfcoder.database.pgpayloads.SolutionTable
+import org.golfcoder.database.pgpayloads.getUser
 import org.golfcoder.database.pgpayloads.toSolution
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
@@ -26,9 +26,7 @@ object SolutionView {
             ?: throw NotFoundException("Invalid solution file name")
 
         val session = call.sessions.get<UserSession>()
-        val currentUser = session?.let {
-            mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)
-        }
+        val currentUser = session?.getUser()
 
         val solution = (mainDatabase.getSuspendingCollection<Solution>().findOne(Solution::_id equal solutionId)
             ?: SolutionTable.selectAll().where(SolutionTable.id eq solutionId).firstOrNull()?.toSolution())

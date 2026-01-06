@@ -1,6 +1,5 @@
 package org.golfcoder.endpoints.web
 
-import com.moshbit.katerbase.equal
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import io.ktor.server.sessions.*
@@ -8,14 +7,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
 import kotlinx.html.*
-import org.golfcoder.database.User
 import org.golfcoder.database.getUserProfiles
 import org.golfcoder.database.pgpayloads.ExpectedOutputTable
 import org.golfcoder.database.pgpayloads.LeaderboardPositionTable
+import org.golfcoder.database.pgpayloads.getUser
 import org.golfcoder.database.pgpayloads.toLeaderboardPosition
 import org.golfcoder.endpoints.api.UploadSolutionApi
 import org.golfcoder.endpoints.api.UploadSolutionApi.YEARS_RANGE
-import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
 import org.golfcoder.utils.relativeToNow
 import org.jetbrains.exposed.v1.core.and
@@ -27,9 +25,7 @@ import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 object LeaderboardYearView {
     suspend fun getHtml(call: ApplicationCall) = suspendTransaction {
         val session = call.sessions.get<UserSession>()
-        val currentUser = session?.let {
-            mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)
-        }
+        val currentUser = session?.getUser()
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
 
         val positionOneLeaderboardPositions = LeaderboardPositionTable

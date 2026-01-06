@@ -12,18 +12,29 @@ import io.ktor.server.sessions.*
 import io.ktor.util.*
 import io.ktor.util.reflect.*
 import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.single
 import kotlinx.html.h1
 import kotlinx.html.p
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
 import org.golfcoder.database.User
+import org.golfcoder.database.pgpayloads.UserTable
+import org.golfcoder.database.pgpayloads.getUser
+import org.golfcoder.database.pgpayloads.toUser
 import org.golfcoder.endpoints.api.EditUserApi
 import org.golfcoder.endpoints.web.LoginView
 import org.golfcoder.endpoints.web.respondHtmlView
 import org.golfcoder.httpClient
 import org.golfcoder.mainDatabase
 import org.golfcoder.utils.bodyOrPrintException
+import org.golfcoder.utils.randomId
+import org.golfcoder.utils.toKotlinLocalDateTime
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.r2dbc.*
+import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import java.util.*
 
 const val sessionAuthenticationName = "session-aocg"
@@ -65,7 +76,10 @@ fun Application.configureSecurity() {
                     mainDatabase.getSuspendingCollection<User>()
                         .find(User::_id equal session.userId)
                         .selectedFields(User::_id)
-                        .count() == 1
+                        .count() == 1 ||
+                            suspendTransaction {
+                                UserTable.select(UserTable.id).where(UserTable.id eq session.userId).count() == 1L
+                            }
                 }
             }
             challenge {
@@ -125,72 +139,7 @@ fun Application.configureSecurity() {
                         header(HttpHeaders.Authorization, "Bearer ${principal.accessToken}")
                     }.bodyOrPrintException(userInfoClassTypeInfo)
 
-                    val currentSession = call.sessions.get<UserSession>()
-                    val currentUser = currentSession?.let {
-                        mainDatabase.getSuspendingCollection<User>()
-                            .findOne(User::_id equal currentSession.userId)
-                    }
-
-                    val authenticatedUser: User // User which is now logged in, newly created, or linked to existing user
-
-                    if (currentUser == null) {
-                        // Login or register user
-                        // Create user in db (if not exists), otherwise just update lastUsedOn
-                        val date = Date()
-                        authenticatedUser = mainDatabase.getSuspendingCollection<User>().findOneOrInsert(
-                            User::oAuthDetails.child(User.OAuthDetails::provider) equal providerName,
-                            User::oAuthDetails.child(User.OAuthDetails::providerUserId) equal userInfo.id
-                        ) {
-                            User().apply {
-                                _id = randomId()
-                                oAuthDetails = listOf(
-                                    User.OAuthDetails(
-                                        provider = providerName,
-                                        providerUserId = userInfo.id,
-                                        createdOn = date,
-                                    )
-                                )
-                                createdOn = date
-                                name = userInfo.name.take(EditUserApi.MAX_USER_NAME_LENGTH)
-                                publicProfilePictureUrl = userInfo.pictureUrl
-                            }
-                        }
-                    } else {
-                        // Link oauth2 account to existing user
-                        val existingUserWithThisProviderId = mainDatabase.getSuspendingCollection<User>().findOne(
-                            User::oAuthDetails.child(User.OAuthDetails::provider) equal providerName,
-                            User::oAuthDetails.child(User.OAuthDetails::providerUserId) equal userInfo.id
-                        )
-                        if (existingUserWithThisProviderId == null) {
-                            // Link oauth2 account to existing user
-                            authenticatedUser = mainDatabase.getSuspendingCollection<User>()
-                                .updateOneAndFind(User::_id equal currentUser._id) {
-                                    User::oAuthDetails push User.OAuthDetails(
-                                        provider = providerName,
-                                        providerUserId = userInfo.id,
-                                        createdOn = Date(),
-                                    )
-                                    if (currentUser.publicProfilePictureUrl.isNullOrEmpty()) {
-                                        User::publicProfilePictureUrl setTo userInfo.pictureUrl
-                                    }
-                                }!!
-                        } else if (existingUserWithThisProviderId._id == currentUser._id) {
-                            // User already exists and is already linked to this oauth2 account - nothing to do
-                            authenticatedUser = existingUserWithThisProviderId
-                        } else {
-                            // User already exists and is linked to another oauth2 account - error
-                            call.respondHtmlView("Account Link Error") {
-                                h1 { +"Account Link Error" }
-                                p { +"This ${LoginView.oauth2Providers[providerName]} account is already linked to another Golfcoder account." }
-                            }
-                            return@get
-                        }
-                    }
-
-                    postprocessLogin?.invoke(authenticatedUser, userInfo, principal)
-
-                    call.sessions.set(UserSession(authenticatedUser._id, authenticatedUser.name))
-                    call.respondRedirect("/")
+                    handleLogin(call, providerName, userInfo, postprocessLogin, principal)
                 }
             }
         }
@@ -216,6 +165,14 @@ fun Application.configureSecurity() {
             val repoInfo = EditUserApi.getAdventOfCodeRepositoryInfo((userInfo as GithubUserInfo).login, principal)
             mainDatabase.getSuspendingCollection<User>().updateOne(User::_id equal user._id) {
                 User::adventOfCodeRepositoryInfo setTo repoInfo
+            }
+            UserTable.update({ UserTable.id eq user._id }) {
+                it[adventOfCodeRepositoryInfo] = UserTable.AdventOfCodeRepositoryInfo(
+                    githubProfileName = userInfo.login,
+                    singleAocRepositoryUrl = repoInfo.singleAocRepositoryUrl,
+                    yearAocRepositoryUrl = repoInfo.yearAocRepositoryUrl,
+                    publiclyVisible = repoInfo.publiclyVisible,
+                )
             }
         }
     )
@@ -249,6 +206,100 @@ fun Application.configureSecurity() {
         userInfoUrl = "https://api.twitter.com/2/users/me",
         userInfoClassTypeInfo = typeInfo<TwitterUserInfo>(),
     )
+}
+
+private suspend fun findUserByOAuthProviderId(
+    providerName: String,
+    providerUserId: String
+): User? {
+    return mainDatabase.getSuspendingCollection<User>().findOne(
+        User::oAuthDetails.child(User.OAuthDetails::provider) equal providerName,
+        User::oAuthDetails.child(User.OAuthDetails::providerUserId) equal providerUserId
+    ) ?:
+    // TODO Do that in the query
+    UserTable.selectAll().map { it.toUser() }.firstOrNull { user ->
+        user.oAuthDetails.any { it.provider == providerName && it.providerUserId == providerUserId }
+    }
+}
+
+private suspend fun handleLogin(
+    call: ApplicationCall,
+    providerName: String,
+    userInfo: OauthUserInfoResponse,
+    postprocessLogin: (suspend (User, OauthUserInfoResponse, OAuthAccessTokenResponse.OAuth2) -> Unit)?,
+    principal: OAuthAccessTokenResponse.OAuth2
+) = suspendTransaction {
+    val currentSession = call.sessions.get<UserSession>()
+    val currentUser = currentSession?.getUser()
+
+    val authenticatedUser: User // User which is now logged in, newly created, or linked to existing user
+
+    if (currentUser == null) {
+        // Login or register user
+        authenticatedUser = findUserByOAuthProviderId(providerName, userInfo.id)
+            ?: UserTable.insertReturning {
+                it[id] = randomId()
+                it[oauthDetails] = arrayOf(
+                    UserTable.OAuthDetails(
+                        provider = providerName,
+                        providerUserId = userInfo.id,
+                        createdOn = Date().toKotlinLocalDateTime()
+                    )
+                )
+                it[name] = userInfo.name.take(EditUserApi.MAX_USER_NAME_LENGTH)
+                it[publicProfilePictureUrl] = userInfo.pictureUrl
+            }.single().toUser()
+    } else {
+        // Link oauth2 account to existing user
+        val existingUserWithThisProviderId = findUserByOAuthProviderId(providerName, userInfo.id)
+        if (existingUserWithThisProviderId == null) {
+            // Link oauth2 account to existing user
+            authenticatedUser = mainDatabase.getSuspendingCollection<User>()
+                .updateOneAndFind(User::_id equal currentUser._id) {
+                    User::oAuthDetails push User.OAuthDetails(
+                        provider = providerName,
+                        providerUserId = userInfo.id,
+                        createdOn = Date(),
+                    )
+                    if (currentUser.publicProfilePictureUrl.isNullOrEmpty()) {
+                        User::publicProfilePictureUrl setTo userInfo.pictureUrl
+                    }
+                }
+                ?: UserTable.updateReturning(where = { UserTable.id eq currentUser._id }) {
+                    it[oauthDetails] = currentUser.oAuthDetails.map {
+                        UserTable.OAuthDetails(
+                            provider = it.provider,
+                            providerUserId = it.providerUserId,
+                            createdOn = it.createdOn.toKotlinLocalDateTime()
+                        )
+                    }.plus(
+                        UserTable.OAuthDetails(
+                            provider = providerName,
+                            providerUserId = userInfo.id,
+                            createdOn = Date().toKotlinLocalDateTime()
+                        )
+                    ).toTypedArray()
+                    if (currentUser.publicProfilePictureUrl.isNullOrEmpty()) {
+                        it[publicProfilePictureUrl] = userInfo.pictureUrl
+                    }
+                }.single().toUser()
+        } else if (existingUserWithThisProviderId._id == currentUser._id) {
+            // User already exists and is already linked to this oauth2 account - nothing to do
+            authenticatedUser = existingUserWithThisProviderId
+        } else {
+            // User already exists and is linked to another oauth2 account - error
+            call.respondHtmlView("Account Link Error") {
+                h1 { +"Account Link Error" }
+                p { +"This ${LoginView.oauth2Providers[providerName]} account is already linked to another Golfcoder account." }
+            }
+            return@suspendTransaction
+        }
+    }
+
+    postprocessLogin?.invoke(authenticatedUser, userInfo, principal)
+
+    call.sessions.set(UserSession(authenticatedUser._id, authenticatedUser.name))
+    call.respondRedirect("/")
 }
 
 @Serializable

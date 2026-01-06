@@ -28,9 +28,7 @@ import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 object LeaderboardDayView {
     suspend fun getHtml(call: ApplicationCall) = suspendTransaction {
         val session = call.sessions.get<UserSession>()
-        val currentUser = session?.let {
-            mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)
-        }
+        val currentUser = session?.getUser()
         val year = 2000 + (call.parameters["year"]?.toIntOrNull() ?: throw NotFoundException("Invalid year"))
         val day = call.parameters["day"]?.toIntOrNull() ?: throw NotFoundException("Invalid day")
         val highlightedSolution: Solution? = call.parameters["solution"]?.let { solutionId ->
@@ -41,8 +39,7 @@ object LeaderboardDayView {
         }
 
         val highlightedSolutionUser: User? = highlightedSolution?.let {
-            // findOne query will return null when the user was deleted
-            mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal it.userId)
+            getUser(it.userId) // will return null when the user was deleted
         }
         val highlightedSolutionTokenized: List<Tokenizer.Token>? = highlightedSolution?.let { solution ->
             solution.language.tokenizer.tokenize(solution.code)

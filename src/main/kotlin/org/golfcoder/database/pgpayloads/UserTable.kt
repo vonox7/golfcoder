@@ -1,14 +1,25 @@
 package org.golfcoder.database.pgpayloads
 
+import com.moshbit.katerbase.equal
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.golfcoder.database.Solution
+import org.golfcoder.database.User
 import org.golfcoder.endpoints.api.EditUserApi.MAX_USER_NAME_LENGTH
+import org.golfcoder.mainDatabase
+import org.golfcoder.plugins.UserSession
+import org.golfcoder.utils.toJavaDate
+import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.datetime.CurrentDateTime
 import org.jetbrains.exposed.v1.datetime.datetime
 import org.jetbrains.exposed.v1.json.jsonb
+import org.jetbrains.exposed.v1.r2dbc.selectAll
 
 object UserTable : Table("user") {
     val id = varchar("id", 32)
@@ -46,4 +57,44 @@ object UserTable : Table("user") {
             return (singleAocRepositoryUrl ?: yearAocRepositoryUrl[year.toString()])?.takeIf { publiclyVisible }
         }
     }
+}
+
+fun ResultRow.toUser() = User().apply {
+    _id = this@toUser[UserTable.id]
+    oAuthDetails = this@toUser[UserTable.oauthDetails].map {
+        User.OAuthDetails(
+            provider = it.provider,
+            providerUserId = it.providerUserId,
+            createdOn = java.util.Date(
+                it.createdOn.toJavaLocalDateTime().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
+            )
+        )
+    }
+    createdOn = this@toUser[UserTable.createdOn].toJavaDate()
+    name = this@toUser[UserTable.name]
+    publicProfilePictureUrl = this@toUser[UserTable.publicProfilePictureUrl]
+    nameIsPublic = this@toUser[UserTable.nameIsPublic]
+    profilePictureIsPublic = this@toUser[UserTable.profilePictureIsPublic]
+    defaultLanguage = this@toUser[UserTable.defaultLanguage]
+    tokenizedCodeCount = this@toUser[UserTable.tokenizedCodeCount]
+    codeRunCount = this@toUser[UserTable.codeRunCount]
+    adventOfCodeRepositoryInfo = this@toUser[UserTable.adventOfCodeRepositoryInfo]?.let {
+        User.AdventOfCodeRepositoryInfo(
+            githubProfileName = it.githubProfileName,
+            singleAocRepositoryUrl = it.singleAocRepositoryUrl,
+            yearAocRepositoryUrl = it.yearAocRepositoryUrl,
+            publiclyVisible = it.publiclyVisible
+        )
+    }
+    admin = this@toUser[UserTable.admin]
+
+}
+
+suspend fun getUser(userId: String): User? {
+    return UserTable.selectAll().where(UserTable.id eq userId).map { it.toUser() }.firstOrNull()
+        ?: mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal userId)
+}
+
+suspend fun UserSession.getUser(): User {
+    return getUser(this.userId)!!
 }

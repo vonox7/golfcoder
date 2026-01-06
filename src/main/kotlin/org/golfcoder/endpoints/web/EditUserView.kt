@@ -7,11 +7,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
 import org.golfcoder.database.Solution
-import org.golfcoder.database.User
-import org.golfcoder.database.pgpayloads.LeaderboardPositionTable
-import org.golfcoder.database.pgpayloads.SolutionTable
-import org.golfcoder.database.pgpayloads.toLeaderboardPosition
-import org.golfcoder.database.pgpayloads.toSolution
+import org.golfcoder.database.pgpayloads.*
 import org.golfcoder.endpoints.api.EditUserApi
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
@@ -25,7 +21,7 @@ import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 object EditUserView {
     suspend fun getHtml(call: ApplicationCall) = suspendTransaction {
         val session = call.sessions.get<UserSession>()!!
-        val currentUser = mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)!!
+        val currentUser = session.getUser()
 
         val mySolutions = mainDatabase.getSuspendingCollection<Solution>()
             .find(Solution::userId equal session.userId)

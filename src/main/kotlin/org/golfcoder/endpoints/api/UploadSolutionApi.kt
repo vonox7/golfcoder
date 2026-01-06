@@ -15,9 +15,7 @@ import org.golfcoder.Sysinfo
 import org.golfcoder.coderunner.Coderunner
 import org.golfcoder.database.Solution
 import org.golfcoder.database.User
-import org.golfcoder.database.pgpayloads.ExpectedOutputTable
-import org.golfcoder.database.pgpayloads.LeaderboardPositionTable
-import org.golfcoder.database.pgpayloads.SolutionTable
+import org.golfcoder.database.pgpayloads.*
 import org.golfcoder.endpoints.web.LeaderboardDayView
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
@@ -27,10 +25,8 @@ import org.golfcoder.utils.toJavaDate
 import org.golfcoder.utils.toKotlinLocalDateTime
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.r2dbc.batchInsert
-import org.jetbrains.exposed.v1.r2dbc.deleteWhere
-import org.jetbrains.exposed.v1.r2dbc.insert
-import org.jetbrains.exposed.v1.r2dbc.select
+import org.jetbrains.exposed.v1.core.plus
+import org.jetbrains.exposed.v1.r2dbc.*
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import java.time.LocalDate
 import java.time.Month
@@ -84,8 +80,7 @@ object UploadSolutionApi {
     suspend fun post(call: ApplicationCall) = suspendTransaction {
         val request = call.receive<UploadSolutionRequest>()
         val userSession = call.sessions.get<UserSession>()
-        val currentUser =
-            userSession?.let { mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal it.userId) }
+        val currentUser = userSession?.getUser()
 
         // Redirect to login screen if "login to submit" was pressed
         if (userSession == null && request.submitState == SubmitState.LOGIN_TO_SUBMIT) {
@@ -123,7 +118,7 @@ object UploadSolutionApi {
         }
 
         // Log to user object
-        if (userSession != null)
+        if (userSession != null) {
             mainDatabase.getSuspendingCollection<User>().updateOne(User::_id equal userSession.userId) {
                 User::defaultLanguage setTo request.language
                 User::tokenizedCodeCount incrementBy 1
@@ -131,6 +126,15 @@ object UploadSolutionApi {
                     User::codeRunCount incrementBy 1
                 }
             }
+
+            UserTable.update({ UserTable.id.eq(userSession.userId) }) {
+                it[defaultLanguage] = request.language
+                it.update(tokenizedCodeCount, tokenizedCodeCount + 1)
+                if (request.submitState == SubmitState.SUBMIT_NOW) {
+                    it.update(codeRunCount, codeRunCount + 1)
+                }
+            }
+        }
 
         if (request.submitState == SubmitState.ONLY_TOKENIZE) {
             val solutionsHtml = with(LeaderboardDayView) {

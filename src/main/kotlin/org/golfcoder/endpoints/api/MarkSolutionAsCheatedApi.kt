@@ -8,8 +8,8 @@ import io.ktor.server.sessions.*
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.Serializable
 import org.golfcoder.database.Solution
-import org.golfcoder.database.User
 import org.golfcoder.database.pgpayloads.SolutionTable
+import org.golfcoder.database.pgpayloads.getUser
 import org.golfcoder.database.pgpayloads.toSolution
 import org.golfcoder.mainDatabase
 import org.golfcoder.plugins.UserSession
@@ -28,7 +28,7 @@ object MarkSolutionAsCheatedApi {
   suspend fun post(call: ApplicationCall) = suspendTransaction {
     val request = call.receive<MarkSolutionAsCheatedRequest>()
     val session = call.sessions.get<UserSession>()!!
-    val currentUser = mainDatabase.getSuspendingCollection<User>().findOne(User::_id equal session.userId)!!
+    val currentUser = session.getUser()
     if (!currentUser.admin) {
       call.respond(ApiCallResult(buttonText = "Not an admin"))
       return@suspendTransaction
