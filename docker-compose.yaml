@@ -1,5 +1,6 @@
 services:
   jvm:
+    network_mode: host
     build:
       context: .
       dockerfile: docker/jvm.dockerfile
