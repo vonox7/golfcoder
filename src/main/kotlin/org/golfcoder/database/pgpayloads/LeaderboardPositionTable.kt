@@ -35,25 +35,24 @@ object LeaderboardPositionTable : Table("leaderboard_position") {
     )
 }
 
+class LeaderboardPosition(
+    val year: Int,
+    val day: Int,
+    val position: Int,
+    val userId: String,
+    val language: Solution.Language,
+    val tokenSum: Int,
+    val partInfos: Map<Int, LeaderboardPositionTable.PartInfo>, // part to PartInfo
+)
+
 fun ResultRow.toLeaderboardPosition(): LeaderboardPosition {
-    return LeaderboardPosition().apply {
-        year = this@toLeaderboardPosition[LeaderboardPositionTable.year]
-        day = this@toLeaderboardPosition[LeaderboardPositionTable.day]
-        position = this@toLeaderboardPosition[LeaderboardPositionTable.position]
-        userId = this@toLeaderboardPosition[LeaderboardPositionTable.userId]
-        language = this@toLeaderboardPosition[LeaderboardPositionTable.language]
-        tokenSum = this@toLeaderboardPosition[LeaderboardPositionTable.tokenSum]
-        partInfos = this@toLeaderboardPosition[LeaderboardPositionTable.partInfos]
-    }
-}
-
-
-class LeaderboardPosition {
-    var year: Int = 0
-    var day: Int = 0
-    var position: Int = 0
-    lateinit var userId: String
-    lateinit var language: Solution.Language
-    var tokenSum: Int = 0
-    var partInfos: Map<Int, LeaderboardPositionTable.PartInfo> = emptyMap() // part to PartInfo
+    return LeaderboardPosition(
+        year = this[LeaderboardPositionTable.year],
+        day = this[LeaderboardPositionTable.day],
+        position = this[LeaderboardPositionTable.position],
+        userId = this[LeaderboardPositionTable.userId],
+        language = this[LeaderboardPositionTable.language],
+        tokenSum = this[LeaderboardPositionTable.tokenSum],
+        partInfos = this[LeaderboardPositionTable.partInfos],
+    )
 }
