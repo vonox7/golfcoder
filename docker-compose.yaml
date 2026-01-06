@@ -1,6 +1,5 @@
 services:
   jvm:
-    network_mode: host
     build:
       context: .
       dockerfile: docker/jvm.dockerfile
@@ -12,7 +11,6 @@ services:
       timeout: 1s
       retries: 3
   node:
-    network_mode: host
     build:
       context: .
       dockerfile: docker/node.dockerfile
