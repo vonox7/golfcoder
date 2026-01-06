@@ -55,8 +55,8 @@ dependencies {
 }
 
 kotlin {
-    compilerOptions.jvmTarget = JvmTarget.JVM_21 // FIXME change to 25 once kotlin gradle plugin supports it
-    jvmToolchain(21)
+    compilerOptions.jvmTarget = JvmTarget.JVM_25
+    jvmToolchain(25)
 }
 
 tasks {
