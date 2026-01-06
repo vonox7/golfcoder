@@ -11,7 +11,6 @@ import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabaseConfig
 import org.jetbrains.exposed.v1.r2dbc.R2dbcTransaction
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
-import org.jetbrains.exposed.v1.r2dbc.transactions.transactionManager
 
 suspend fun connectToPostgres(): R2dbcDatabase {
     // DATABASE_URL=postgresql://[user]:[password]@[url]:[port]/[dbname]
@@ -32,15 +31,14 @@ suspend fun connectToPostgres(): R2dbcDatabase {
                 }
             }
     ).apply {
-        // Test the connection
-        transactionManager.newTransaction().exec("SELECT 1")
-        println("PostgreSQL connection successful")
-
-        // Migrate the database
         suspendTransaction {
             migrateDb()
         }
     }
+}
+
+suspend fun testPostgresConnection() = suspendTransaction {
+    exec("SELECT 1")
 }
 
 // We directly migrate everything without flyway for simplicity.

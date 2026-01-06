@@ -5,6 +5,7 @@ import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -13,11 +14,11 @@ import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.golfcoder.database.connectToPostgres
+import org.golfcoder.database.testPostgresConnection
 import org.golfcoder.endpoints.api.*
 import org.golfcoder.endpoints.web.*
 import org.golfcoder.expectedoutputaggregator.ExpectedOutputAggregatorLoader
@@ -56,20 +57,6 @@ fun main(): Unit = runBlocking {
     println("Connecting to database...")
     pgDatabase = connectToPostgres()
 
-    // Wait for tree-sitter server to start
-    if (!Sysinfo.isLocal) {
-        println("Checking tree-sitter server...")
-        while (true) {
-            try {
-                httpClient.get("http://localhost:8031").body<String>().contains("tree-sitter")
-                break
-            } catch (e: Exception) {
-                println("Waiting for tree-sitter server to start...")
-                delay(500)
-            }
-        }
-    }
-
     println("Starting ktor...")
     val port = System.getenv("PORT")?.toIntOrNull() ?: 8030
     embeddedServer(
@@ -101,6 +88,7 @@ private fun Application.ktorServerModule() {
     install(SentryPlugin)
 
     routing {
+        get("/health") { healthCheck(call) }
         get("/") { call.respondRedirect("/${UploadSolutionApi.YEARS_RANGE.last}") }
         get("/favicon.ico") { call.respondRedirect("/static/images/favicon.ico", permanent = true) }
 
@@ -135,5 +123,18 @@ private fun Application.ktorServerModule() {
         staticResources("/static/css-{release}", "static/css")
         staticResources("/static/js-{release}", "static/js")
         staticResources("/static/images", "static/images")
+    }
+}
+
+private suspend fun healthCheck(call: ApplicationCall) {
+    try {
+        testPostgresConnection()
+
+        val treeSitterResponse = httpClient.get("http://localhost:8031").body<String>()
+        require(treeSitterResponse.contains("tree-sitter"))
+
+        call.respondText("OK")
+    } catch (e: Exception) {
+        call.respondText("NOT OK: ${e.message}", status = HttpStatusCode.ServiceUnavailable)
     }
 }
