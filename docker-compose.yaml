@@ -1,5 +1,5 @@
 services:
-  java-server:
+  jvm:
     network_mode: host
     build:
       context: .
@@ -11,7 +11,8 @@ services:
       interval: 10s
       timeout: 1s
       retries: 3
-  node-server:
+  node:
+    network_mode: host
     build:
       context: .
       dockerfile: docker/node.dockerfile
