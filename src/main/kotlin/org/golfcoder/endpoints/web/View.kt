@@ -6,7 +6,7 @@ import io.ktor.server.html.*
 import io.ktor.server.sessions.*
 import kotlinx.html.*
 import org.golfcoder.Sysinfo
-import org.golfcoder.database.User
+import org.golfcoder.database.pgpayloads.User
 import org.golfcoder.plugins.UserSession
 
 suspend fun ApplicationCall.respondHtmlView(

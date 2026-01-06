@@ -3,11 +3,9 @@ package org.golfcoder.database.pgpayloads
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.golfcoder.database.Solution
-import org.golfcoder.database.User
 import org.golfcoder.endpoints.api.EditUserApi.MAX_USER_NAME_LENGTH
 import org.golfcoder.plugins.UserSession
 import org.jetbrains.exposed.v1.core.ResultRow
@@ -50,40 +48,37 @@ object UserTable : Table("user") {
         val yearAocRepositoryUrl: Map<String, String> = emptyMap(), // year-string to repository-Url
         val publiclyVisible: Boolean = true,
     ) {
-        fun getAdventOfCodeRepositoryUrl(year: Int): String? {
+        fun getUrl(year: Int): String? {
             return (singleAocRepositoryUrl ?: yearAocRepositoryUrl[year.toString()])?.takeIf { publiclyVisible }
         }
     }
 }
 
-fun ResultRow.toUser() = User().apply {
-    id = this@toUser[UserTable.id]
-    oAuthDetails = this@toUser[UserTable.oauthDetails].map {
-        User.OAuthDetails(
-            provider = it.provider,
-            providerUserId = it.providerUserId,
-            createdOn = java.util.Date(
-                it.createdOn.toJavaLocalDateTime().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
-            )
-        )
-    }
-    createdOn = this@toUser[UserTable.createdOn]
-    name = this@toUser[UserTable.name]
-    publicProfilePictureUrl = this@toUser[UserTable.publicProfilePictureUrl]
-    nameIsPublic = this@toUser[UserTable.nameIsPublic]
-    profilePictureIsPublic = this@toUser[UserTable.profilePictureIsPublic]
-    defaultLanguage = this@toUser[UserTable.defaultLanguage]
-    adventOfCodeRepositoryInfo = this@toUser[UserTable.adventOfCodeRepositoryInfo]?.let {
-        User.AdventOfCodeRepositoryInfo(
-            githubProfileName = it.githubProfileName,
-            singleAocRepositoryUrl = it.singleAocRepositoryUrl,
-            yearAocRepositoryUrl = it.yearAocRepositoryUrl,
-            publiclyVisible = it.publiclyVisible
-        )
-    }
-    admin = this@toUser[UserTable.admin]
+class User(
+    val id: String,
+    val oAuthDetails: List<UserTable.OAuthDetails>,
+    val createdOn: LocalDateTime,
+    val name: String,
+    val publicProfilePictureUrl: String?,
+    val nameIsPublic: Boolean,
+    val profilePictureIsPublic: Boolean,
+    val defaultLanguage: Solution.Language?,
+    val adventOfCodeRepositoryInfo: UserTable.AdventOfCodeRepositoryInfo?,
+    var admin: Boolean,
+)
 
-}
+fun ResultRow.toUser() = User(
+    id = this[UserTable.id],
+    oAuthDetails = this[UserTable.oauthDetails].toList(),
+    createdOn = this[UserTable.createdOn],
+    name = this[UserTable.name],
+    publicProfilePictureUrl = this[UserTable.publicProfilePictureUrl],
+    nameIsPublic = this[UserTable.nameIsPublic],
+    profilePictureIsPublic = this[UserTable.profilePictureIsPublic],
+    defaultLanguage = this[UserTable.defaultLanguage],
+    adventOfCodeRepositoryInfo = this[UserTable.adventOfCodeRepositoryInfo],
+    admin = this[UserTable.admin],
+)
 
 suspend fun getUser(userId: String): User? {
     return UserTable.selectAll().where(UserTable.id eq userId).map { it.toUser() }.firstOrNull()

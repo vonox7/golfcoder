@@ -17,7 +17,7 @@ import kotlinx.html.p
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
-import org.golfcoder.database.User
+import org.golfcoder.database.pgpayloads.User
 import org.golfcoder.database.pgpayloads.UserTable
 import org.golfcoder.database.pgpayloads.getUser
 import org.golfcoder.database.pgpayloads.toUser
@@ -240,13 +240,7 @@ private suspend fun handleLogin(
         if (existingUserWithThisProviderId == null) {
             // Link oauth2 account to existing user
             authenticatedUser = UserTable.updateReturning(where = { UserTable.id eq currentUser.id }) {
-                it[oauthDetails] = currentUser.oAuthDetails.map {
-                    UserTable.OAuthDetails(
-                        provider = it.provider,
-                        providerUserId = it.providerUserId,
-                        createdOn = it.createdOn.toKotlinLocalDateTime()
-                    )
-                }.plus(
+                it[oauthDetails] = currentUser.oAuthDetails.plus(
                     UserTable.OAuthDetails(
                         provider = providerName,
                         providerUserId = userInfo.id,

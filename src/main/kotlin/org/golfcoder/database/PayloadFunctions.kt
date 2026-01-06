@@ -2,6 +2,7 @@ package org.golfcoder.database
 
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import org.golfcoder.database.pgpayloads.User
 import org.golfcoder.database.pgpayloads.UserTable
 import org.golfcoder.database.pgpayloads.toUser
 import org.jetbrains.exposed.v1.core.inList

@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.html.*
 import org.golfcoder.database.Solution
-import org.golfcoder.database.User
 import org.golfcoder.database.getUserProfiles
 import org.golfcoder.database.pgpayloads.*
 import org.golfcoder.endpoints.api.UploadSolutionApi
@@ -214,7 +213,7 @@ object LeaderboardDayView {
                             renderUserProfileImage(user, big = false)
                             val userName = (user?.name?.takeIf { user.nameIsPublic } ?: "anonymous")
                             val adventOfCodeRepositoryUrl =
-                                user?.getAdventOfCodeRepositoryUrl(year)?.takeIf { user.nameIsPublic }
+                                user?.adventOfCodeRepositoryInfo?.getUrl(year)?.takeIf { user.nameIsPublic }
                             if (adventOfCodeRepositoryUrl == null) {
                                 +userName
                             } else {

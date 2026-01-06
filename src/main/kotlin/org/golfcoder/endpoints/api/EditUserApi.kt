@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.golfcoder.database.User
 import org.golfcoder.database.pgpayloads.UserTable
 import org.golfcoder.httpClient
 import org.golfcoder.plugins.UserSession
@@ -74,7 +73,7 @@ object EditUserApi {
     suspend fun getAdventOfCodeRepositoryInfo(
         profileName: String,
         principal: OAuthAccessTokenResponse.OAuth2,
-    ): User.AdventOfCodeRepositoryInfo {
+    ): UserTable.AdventOfCodeRepositoryInfo {
         val repos = httpClient
             .get("https://api.github.com/users/${profileName}/repos") {
                 header(HttpHeaders.Authorization, "Bearer ${principal.accessToken}")
@@ -93,11 +92,11 @@ object EditUserApi {
         val yearRegex = Regex("20[0-9]{1,2}")
         return when {
             adventOfCodeRepos.isNullOrEmpty() -> {
-                User.AdventOfCodeRepositoryInfo(githubProfileName = profileName)
+                UserTable.AdventOfCodeRepositoryInfo(githubProfileName = profileName)
             }
 
             adventOfCodeRepos.count() == 1 || adventOfCodeRepos.none { it.name.contains(yearRegex) } -> {
-                User.AdventOfCodeRepositoryInfo(
+                UserTable.AdventOfCodeRepositoryInfo(
                     githubProfileName = profileName,
                     singleAocRepositoryUrl = adventOfCodeRepos.maxBy { it.pushedAt }.htmlUrl
                 )
@@ -111,7 +110,7 @@ object EditUserApi {
                         yearAocRepositoryUrl[year.toString()] = yearRepo.htmlUrl
                     }
                 }
-                User.AdventOfCodeRepositoryInfo(
+                UserTable.AdventOfCodeRepositoryInfo(
                     githubProfileName = profileName,
                     yearAocRepositoryUrl = yearAocRepositoryUrl
                 )

@@ -6,42 +6,6 @@ import org.golfcoder.coderunner.KotlinPlaygroundCoderunner
 import org.golfcoder.coderunner.OnecompilerCoderunner
 import org.golfcoder.tokenizer.Tokenizer
 import org.golfcoder.tokenizer.TreeSitterTokenizer
-import java.util.*
-
-class User {
-    lateinit var id: String
-    var oAuthDetails: List<OAuthDetails> = emptyList()
-    lateinit var createdOn: LocalDateTime
-    var name: String = ""
-    var publicProfilePictureUrl: String? = null
-    var nameIsPublic: Boolean = true
-    var profilePictureIsPublic: Boolean = true
-    var defaultLanguage: Solution.Language? = null
-    var adventOfCodeRepositoryInfo: AdventOfCodeRepositoryInfo? = null
-
-    // Admins can see all solutions to detect cheaters and can delete solutions. Must be set manually in the database.
-    var admin: Boolean = false
-
-    class OAuthDetails(
-        val provider: String,
-        val providerUserId: String,
-        val createdOn: Date,
-    )
-
-    // Either singleAocRepositoryUrl, yearAocRepositoryUrl or none will be set
-    class AdventOfCodeRepositoryInfo(
-        val githubProfileName: String,
-        var singleAocRepositoryUrl: String? = null,
-        var yearAocRepositoryUrl: Map<String, String> = emptyMap(), // year-string to repository-Url
-        var publiclyVisible: Boolean = true,
-    )
-
-    fun getAdventOfCodeRepositoryUrl(year: Int): String? {
-        return (adventOfCodeRepositoryInfo?.singleAocRepositoryUrl
-            ?: adventOfCodeRepositoryInfo?.yearAocRepositoryUrl?.get(year.toString()))
-            ?.takeIf { adventOfCodeRepositoryInfo?.publiclyVisible == true }
-    }
-}
 
 class Solution {
     lateinit var id: String
