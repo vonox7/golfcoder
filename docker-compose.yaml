@@ -1,9 +1,10 @@
 services:
   golfcoder-jvm:
-    network_mode: host
     build:
       context: .
       dockerfile: docker/jvm.dockerfile
+    ports:
+      - "8030:8030"
     healthcheck:
       test: [ "CMD", "/usr/bin/wget", "-q", "-O-", "http://localhost:8030/health" ]
       interval: 10s
