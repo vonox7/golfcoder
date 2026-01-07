@@ -7,4 +7,4 @@ RUN gradle shadowJar --no-daemon
 FROM eclipse-temurin:25-jdk
 COPY --from=build /app/build/libs/Server.jar /Server.jar
 EXPOSE 8030
-CMD ["Server.jar"]
+CMD ["java", "-jar", "/Server.jar"]
