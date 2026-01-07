@@ -4,7 +4,6 @@ services:
       context: .
       dockerfile: docker/jvm.dockerfile
     ports:
-      - "5432:5432"
       - "8030:8030"
     healthcheck:
       test: [ "CMD", "/usr/bin/wget", "-q", "-O-", "http://localhost:8030/health" ]
