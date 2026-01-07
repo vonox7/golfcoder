@@ -19,7 +19,7 @@ services:
     ports:
       - "8031:8031"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8031/health" ]
+      test: [ "CMD", "/usr/bin/wget", "-q", "-O-", "http://localhost:8031/health" ]
       interval: 10s
       timeout: 1s
       retries: 3
