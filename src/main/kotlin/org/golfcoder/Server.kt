@@ -49,6 +49,8 @@ val httpClient = HttpClient(CIO) {
     }
 }
 
+val treeSitterUrl = System.getenv("TREE_SITTER_URL") ?: "http://localhost:8031"
+
 fun main(): Unit = runBlocking {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
@@ -129,7 +131,7 @@ private fun Application.ktorServerModule() {
 private suspend fun healthCheck(call: ApplicationCall) {
     try {
         testPostgresConnection()
-        require(httpClient.get("http://localhost:8031/health").body<String>() == "OK")
+        require(httpClient.get("$treeSitterUrl/health").body<String>() == "OK")
         call.respondText("OK")
     } catch (e: Exception) {
         call.respondText("NOT OK: ${e.message}", status = HttpStatusCode.ServiceUnavailable)

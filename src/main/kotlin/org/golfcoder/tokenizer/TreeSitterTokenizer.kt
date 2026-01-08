@@ -5,6 +5,7 @@ import io.ktor.http.*
 import kotlinx.serialization.Serializable
 import org.golfcoder.Sysinfo
 import org.golfcoder.httpClient
+import org.golfcoder.treeSitterUrl
 import org.golfcoder.utils.bodyOrPrintException
 import java.net.ConnectException
 
@@ -28,7 +29,7 @@ class TreeSitterTokenizer(private val language: String, override val tokenizerVe
 
     override suspend fun tokenize(input: String): List<Tokenizer.Token> {
         val response = try {
-            httpClient.post("http://localhost:8031/tokenize") {
+            httpClient.post("$treeSitterUrl/tokenize") {
                 contentType(ContentType.Application.Json)
                 setBody(TreeSitterRequest(language, input))
             }
