@@ -5,6 +5,7 @@ services:
       dockerfile: docker/jvm.dockerfile
     environment:
       - TREE_SITTER_URL=http://golfcoder-node:8031
+      - CONTAINER=web
     ports:
       - "8030:8030"
     healthcheck:
