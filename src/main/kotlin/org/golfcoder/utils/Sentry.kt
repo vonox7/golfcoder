@@ -21,7 +21,7 @@ fun initSentry() {
     Sentry.init { options ->
       options.dsn = sentryDsn
       options.addInAppInclude("org.golfcoder") // Mark our own packages in stacktrace
-      options.release = System.getenv("CONTAINER_VERSION") // Git commit hash
+      options.release = System.getenv("CONTAINER_VERSION")?.take(7) // Git commit hash
       options.serverName = System.getenv("CONTAINER") // Container name
     }
   }
