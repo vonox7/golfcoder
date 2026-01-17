@@ -17,4 +17,4 @@ This project is not affiliated with adventofcode.com.
 
 # Deployment
 
-The site is hosted on [Scalingo](https://scalingo.com), and is automatically deployed from the `main` branch.
+The application is automatically deployed from the `main` branch, see `docker-compose.yaml`.

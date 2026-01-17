@@ -152,9 +152,7 @@ object FaqView {
                     a("https://chat.openai.com/", "_blank") { +"ChatGPT 3.5" }
                 }
                 li {
-                    +"Hosting: "
-                    a("https://sclng.io/r/a3cd6268ba623f3b", "_blank") { +"Scalingo" }
-                    +" (support Golfcoder by using this referral link to create your Scalingo account)"
+                    +"Hosting: Self-hosted in the EU. No hyperscalers, just docker compose on a VPS."
                 }
                 li {
                     +"Backend: "

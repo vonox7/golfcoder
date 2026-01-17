@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
@@ -55,34 +53,12 @@ dependencies {
 }
 
 kotlin {
-    compilerOptions.jvmTarget = JvmTarget.JVM_25
     jvmToolchain(25)
 }
 
 tasks {
-    getByName<JavaExec>("run") {
-        dependsOn(shadowJar)
-        classpath(shadowJar)
-    }
-
     shadowJar {
         setProperty("archiveFileName", "Server.jar")
         isZip64 = true // Our jar files might have more than 65535 classes/files
-    }
-
-    // Copy Server.jar from build folder to root folder so we can delete all other folders
-    register<Copy>("copyServer") {
-        dependsOn(shadowJar)
-        from(file("build/libs/Server.jar"))
-        into(file("."))
-    }
-
-    register("stage") {
-        group = "distribution"
-        dependsOn(getByName("copyServer"))
-    }
-
-    build {
-        mustRunAfter(clean)
     }
 }
