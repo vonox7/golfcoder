@@ -4,9 +4,9 @@ val logback_version: String by project
 val exposed_version: String by project
 
 plugins {
-    kotlin("jvm") version "2.3.0"
-    id("io.ktor.plugin") version "3.3.3"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.3.0"
+    kotlin("jvm") version "2.4.10"
+    id("io.ktor.plugin") version "3.5.2"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.4.10"
 }
 
 group = "org.golfcoder"
@@ -48,8 +48,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-migration-r2dbc:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-json:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposed_version")
-    implementation("org.postgresql:r2dbc-postgresql:1.1.1.RELEASE")
-    implementation("io.sentry:sentry:8.27.1")
+    implementation("org.postgresql:r2dbc-postgresql:1.1.2.RELEASE")
+    implementation("io.sentry:sentry:8.53.0")
 }
 
 kotlin {
