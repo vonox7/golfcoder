@@ -11,7 +11,7 @@ This project is not affiliated with adventofcode.com.
 
 # Running the leaderboard locally
 
-1. Install mongodb, at least version 4.0, see https://www.mongodb.com/docs/manual/administration/install-community/
+1. Install PostreSQL and create a database called `golfcoder`
 2. Clone the repo, open it in IntelliJ, run the `Server` run configuration, and navigate to http://localhost:8030
 3. Create a random user locally by clicking "Create random user (local only)" in the menu
 
