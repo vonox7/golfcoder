@@ -7,7 +7,6 @@ import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
-import io.ktor.util.*
 import io.ktor.util.reflect.*
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -60,7 +59,12 @@ fun Application.configureSecurity() {
             cookie.maxAgeInSeconds = 30 * 24 * 60 * 60
             cookie.httpOnly = true
             cookie.secure = !Sysinfo.isLocal
-            transform(SessionTransportTransformerEncrypt(hex(secretEncryptKey), hex(secretSignKey)))
+            transform(
+                SessionTransportTransformerEncrypt(
+                    secretEncryptKey.hexToByteArray(),
+                    secretSignKey.hexToByteArray()
+                )
+            )
         }
     }
 
