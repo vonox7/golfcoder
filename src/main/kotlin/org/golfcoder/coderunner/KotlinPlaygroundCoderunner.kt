@@ -68,7 +68,7 @@ class KotlinPlaygroundCoderunner : Coderunner(stdinCharLimit = 1_000_000) {
         require(language == Solution.Language.KOTLIN)
         val stdInAsListString = stdin.split("\n").joinToString(",") { "\"\"\"$it\"\"\"" }
 
-        val response = httpClient.post("https://api.kotlinlang.org/api/2.2.21/compiler/run") {
+        val response = httpClient.post("https://api.kotlinlang.org/api/2.4.10/compiler/run") {
             contentType(ContentType.Application.Json)
             setBody(
                 KotlinPlaygroundRunRequest(
